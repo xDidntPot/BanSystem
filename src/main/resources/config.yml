@@ -1,0 +1,100 @@
+# --- MongoDB ---
+#You have to create the database and then the collections with MongoDB.
+MongoDB: false
+
+MongoDBUri: ""
+Database: bansystem
+BanCollection: bans
+MuteCollection: mutes
+
+# --- Reasons ---
+#Here you can edit/add/remove every ban reason or mute reason.
+
+BanReasons:
+  #If you have 7 ban reasons, you have to set the count of reasons to 7.
+  Count: 5
+  "1":
+    Reason: "Hacking"
+    Seconds: 3600
+  "2":
+    Reason: "Bugusing"
+    Seconds: 7200
+  "3":
+    Reason: "Reason 3"
+    Seconds: 86400
+  "4":
+    Reason: "Reason 4"
+    Seconds: 604800
+  "5":
+    Reason: "Reason 5"
+    Seconds: -1
+
+#Seconds = the duration of a ban/mute in seconds.
+#1 hour = 3600 seconds
+#1 day = 86400 seconds
+#1 week = 604800 seconds
+#1 year = 31536000 seconds
+#-1 = permanent
+
+MuteReasons:
+  Count: 3
+  "1":
+    Reason: "Insults"
+    Seconds: 3600
+  "2":
+    Reason: "Advertising"
+    Seconds: 7200
+  "3":
+    Reason: "Racism"
+    Seconds: -1
+
+# --- Messages ---
+
+Prefix: "&8» &3BanSystem &8| &7"
+NoPermission: "&cYou have insufficient permissions to execute this command."
+
+Days: "days"
+Day: "day"
+Hours: "hours"
+Hour: "hour"
+Minutes: "minutes"
+Minute: "minute"
+Seconds: "A few seconds"
+Permanent: "Permanent"
+
+BanSuccess: "&aThe player &e%player% &ahas been banned."
+MuteSuccess: "&aThe player &e%player% &ahas been muted."
+AlreadyBanned: "&cThis player is already banned."
+AlreadyMuted: "&cThis player is already muted."
+UnbanSuccess: "&aThe player &e%player% &ahas been unbanned."
+UnmuteSuccess: "&aThe player &e%player% &ahas been unmuted."
+PlayerNotBanned: "&cThis player is not banned."
+PlayerNotMuted: "&cThis player is not muted."
+MustNumber: "&cThe reason must be a number between 1 and %max%."
+Reasonlimit: "&cNo reason could be found under this ID."
+BanScreen: "&3You were banned. &3Reason: &7%reason% &3ID: &7%id% \n&3Remaining time: &7%time%"
+MuteScreen: "&cYou were muted from the chat.\n&cReason: &7%reason% &cID: &7%id%\n&cRemaining time: &7%time%"
+
+Check:
+  Ban:
+    Info: "&aLoading data..."
+    Player: "&aPlayer: &e%player%"
+    Reason: "&aReason: &e%reason%"
+    ID: "&aID: &e%id%"
+    Banner: "&aBanned by: &e%banner%"
+    Date: "&aDate: &e%date%"
+    RemainingTime: "&aRemaining time: &e%time%"
+  Mute:
+    Info: "&aLoading data..."
+    Player: "&aPlayer: &e%player%"
+    Reason: "&aReason: &e%reason%"
+    ID: "&aID: &e%id%"
+    Muter: "&aMuted by: &e%muter%"
+    Date: "&aDate: &e%date%"
+    RemainingTime: "&aRemaining time: &e%time%"
+Usage:
+  BanCommand: "&7Usage: &a/ban <Player> <ID>"
+  UnbanCommand: "&7Usage: &a/unban <Player>"
+  CheckCommand: "&7Usage: &a/check <Player> <ban|mute>"
+  MuteCommand: "&7Usage: &a/mute <Player> <ID>"
+  UnmuteCommand: "&7Usage: &a/unmute <Player>"
