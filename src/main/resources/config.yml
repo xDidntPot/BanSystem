@@ -74,6 +74,8 @@ MustNumber: "&cThe reason must be a number between 1 and %max%."
 Reasonlimit: "&cNo reason could be found under this ID."
 BanScreen: "&3You were banned. &3Reason: &7%reason% &3ID: &7%id% \n&3Remaining time: &7%time%"
 MuteScreen: "&cYou were muted from the chat.\n&cReason: &7%reason% &cID: &7%id%\n&cRemaining time: &7%time%"
+BanReasonFormat: "&eID: &7%id% &8| &eReason: &7%reason%"
+MuteReasonFormat: "&eID: &7%id% &8| &eReason: &7%reason%"
 
 Check:
   Ban:
