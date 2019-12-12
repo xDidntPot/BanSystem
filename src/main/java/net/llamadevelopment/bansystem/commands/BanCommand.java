@@ -29,10 +29,10 @@ public class BanCommand extends CommandManager {
                 String player = args[0];
                 String number = args[1];
                 try {
-                    Integer n = Integer.parseInt(args[1]);
+                    int n = Integer.parseInt(args[1]);
                     int seconds = plugin.getConfig().getInt("BanReasons." + number + ".Seconds");
                     String reason = plugin.getConfig().getString("BanReasons." + number + ".Reason");
-                    Integer max = plugin.getConfig().getInt("BanReasons.Count");
+                    int max = plugin.getConfig().getInt("BanReasons.Count");
                     if (BanSystem.getInstance().getConfig().getBoolean("MongoDB")) {
                         Document document = new Document("name", player);
                         Document found = (Document) BanSystem.getInstance().getBanCollection().find(document).first();
@@ -67,6 +67,7 @@ public class BanCommand extends CommandManager {
                     var1.getMessage();
                 }
             } else {
+                MessageUtil.sendBanHelp(sender, BanSystem.getInstance());
                 sender.sendMessage(plugin.getConfig().getString("Prefix").replace("&", "§") + plugin.getConfig().getString("Usage.BanCommand").replace("&", "§"));
             }
         } else {
