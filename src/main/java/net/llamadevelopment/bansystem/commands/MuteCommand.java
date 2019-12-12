@@ -5,6 +5,7 @@ import cn.nukkit.command.CommandSender;
 import cn.nukkit.utils.Config;
 import net.llamadevelopment.bansystem.BanSystem;
 import net.llamadevelopment.bansystem.managers.MuteManager;
+import net.llamadevelopment.bansystem.utils.MessageUtil;
 import net.llamadevelopment.bansystem.utils.MuteUtil;
 import net.llamadevelopment.bansystem.utils.MutedPlayer;
 import org.bson.Document;
@@ -72,6 +73,7 @@ public class MuteCommand extends CommandManager {
                     var1.getMessage();
                 }
             } else {
+                MessageUtil.sendMuteHelp(sender, BanSystem.getInstance());
                 sender.sendMessage(plugin.getConfig().getString("Prefix").replace("&", "§") + plugin.getConfig().getString("Usage.MuteCommand").replace("&", "§"));
             }
         } else {
