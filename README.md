@@ -1,2 +1,2 @@
 # BanSystem-Nukkit
-A bansystem for Nukkit.
+Download: https://nukkitx.com/resources/bansystem.332/
