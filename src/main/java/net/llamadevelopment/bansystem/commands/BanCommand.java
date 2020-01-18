@@ -19,7 +19,7 @@ public class BanCommand extends CommandManager {
     private BanSystem plugin;
 
     public BanCommand(BanSystem plugin) {
-        super(plugin, "ban", "Ban a player.", "/ban");
+        super(plugin, plugin.getConfig().getString("Commands.Ban"), "Ban a player.", "/ban");
         this.plugin = plugin;
     }
 
@@ -68,7 +68,7 @@ public class BanCommand extends CommandManager {
                 }
             } else {
                 MessageUtil.sendBanHelp(sender, BanSystem.getInstance());
-                sender.sendMessage(plugin.getConfig().getString("Prefix").replace("&", "§") + plugin.getConfig().getString("Usage.BanCommand").replace("&", "§"));
+                sender.sendMessage(plugin.getConfig().getString("Prefix").replace("&", "§") + plugin.getConfig().getString("Usage.BanCommand").replace("&", "§").replace("%command%", "/" + plugin.getConfig().getString("Commands.Ban")));
             }
         } else {
             sender.sendMessage(plugin.getConfig().getString("Prefix").replace("&", "§") + plugin.getConfig().getString("NoPermission").replace("&", "§"));

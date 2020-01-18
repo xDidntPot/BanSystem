@@ -11,7 +11,7 @@ public class UnbanCommand extends CommandManager {
     private BanSystem plugin;
 
     public UnbanCommand(BanSystem plugin) {
-        super(plugin, "unban", "Unban a player.", "/unban");
+        super(plugin, plugin.getConfig().getString("Commands.Unban"), "Unban a player.", "/unban");
         this.plugin = plugin;
     }
 
@@ -36,7 +36,7 @@ public class UnbanCommand extends CommandManager {
                 BanManager.unBan(player);
                 sender.sendMessage(plugin.getConfig().getString("Prefix").replace("&", "§") + plugin.getConfig().getString("UnbanSuccess").replace("&", "§").replace("%player%", player));
             } else {
-                sender.sendMessage(plugin.getConfig().getString("Prefix").replace("&", "§") + plugin.getConfig().getString("Usage.UnbanCommand").replace("&", "§"));
+                sender.sendMessage(plugin.getConfig().getString("Prefix").replace("&", "§") + plugin.getConfig().getString("Usage.UnbanCommand").replace("&", "§").replace("%command%", "/" + plugin.getConfig().getString("Commands.Unban")));
             }
         } else {
             sender.sendMessage(plugin.getConfig().getString("Prefix").replace("&", "§") + plugin.getConfig().getString("NoPermission").replace("&", "§"));

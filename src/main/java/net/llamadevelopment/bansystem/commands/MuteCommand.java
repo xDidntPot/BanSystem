@@ -20,7 +20,7 @@ public class MuteCommand extends CommandManager {
     private BanSystem plugin;
 
     public MuteCommand(BanSystem plugin) {
-        super(plugin, "mute", "Mute a player.", "/mute");
+        super(plugin, plugin.getConfig().getString("Commands.Mute"), "Mute a player.", "/mute");
         this.plugin = plugin;
     }
 
@@ -74,7 +74,7 @@ public class MuteCommand extends CommandManager {
                 }
             } else {
                 MessageUtil.sendMuteHelp(sender, BanSystem.getInstance());
-                sender.sendMessage(plugin.getConfig().getString("Prefix").replace("&", "§") + plugin.getConfig().getString("Usage.MuteCommand").replace("&", "§"));
+                sender.sendMessage(plugin.getConfig().getString("Prefix").replace("&", "§") + plugin.getConfig().getString("Usage.MuteCommand").replace("&", "§").replace("%command%", "/" + plugin.getConfig().getString("Commands.Mute")));
             }
         } else {
             sender.sendMessage(plugin.getConfig().getString("Prefix").replace("&", "§") + plugin.getConfig().getString("NoPermission").replace("&", "§"));

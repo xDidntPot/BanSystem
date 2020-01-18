@@ -14,7 +14,7 @@ public class CheckCommand extends CommandManager {
     private BanSystem plugin;
 
     public CheckCommand(BanSystem plugin) {
-        super(plugin, "check", "Check if a player is banned or muted.", "/check");
+        super(plugin, plugin.getConfig().getString("Commands.Check"), "Check if a player is banned or muted.", "/check");
         this.plugin = plugin;
     }
 
@@ -69,10 +69,10 @@ public class CheckCommand extends CommandManager {
                     sender.sendMessage(plugin.getConfig().getString("Prefix").replace("&", "§") + plugin.getConfig().getString("Check.Mute.Date").replace("&", "§").replace("%date%", muteUtil.getDate()));
                     sender.sendMessage(plugin.getConfig().getString("Prefix").replace("&", "§") + plugin.getConfig().getString("Check.Mute.RemainingTime").replace("&", "§").replace("%time%", MuteManager.getRemainingTime(muteUtil.getEnd())));
                 } else {
-                    sender.sendMessage(plugin.getConfig().getString("Prefix").replace("&", "§") + plugin.getConfig().getString("Usage.CheckCommand").replace("&", "§"));
+                    sender.sendMessage(plugin.getConfig().getString("Prefix").replace("&", "§") + plugin.getConfig().getString("Usage.CheckCommand").replace("&", "§").replace("%command%", "/" + plugin.getConfig().getString("Commands.Ban")));
                 }
             } else {
-                sender.sendMessage(plugin.getConfig().getString("Prefix").replace("&", "§") + plugin.getConfig().getString("Usage.CheckCommand").replace("&", "§"));
+                sender.sendMessage(plugin.getConfig().getString("Prefix").replace("&", "§") + plugin.getConfig().getString("Usage.CheckCommand").replace("&", "§").replace("%command%", "/" + plugin.getConfig().getString("Commands.Check")));
             }
         } else {
             sender.sendMessage(plugin.getConfig().getString("Prefix").replace("&", "§") + plugin.getConfig().getString("NoPermission").replace("&", "§"));

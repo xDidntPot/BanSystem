@@ -12,7 +12,7 @@ public class UnmuteCommand extends CommandManager {
     private BanSystem plugin;
 
     public UnmuteCommand(BanSystem plugin) {
-        super(plugin, "unmute", "Unmute a player.", "/unmute");
+        super(plugin, plugin.getConfig().getString("Commands.Unmute"), "Unmute a player.", "/unmute");
         this.plugin = plugin;
     }
 
@@ -41,7 +41,7 @@ public class UnmuteCommand extends CommandManager {
                 }
                 sender.sendMessage(plugin.getConfig().getString("Prefix").replace("&", "§") + plugin.getConfig().getString("UnmuteSuccess").replace("&", "§").replace("%player%", player));
             } else {
-                sender.sendMessage(plugin.getConfig().getString("Prefix").replace("&", "§") + plugin.getConfig().getString("Usage.UnmuteCommand").replace("&", "§"));
+                sender.sendMessage(plugin.getConfig().getString("Prefix").replace("&", "§") + plugin.getConfig().getString("Usage.UnmuteCommand").replace("&", "§").replace("%command%", "/" + plugin.getConfig().getString("Commands.Unmute")));
             }
         } else {
             sender.sendMessage(plugin.getConfig().getString("Prefix").replace("&", "§") + plugin.getConfig().getString("NoPermission").replace("&", "§"));
