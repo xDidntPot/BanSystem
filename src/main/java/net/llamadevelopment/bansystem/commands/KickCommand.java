@@ -6,7 +6,6 @@ import net.llamadevelopment.bansystem.BanSystem;
 
 public class KickCommand extends CommandManager {
 
-
     private BanSystem plugin;
 
     public KickCommand(BanSystem plugin) {
@@ -20,18 +19,18 @@ public class KickCommand extends CommandManager {
                 Player player = plugin.getServer().getPlayer(args[0]);
                 String reason = "";
                 for (int i = 1; i < args.length; ++i) reason = reason + args[i] + " ";
-                String kickMessage = plugin.getConfig().getString("KickScreen").replace("&", "§").replace("%reason%", reason);
+                String kickMessage = plugin.getConfig().getString("Messages.KickScreen").replace("&", "§").replace("%reason%", reason);
                 if (player != null) {
                     player.kick(kickMessage, false);
-                    sender.sendMessage(plugin.getConfig().getString("Prefix").replace("&", "§") + plugin.getConfig().getString("KickSuccess").replace("%player%", player.getName()).replace("&", "§"));
+                    sender.sendMessage(plugin.getConfig().getString("Messages.Prefix").replace("&", "§") + plugin.getConfig().getString("Messages.KickSuccess").replace("%player%", player.getName()).replace("&", "§"));
                 } else {
-                    sender.sendMessage(plugin.getConfig().getString("Prefix").replace("&", "§") + plugin.getConfig().getString("PlayerNotOnline").replace("&", "§"));
+                    sender.sendMessage(plugin.getConfig().getString("Messages.Prefix").replace("&", "§") + plugin.getConfig().getString("Messages.PlayerNotOnline").replace("&", "§"));
                 }
             } else {
-                sender.sendMessage(plugin.getConfig().getString("Prefix").replace("&", "§") + plugin.getConfig().getString("Usage.KickCommand").replace("&", "§").replace("%command%", "/" + plugin.getConfig().getString("Commands.Kick")));
+                sender.sendMessage(plugin.getConfig().getString("Messages.Prefix").replace("&", "§") + plugin.getConfig().getString("Usage.KickCommand").replace("&", "§").replace("%command%", "/" + plugin.getConfig().getString("Commands.Kick")));
             }
         } else {
-            sender.sendMessage(plugin.getConfig().getString("Prefix").replace("&", "§") + plugin.getConfig().getString("NoPermission").replace("&", "§"));
+            sender.sendMessage(plugin.getConfig().getString("Messages.Prefix").replace("&", "§") + plugin.getConfig().getString("Messages.NoPermission").replace("&", "§"));
         }
         return false;
     }

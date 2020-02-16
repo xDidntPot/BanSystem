@@ -6,7 +6,7 @@
 
     <groupId>net.llamagames.os.bansystem</groupId>
     <artifactId>BanSystemNK</artifactId>
-    <version>1.0.2-SNAPSHOT</version>
+    <version>1.2.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <dependencies>
@@ -19,6 +19,12 @@
         <dependency>
             <groupId>cn.nukkit</groupId>
             <artifactId>nukkit</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>ru.nukkit.dblib</groupId>
+            <artifactId>DbLib</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>

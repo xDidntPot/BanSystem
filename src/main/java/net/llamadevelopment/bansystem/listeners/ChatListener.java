@@ -5,11 +5,9 @@ import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.Listener;
 import cn.nukkit.event.player.PlayerChatEvent;
 import net.llamadevelopment.bansystem.BanSystem;
-import net.llamadevelopment.bansystem.managers.MuteManager;
-import net.llamadevelopment.bansystem.utils.MessageUtil;
-import net.llamadevelopment.bansystem.utils.MuteUtil;
-import net.llamadevelopment.bansystem.utils.MutedPlayer;
-import org.bson.Document;
+import net.llamadevelopment.bansystem.components.managers.MuteManager;
+import net.llamadevelopment.bansystem.components.utils.MessageUtil;
+import net.llamadevelopment.bansystem.components.utils.MutedPlayer;
 
 public class ChatListener implements Listener {
 
