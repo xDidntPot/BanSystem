@@ -31,6 +31,7 @@ public class MySqlProvider {
         this.connect(BanSystem.getInstance());
         update("CREATE TABLE IF NOT EXISTS bans(name VARCHAR(255), reason VARCHAR(255), id VARCHAR(255), banner VARCHAR(255), date VARCHAR(255), end BIGINT(255), PRIMARY KEY (id));");
         update("CREATE TABLE IF NOT EXISTS mutes(name VARCHAR(255), reason VARCHAR(255), id VARCHAR(255), banner VARCHAR(255), date VARCHAR(255), end BIGINT(255), PRIMARY KEY (id));");
+        update("CREATE TABLE IF NOT EXISTS warnings(player VARCHAR(255), reason VARCHAR(255), id VARCHAR(255), creator VARCHAR(255), date VARCHAR(255), PRIMARY KEY (id));");
         update("CREATE TABLE IF NOT EXISTS banlogs(player VARCHAR(255), reason VARCHAR(255), id VARCHAR(255), banner VARCHAR(255), date VARCHAR(255), PRIMARY KEY (id));");
         update("CREATE TABLE IF NOT EXISTS mutelogs(player VARCHAR(255), reason VARCHAR(255), id VARCHAR(255), banner VARCHAR(255), date VARCHAR(255), PRIMARY KEY (id));");
     }

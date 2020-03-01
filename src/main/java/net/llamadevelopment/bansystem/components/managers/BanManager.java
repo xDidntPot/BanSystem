@@ -41,7 +41,7 @@ public class BanManager {
             long end = current + seconds * 1000L;
             if (seconds == -1) end = -1L;
             try {
-                MySqlProvider.update("INSERT INTO bans (NAME, REASON, ID, BANNER, DATE, END) VALUES ('" + player + "', '" + reason + "', '" + id + "', '" + banner + "', '" + date + "','" + end + "');");
+                MySqlProvider.update("INSERT INTO bans (NAME, REASON, ID, BANNER, DATE, END) VALUES ('" + player + "', '" + reason + "', '" + id + "', '" + banner + "', '" + date + "', '" + end + "');");
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -129,7 +129,6 @@ public class BanManager {
                 ResultSet rs = preparedStatement.executeQuery();
                 if (rs.next()) {
                     name = rs.getString("NAME");
-                    reason = rs.getString("REASON");
                     reason = rs.getString("REASON");
                     id = rs.getString("ID");
                     banner = rs.getString("BANNER");

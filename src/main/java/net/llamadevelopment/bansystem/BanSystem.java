@@ -37,7 +37,6 @@ public class BanSystem extends PluginBase {
         System.out.println("                          |___/                       ");
         getLogger().info("§aStarting and loading all components...");
         saveDefaultConfig();
-        updateConfig();
         getServer().getPluginManager().registerEvents(new JoinListener(), this);
         getServer().getPluginManager().registerEvents(new ChatListener(), this);
         getLogger().info("Components successfully loaded!");
@@ -59,10 +58,32 @@ public class BanSystem extends PluginBase {
         } else {
             getLogger().warning("§4§lFailed to load! Please specify a valid provider: MySql, MongoDB, Yaml");
         }
+        updateConfig();
         registerCommands();
     }
 
     private void updateConfig() {
+        if (getConfig().getInt("ConfigVersion") == 1) {
+            getConfig().set("ConfigVersion", 2);
+            getConfig().set("Messages.WarnScreen", "&3You have been warned. &3Reason: &7%reason% &3ID: &7%id% \n&3Creator: &7%creator%");
+            getConfig().set("Messages.WarnSuccess", "&aThe player &e%player% &ahas been warned.");
+            getConfig().set("Warning.EnableBan", false);
+            getConfig().set("Warning.BanByAmount", 5);
+            getConfig().set("Warning.BanReason", "You've been warned too many times");
+            getConfig().set("Warning.BanTime", 259200);
+            getConfig().set("Usage.WarnCommand", "&7Usage: &a%command% <Player> <Reason>");
+            getConfig().set("Usage.WarnlogCommand", "&7Usage: &a%command% <Player>");
+            getConfig().set("Commands.Warn", "warn");
+            getConfig().set("Commands.Warnlog", "warnlog");
+            getConfig().set("Warnlog.Info", "&aWarning: &e#%count%");
+            getConfig().set("Warnlog.Player", "&aPlayer: &e%player%");
+            getConfig().set("Warnlog.Reason", "&aReason: &e%reason%");
+            getConfig().set("Warnlog.ID", "&aID: &e%id%");
+            getConfig().set("Warnlog.Creator", "&aCreated by: &e%creator%");
+            getConfig().set("Warnlog.Date", "&aDate: &e%date%");
+            getConfig().save();
+            getConfig().reload();
+        }
     }
 
     private void registerCommands() {
@@ -77,6 +98,8 @@ public class BanSystem extends PluginBase {
         if (mongodb || mysql) {
             map.register(config.getString("Commands.Banlog"), new BanlogCommand(this));
             map.register(config.getString("Commands.Mutelog"), new MutelogCommand(this));
+            map.register(config.getString("Commands.Warn"), new WarnCommand(this));
+            map.register(config.getString("Commands.Warnlog"), new WarnlogCommand(this));
         }
     }
 

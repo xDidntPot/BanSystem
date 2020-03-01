@@ -11,7 +11,7 @@ public class MongoDBProvider {
 
     private static MongoClient mongoClient;
     private static MongoDatabase mongoDatabase;
-    private static MongoCollection<Document> banCollection, muteCollection, banlogCollection, mutelogCollection;
+    private static MongoCollection<Document> banCollection, muteCollection, banlogCollection, mutelogCollection, warnCollection;
 
     public static void connect(BanSystem instance) {
         try {
@@ -22,6 +22,7 @@ public class MongoDBProvider {
             muteCollection = mongoDatabase.getCollection("mutes");
             banlogCollection = mongoDatabase.getCollection("banlogs");
             mutelogCollection = mongoDatabase.getCollection("mutelogs");
+            warnCollection = mongoDatabase.getCollection("warnings");
             instance.getLogger().info("§aConnected successfully to database!");
         } catch (Exception e) {
             instance.getLogger().error("§4Failed to connect to database.");
@@ -45,6 +46,10 @@ public class MongoDBProvider {
 
     public static MongoCollection<Document> getBanCollection() {
         return banCollection;
+    }
+
+    public static MongoCollection<Document> getWarnCollection() {
+        return warnCollection;
     }
 
     public static MongoDatabase getMongoDatabase() {

@@ -14,6 +14,14 @@ public class MessageUtil {
         return str.replace("&", "§");
     }
 
+    public static String warnScreen(String reason, String id, String creator) {
+        String str = BanSystem.getInstance().getConfig().getString("Messages.WarnScreen");
+        str = str.replace("%reason%", reason);
+        str = str.replace("%id%", id);
+        str = str.replace("%creator%", creator);
+        return str.replace("&", "§");
+    }
+
     public static String muteScreen(String reason, String id, String time, String banner) {
         String str = BanSystem.getInstance().getConfig().getString("Messages.MuteScreen");
         str = str.replace("%reason%", reason);
