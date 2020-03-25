@@ -21,8 +21,6 @@ public class BanSystem extends PluginBase {
     private boolean mysql, mongodb, yaml = false;
     private MySqlProvider mySql;
 
-    private int version = 1;
-
     @Override
     public void onEnable() {
         instance = this;
@@ -83,6 +81,15 @@ public class BanSystem extends PluginBase {
             getConfig().set("Warnlog.Date", "&aDate: &e%date%");
             getConfig().save();
             getConfig().reload();
+        } else if (getConfig().getInt("ConfigVersion") == 2) {
+            getConfig().set("ConfigVersion", 3);
+            getConfig().set("Messages.TimeMustNumber", "&cThe number of days or hours must be a valid number.");
+            getConfig().set("Usage.TempbanCommand", "&7Usage: &a%command% <Player> <days|hours> <Time[int]> <Reason>");
+            getConfig().set("Usage.TempmuteCommand", "&7Usage: &a%command% <Player> <days|hours> <Time[int]> <Reason>");
+            getConfig().set("Commands.Tempban", "tempban");
+            getConfig().set("Commands.Tempmute", "tempmute");
+            getConfig().save();
+            getConfig().reload();
         }
     }
 
@@ -95,6 +102,8 @@ public class BanSystem extends PluginBase {
         map.register(config.getString("Commands.Mute"), new MuteCommand(this));
         map.register(config.getString("Commands.Unmute"), new UnmuteCommand(this));
         map.register(config.getString("Commands.Kick"), new KickCommand(this));
+        map.register(config.getString("Commands.Tempban"), new TempbanCommand(this));
+        map.register(config.getString("Commands.Tempmute"), new TempmuteCommand(this));
         if (mongodb || mysql) {
             map.register(config.getString("Commands.Banlog"), new BanlogCommand(this));
             map.register(config.getString("Commands.Mutelog"), new MutelogCommand(this));
