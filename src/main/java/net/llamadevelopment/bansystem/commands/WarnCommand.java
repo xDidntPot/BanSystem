@@ -8,7 +8,7 @@ import net.llamadevelopment.bansystem.components.utils.MessageUtil;
 
 import java.util.Random;
 
-public class WarnCommand  extends CommandManager {
+public class WarnCommand extends CommandManager {
 
     private BanSystem plugin;
 
@@ -24,11 +24,11 @@ public class WarnCommand  extends CommandManager {
                 String reason = "";
                 for (int i = 1; i < args.length; ++i) reason = reason + args[i] + " ";
                 String kickMessage = MessageUtil.warnScreen(reason, getID(), sender.getName());
+                WarnManager.createWarning(args[0], reason, sender.getName());
+                WarnManager.updatePlayer(args[0]);
+                sender.sendMessage(plugin.getConfig().getString("Messages.Prefix").replace("&", "§") + plugin.getConfig().getString("Messages.WarnSuccess").replace("%player%", args[0]).replace("&", "§"));
                 if (player != null) {
-                    WarnManager.createWarning(player.getName(), reason, sender.getName());
                     player.kick(kickMessage, false);
-                    WarnManager.updatePlayer(player.getName());
-                    sender.sendMessage(plugin.getConfig().getString("Messages.Prefix").replace("&", "§") + plugin.getConfig().getString("Messages.WarnSuccess").replace("%player%", player.getName()).replace("&", "§"));
                 } else {
                     sender.sendMessage(plugin.getConfig().getString("Messages.Prefix").replace("&", "§") + plugin.getConfig().getString("Messages.PlayerNotOnline").replace("&", "§"));
                 }
