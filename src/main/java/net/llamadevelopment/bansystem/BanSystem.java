@@ -24,15 +24,6 @@ public class BanSystem extends PluginBase {
     @Override
     public void onEnable() {
         instance = this;
-        System.out.println();
-        System.out.println(" ____               _____           _                 ");
-        System.out.println("|  _ \\             / ____|         | |                ");
-        System.out.println("| |_) | __ _ _ __ | (___  _   _ ___| |_ ___ _ __ ___  ");
-        System.out.println("|  _ < / _` | '_ \\ \\___ \\| | | / __| __/ _ \\ '_ ` _ \\ ");
-        System.out.println("| |_) | (_| | | | |____) | |_| \\__ \\ ||  __/ | | | | |");
-        System.out.println("|____/ \\__,_|_| |_|_____/ \\__, |___/\\__\\___|_| |_| |_|");
-        System.out.println("                           __/ |                      ");
-        System.out.println("                          |___/                       ");
         getLogger().info("§aStarting and loading all components...");
         saveDefaultConfig();
         getServer().getPluginManager().registerEvents(new JoinListener(), this);
@@ -88,6 +79,11 @@ public class BanSystem extends PluginBase {
             getConfig().set("Usage.TempmuteCommand", "&7Usage: &a%command% <Player> <days|hours> <Time[int]> <Reason>");
             getConfig().set("Commands.Tempban", "tempban");
             getConfig().set("Commands.Tempmute", "tempmute");
+            getConfig().save();
+            getConfig().reload();
+        } else if (getConfig().getInt("ConfigVersion") == 3) {
+            getConfig().set("ConfigVersion", 4);
+            getConfig().set("Settings.JoinDelay", 60);
             getConfig().save();
             getConfig().reload();
         }
