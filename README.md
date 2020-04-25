@@ -1,5 +1,5 @@
 # BanSystem-Nukkit
-Download: https://nukkitx.com/resources/bansystem.332/download/
+You can download the .jar file for your server [here](https://nukkitx.com/resources/bansystem.332/download)!
 
 # Wiki Page
 Wiki: https://github.com/llama-development/BanSystem-Nukkit/wiki
