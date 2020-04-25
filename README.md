@@ -2,7 +2,7 @@
 You can download the .jar file for your server [here](https://nukkitx.com/resources/bansystem.332/download)!
 
 # Wiki Page
-Wiki: https://github.com/llama-development/BanSystem-Nukkit/wiki
+Get more information [here](https://nukkitx.com/resources/bansystem.332/) or on the [Wiki page](https://github.com/llama-development/BanSystemNK/wiki)!
 
 # Thanks to ZAP-Hosting!
 This project wouldn't be possible without the help of ZAP-Hosting!
