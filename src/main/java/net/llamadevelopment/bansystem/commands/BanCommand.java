@@ -1,120 +1,88 @@
 package net.llamadevelopment.bansystem.commands;
 
 import cn.nukkit.Player;
+import cn.nukkit.Server;
+import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
-import cn.nukkit.utils.Config;
+import cn.nukkit.command.data.CommandParamType;
+import cn.nukkit.command.data.CommandParameter;
+import cn.nukkit.network.protocol.ScriptCustomEventPacket;
+import cn.nukkit.scheduler.AsyncTask;
 import net.llamadevelopment.bansystem.BanSystem;
-import net.llamadevelopment.bansystem.components.managers.BanManager;
-import net.llamadevelopment.bansystem.components.managers.database.MongoDBProvider;
-import net.llamadevelopment.bansystem.components.managers.database.MySqlProvider;
-import net.llamadevelopment.bansystem.components.utils.BanUtil;
-import net.llamadevelopment.bansystem.components.utils.MessageUtil;
-import org.bson.Document;
+import net.llamadevelopment.bansystem.Configuration;
+import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
+import net.llamadevelopment.bansystem.components.api.SystemSettings;
+import net.llamadevelopment.bansystem.components.data.Ban;
+import net.llamadevelopment.bansystem.components.data.BanReason;
+import net.llamadevelopment.bansystem.components.managers.database.Provider;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Random;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 
-public class BanCommand extends CommandManager {
+public class BanCommand extends Command {
 
-    private BanSystem plugin;
-
-    public BanCommand(BanSystem plugin) {
-        super(plugin, plugin.getConfig().getString("Commands.Ban"), "Ban a player.", "/ban");
-        this.plugin = plugin;
+    public BanCommand(String name) {
+        super(name, "Ban a player.");
+        commandParameters.put("default", new CommandParameter[]{
+                new CommandParameter("player", CommandParamType.TARGET, false),
+                new CommandParameter("reason", CommandParamType.TEXT, false)
+        });
+        setPermission("bansystem.command.ban");
     }
 
-    public boolean execute(CommandSender sender, String label, String[] args) {
-        if (sender.hasPermission("bansystem.command.ban")) {
+    @Override
+    public boolean execute(CommandSender sender, String s, String[] args) {
+        Provider api = BanSystemAPI.getProvider();
+        SystemSettings settings = BanSystemAPI.getSystemSettings();
+        if (sender.hasPermission(getPermission())) {
             if (args.length == 2) {
                 String player = args[0];
-                String number = args[1];
-                try {
-                    int n = Integer.parseInt(args[1]);
-                    int seconds = plugin.getConfig().getInt("BanReasons." + number + ".Seconds");
-                    String reason = plugin.getConfig().getString("BanReasons." + number + ".Reason");
-                    int max = plugin.getConfig().getInt("BanReasons.Count");
-                    if (plugin.isMongodb()) {
-                        Document document = new Document("name", player);
-                        Document found = (Document) MongoDBProvider.getBanCollection().find(document).first();
-                        if (found != null) {
-                            sender.sendMessage(plugin.getConfig().getString("Messages.Prefix").replace("&", "§") + plugin.getConfig().getString("Messages.AlreadyBanned").replace("&", "§"));
-                            return true;
-                        }
-                    } else if (plugin.isMysql()) {
-                        try {
-                            PreparedStatement preparedStatement = MySqlProvider.getConnection().prepareStatement("SELECT * FROM bans WHERE NAME = ?");
-                            preparedStatement.setString(1, player);
-                            ResultSet rs = preparedStatement.executeQuery();
-                            if (rs.next()) {
-                                if (rs.getString("NAME") != null) {
-                                    sender.sendMessage(plugin.getConfig().getString("Messages.Prefix").replace("&", "§") + plugin.getConfig().getString("Messages.AlreadyBanned").replace("&", "§"));
-                                    return true;
-                                }
-                            }
-                            rs.close();
-                            preparedStatement.close();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    } else if (plugin.isYaml()) {
-                        Config bans = new Config(BanSystem.getInstance().getDataFolder() + "/bans.yml", Config.YAML);
-                        if (bans.exists("Player." + player)) {
-                            sender.sendMessage(plugin.getConfig().getString("Messages.Prefix").replace("&", "§") + plugin.getConfig().getString("Messages.AlreadyBanned").replace("&", "§"));
-                            return true;
-                        }
-                    }
-                    if (!(n > max)) {
-                        if (n >= 1) {
-                            BanManager.setBanned(player, reason, getBanID(), sender.getName(), getDate(), seconds);
-                            sender.sendMessage(plugin.getConfig().getString("Messages.Prefix").replace("&", "§") + plugin.getConfig().getString("Messages.BanSuccess").replace("%player%", player).replace("&", "§"));
-                            Player target = BanSystem.getInstance().getServer().getPlayer(player);
-                            BanUtil banUtil = BanManager.getPlayer(player);
-                            if (target != null) {
-                                target.kick(MessageUtil.banScreen(banUtil.getReason(), banUtil.getId(), BanManager.getRemainingTime(banUtil.getEnd()), banUtil.getBanner()), false);
-                            }
-                        } else {
-                            sender.sendMessage(plugin.getConfig().getString("Messages.Prefix").replace("&", "§") + plugin.getConfig().getString("Messages.Reasonlimit").replace("&", "§"));
-                        }
-                    } else {
-                        sender.sendMessage(plugin.getConfig().getString("Messages.Prefix").replace("&", "§") + plugin.getConfig().getString("Messages.Reasonlimit").replace("&", "§"));
-                    }
-                } catch (NumberFormatException var1) {
-                    sender.sendMessage(plugin.getConfig().getString("Messages.Prefix").replace("&", "§") + plugin.getConfig().getString("Messages.MustNumber").replace("&", "§").replace("%max%", plugin.getConfig().getString("BanReasons.Count")));
-                    var1.getMessage();
+                String reason = args[1];
+                if (api.playerIsBanned(player)) {
+                    sender.sendMessage(Configuration.getAndReplace("PlayerIsBanned"));
+                    return true;
                 }
+                if (settings.banReasons.get(reason) == null) {
+                    sender.sendMessage(Configuration.getAndReplace("ReasonNotFound"));
+                    return true;
+                }
+                Server.getInstance().getScheduler().scheduleAsyncTask(BanSystem.getInstance(), new AsyncTask() {
+                    @Override
+                    public void onRun() {
+                        BanReason banReason = settings.banReasons.get(reason);
+                        api.banPlayer(player, banReason.getReason(), sender.getName(), banReason.getSeconds());
+                        sender.sendMessage(Configuration.getAndReplace("PlayerBanned", player));
+                        Player onlinePlayer = Server.getInstance().getPlayer(player);
+                        if (onlinePlayer != null) {
+                            Ban ban = api.getBan(player);
+                            onlinePlayer.kick(Configuration.getAndReplaceNP("BanScreen", ban.getBanID(), ban.getReason(), api.getRemainingTime(ban.getTime())), false);
+                        }
+                        if (settings.isWaterdog() && sender instanceof Player) {
+                            Player player1 = (Player) sender;
+                            Ban ban = api.getBan(player);
+                            ScriptCustomEventPacket customEventPacket = new ScriptCustomEventPacket();
+                            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                            DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
+                            try {
+                                dataOutputStream.writeUTF("banplayer");
+                                dataOutputStream.writeUTF(player);
+                                dataOutputStream.writeUTF(ban.getReason());
+                                dataOutputStream.writeUTF(ban.getBanID());
+                                dataOutputStream.writeUTF(api.getRemainingTime(ban.getTime()));
+                                customEventPacket.eventName = "bungeecord:main";
+                                customEventPacket.eventData = outputStream.toByteArray();
+                                player1.dataPacket(customEventPacket);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                });
             } else {
-                MessageUtil.sendBanHelp(sender, BanSystem.getInstance());
-                sender.sendMessage(plugin.getConfig().getString("Messages.Prefix").replace("&", "§") + plugin.getConfig().getString("Usage.BanCommand").replace("&", "§").replace("%command%", "/" + plugin.getConfig().getString("Commands.Ban")));
+                settings.banReasons.values().forEach(reason -> sender.sendMessage(Configuration.getAndReplace("ReasonFormat", reason.getId(), reason.getReason())));
+                sender.sendMessage(Configuration.getAndReplace("BanCommandUsage", getName()));
             }
-        } else {
-            sender.sendMessage(plugin.getConfig().getString("Messages.Prefix").replace("&", "§") + plugin.getConfig().getString("Messages.NoPermission").replace("&", "§"));
-        }
+        } else sender.sendMessage(Configuration.getAndReplace("NoPermission"));
         return false;
-    }
-
-    private String getBanID() {
-        String string = "";
-        int lastrandom = 0;
-        for (int i = 0; i < 6; i++) {
-            Random random = new Random();
-            int rand = random.nextInt(9);
-            while (rand == lastrandom) {
-                rand = random.nextInt(9);
-            }
-            lastrandom = rand;
-            string = string + rand;
-        }
-        return string;
-    }
-
-    private String getDate() {
-        Date now = new Date();
-        DateFormat dateFormat = new SimpleDateFormat("dd.MM.yy HH:mm");
-        String now1 = dateFormat.format(now);
-        return now1;
     }
 }

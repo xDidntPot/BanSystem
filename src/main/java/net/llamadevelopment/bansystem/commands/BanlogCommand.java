@@ -1,66 +1,52 @@
 package net.llamadevelopment.bansystem.commands;
 
+import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
+import cn.nukkit.command.data.CommandParamType;
+import cn.nukkit.command.data.CommandParameter;
+import cn.nukkit.scheduler.AsyncTask;
 import net.llamadevelopment.bansystem.BanSystem;
-import net.llamadevelopment.bansystem.components.managers.database.MongoDBProvider;
-import net.llamadevelopment.bansystem.components.managers.database.MySqlProvider;
-import org.bson.Document;
+import net.llamadevelopment.bansystem.Configuration;
+import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
+import net.llamadevelopment.bansystem.components.managers.database.Provider;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+public class BanlogCommand extends Command {
 
-public class BanlogCommand extends CommandManager {
-
-    private BanSystem plugin;
-
-    public BanlogCommand(BanSystem plugin) {
-        super(plugin, plugin.getConfig().getString("Commands.Banlog"), "See the history of a player.", "/banlog");
-        this.plugin = plugin;
+    public BanlogCommand(String name) {
+        super(name, "Get the ban history of a player.");
+        commandParameters.put("default", new CommandParameter[]{
+                new CommandParameter("player", CommandParamType.TARGET, false)
+        });
+        setPermission("bansystem.command.banlog");
     }
 
-
+    @Override
     public boolean execute(CommandSender sender, String s, String[] args) {
-        if (sender.hasPermission("bansystem.command.banlog")) {
+        BanSystem instance = BanSystem.getInstance();
+        Provider api = BanSystemAPI.getProvider();
+        if (sender.hasPermission(getPermission())) {
             if (args.length == 1) {
-                int a = 1;
-                if (plugin.isMongodb()) {
-                    for (Document doc : MongoDBProvider.getBanlogCollection().find(new Document("player", args[0]))) {
-                        sender.sendMessage(plugin.getConfig().getString("Messages.Prefix").replace("&", "§") + plugin.getConfig().getString("Banlog.Info").replace("&", "§").replace("%count%", String.valueOf(a)));
-                        sender.sendMessage(plugin.getConfig().getString("Messages.Prefix").replace("&", "§") + plugin.getConfig().getString("Banlog.Player").replace("&", "§").replace("%player%", doc.getString("player")));
-                        sender.sendMessage(plugin.getConfig().getString("Messages.Prefix").replace("&", "§") + plugin.getConfig().getString("Banlog.Reason").replace("&", "§").replace("%reason%", doc.getString("reason")));
-                        sender.sendMessage(plugin.getConfig().getString("Messages.Prefix").replace("&", "§") + plugin.getConfig().getString("Banlog.ID").replace("&", "§").replace("%id%", doc.getString("id")));
-                        sender.sendMessage(plugin.getConfig().getString("Messages.Prefix").replace("&", "§") + plugin.getConfig().getString("Banlog.Banner").replace("&", "§").replace("%banner%", doc.getString("banner")));
-                        sender.sendMessage(plugin.getConfig().getString("Messages.Prefix").replace("&", "§") + plugin.getConfig().getString("Banlog.Date").replace("&", "§").replace("%date%", doc.getString("date")));
-                        a++;
-                    }
-                } else if (plugin.isMysql()) {
-                    try {
-                        PreparedStatement preparedStatement = MySqlProvider.getConnection().prepareStatement("SELECT * FROM banlogs WHERE PLAYER = ?");
-                        preparedStatement.setString(1, args[0]);
-                        ResultSet rs = preparedStatement.executeQuery();
-                        while (rs.next()) {
-                            sender.sendMessage(plugin.getConfig().getString("Messages.Prefix").replace("&", "§") + plugin.getConfig().getString("Banlog.Info").replace("&", "§").replace("%count%", String.valueOf(a)));
-                            sender.sendMessage(plugin.getConfig().getString("Messages.Prefix").replace("&", "§") + plugin.getConfig().getString("Banlog.Player").replace("&", "§").replace("%player%", rs.getString("PLAYER")));
-                            sender.sendMessage(plugin.getConfig().getString("Messages.Prefix").replace("&", "§") + plugin.getConfig().getString("Banlog.Reason").replace("&", "§").replace("%reason%", rs.getString("REASON")));
-                            sender.sendMessage(plugin.getConfig().getString("Messages.Prefix").replace("&", "§") + plugin.getConfig().getString("Banlog.ID").replace("&", "§").replace("%id%", rs.getString("ID")));
-                            sender.sendMessage(plugin.getConfig().getString("Messages.Prefix").replace("&", "§") + plugin.getConfig().getString("Banlog.Banner").replace("&", "§").replace("%banner%", rs.getString("BANNER")));
-                            sender.sendMessage(plugin.getConfig().getString("Messages.Prefix").replace("&", "§") + plugin.getConfig().getString("Banlog.Date").replace("&", "§").replace("%date%", rs.getString("DATE")));
-                            a++;
+                String player = args[0];
+                instance.getServer().getScheduler().scheduleAsyncTask(instance, new AsyncTask() {
+                    @Override
+                    public void onRun() {
+                        int i = api.getBanlog(player).size();
+                        if (i == 0) {
+                            sender.sendMessage(Configuration.getAndReplace("NoDataFound"));
+                            return;
                         }
-                        rs.close();
-                        preparedStatement.close();
-                    } catch (Exception ignored) {
+                        api.getBanlog(player).forEach(ban -> {
+                            sender.sendMessage(Configuration.getAndReplace("BanlogInfo", player, i));
+                            sender.sendMessage(Configuration.getAndReplace("BanlogPlaceholder"));
+                            sender.sendMessage(Configuration.getAndReplace("BanlogReason", ban.getReason()));
+                            sender.sendMessage(Configuration.getAndReplace("BanlogID", ban.getBanID()));
+                            sender.sendMessage(Configuration.getAndReplace("BanlogBanner", ban.getBanner()));
+                            sender.sendMessage(Configuration.getAndReplace("BanlogDate", ban.getDate()));
+                        });
                     }
-                }
-                if (a == 1) sender.sendMessage(plugin.getConfig().getString("Messages.Prefix").replace("&", "§") + plugin.getConfig().getString("Messages.NoDataFound").replace("&", "§"));
-            } else {
-                sender.sendMessage(plugin.getConfig().getString("Messages.Prefix").replace("&", "§") + plugin.getConfig().getString("Usage.BanlogCommand").replace("&", "§").replace("%command%", "/" + plugin.getConfig().getString("Commands.Banlog")));
-            }
-        } else {
-            sender.sendMessage(plugin.getConfig().getString("Messages.Prefix").replace("&", "§") + plugin.getConfig().getString("Messages.NoPermission").replace("&", "§"));
-        }
+                });
+            } else sender.sendMessage(Configuration.getAndReplace("BanlogCommandUsage", getName()));
+        } else sender.sendMessage(Configuration.getAndReplace("NoPermission"));
         return false;
     }
 }
-
-

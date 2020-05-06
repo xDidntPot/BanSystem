@@ -1,131 +1,91 @@
 package net.llamadevelopment.bansystem;
 
-import cn.nukkit.Player;
 import cn.nukkit.command.CommandMap;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.utils.Config;
 import net.llamadevelopment.bansystem.commands.*;
-import net.llamadevelopment.bansystem.components.managers.database.MongoDBProvider;
-import net.llamadevelopment.bansystem.components.managers.database.MySqlProvider;
-import net.llamadevelopment.bansystem.listeners.ChatListener;
-import net.llamadevelopment.bansystem.listeners.JoinListener;
-import net.llamadevelopment.bansystem.components.utils.MutedPlayer;
+import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
+import net.llamadevelopment.bansystem.components.api.SystemSettings;
+import net.llamadevelopment.bansystem.components.data.BanReason;
+import net.llamadevelopment.bansystem.components.data.MuteReason;
+import net.llamadevelopment.bansystem.components.managers.MongodbProvider;
+import net.llamadevelopment.bansystem.components.managers.MysqlProvider;
+import net.llamadevelopment.bansystem.components.managers.YamlProvider;
+import net.llamadevelopment.bansystem.components.managers.database.Provider;
+import net.llamadevelopment.bansystem.listeners.EventListener;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class BanSystem extends PluginBase {
 
     private static BanSystem instance;
-    public HashMap<Player, MutedPlayer> mutedCache = new HashMap<Player, MutedPlayer>();
-    public boolean dataError = false;
-    private boolean mysql, mongodb, yaml = false;
-    private MySqlProvider mySql;
+    public static Provider provider;
+    private static final Map<String, Provider> providers = new HashMap<>();
 
     @Override
     public void onEnable() {
         instance = this;
-        getLogger().info("§aStarting and loading all components...");
         saveDefaultConfig();
-        getServer().getPluginManager().registerEvents(new JoinListener(), this);
-        getServer().getPluginManager().registerEvents(new ChatListener(), this);
-        getLogger().info("Components successfully loaded!");
-        if (getConfig().getString("Provider").equalsIgnoreCase("MongoDB")) {
-            mongodb = true;
-            getLogger().info("Connecting to database...");
-            MongoDBProvider.connect(this);
-        } else if (getConfig().getString("Provider").equalsIgnoreCase("MySql")) {
-            mysql = true;
-            getLogger().info("Connecting to database...");
-            this.mySql = new MySqlProvider();
-            this.mySql.createTables();
-        } else if (getConfig().getString("Provider").equalsIgnoreCase("Yaml")) {
-            yaml = true;
-            getLogger().info("Using YAML as provider...");
-            saveResource("bans.yml");
-            saveResource("mutes.yml");
-            getLogger().info("§aPlugin successfully started.");
-        } else {
-            getLogger().warning("§4§lFailed to load! Please specify a valid provider: MySql, MongoDB, Yaml");
+        BanSystemAPI api = new BanSystemAPI();
+        api.initBanSystemAPI();
+        registerProvider(new MongodbProvider());
+        registerProvider(new MysqlProvider());
+        registerProvider(new YamlProvider());
+        if (!providers.containsKey(getConfig().getString("Provider"))) {
+            getLogger().error("§4Please specify a valid provider: Yaml, MySql, MongoDB");
+            return;
         }
-        updateConfig();
-        registerCommands();
+        provider = providers.get(getConfig().getString("Provider"));
+        provider.setUp(this);
+        api.setProvider(provider);
+        Configuration.initConfiguration();
+        loadPlugin();
     }
 
-    private void updateConfig() {
-        if (getConfig().getInt("ConfigVersion") == 1) {
-            getConfig().set("ConfigVersion", 2);
-            getConfig().set("Messages.WarnScreen", "&3You have been warned. &3Reason: &7%reason% &3ID: &7%id% \n&3Creator: &7%creator%");
-            getConfig().set("Messages.WarnSuccess", "&aThe player &e%player% &ahas been warned.");
-            getConfig().set("Warning.EnableBan", false);
-            getConfig().set("Warning.BanByAmount", 5);
-            getConfig().set("Warning.BanReason", "You've been warned too many times");
-            getConfig().set("Warning.BanTime", 259200);
-            getConfig().set("Usage.WarnCommand", "&7Usage: &a%command% <Player> <Reason>");
-            getConfig().set("Usage.WarnlogCommand", "&7Usage: &a%command% <Player>");
-            getConfig().set("Commands.Warn", "warn");
-            getConfig().set("Commands.Warnlog", "warnlog");
-            getConfig().set("Warnlog.Info", "&aWarning: &e#%count%");
-            getConfig().set("Warnlog.Player", "&aPlayer: &e%player%");
-            getConfig().set("Warnlog.Reason", "&aReason: &e%reason%");
-            getConfig().set("Warnlog.ID", "&aID: &e%id%");
-            getConfig().set("Warnlog.Creator", "&aCreated by: &e%creator%");
-            getConfig().set("Warnlog.Date", "&aDate: &e%date%");
-            getConfig().save();
-            getConfig().reload();
-        } else if (getConfig().getInt("ConfigVersion") == 2) {
-            getConfig().set("ConfigVersion", 3);
-            getConfig().set("Messages.TimeMustNumber", "&cThe number of days or hours must be a valid number.");
-            getConfig().set("Usage.TempbanCommand", "&7Usage: &a%command% <Player> <days|hours> <Time[int]> <Reason>");
-            getConfig().set("Usage.TempmuteCommand", "&7Usage: &a%command% <Player> <days|hours> <Time[int]> <Reason>");
-            getConfig().set("Commands.Tempban", "tempban");
-            getConfig().set("Commands.Tempmute", "tempmute");
-            getConfig().save();
-            getConfig().reload();
-        } else if (getConfig().getInt("ConfigVersion") == 3) {
-            getConfig().set("ConfigVersion", 4);
-            getConfig().set("Settings.JoinDelay", 60);
-            getConfig().save();
-            getConfig().reload();
-        }
+    private void loadReasons() {
+        Config c = getConfig();
+        SystemSettings settings = BanSystemAPI.getSystemSettings();
+        for (String s : c.getSection("Reasons.BanReasons").getAll().getKeys(false)) settings.banReasons.put(s, new BanReason(c.getString("Reasons.BanReasons." + s + ".Reason"), s, c.getInt("Reasons.BanReasons." + s + ".Seconds")));
+        for (String s : c.getSection("Reasons.MuteReasons").getAll().getKeys(false)) settings.muteReasons.put(s, new MuteReason(c.getString("Reasons.MuteReasons." + s + ".Reason"), s, c.getInt("Reasons.MuteReasons." + s + ".Seconds")));
     }
 
-    private void registerCommands() {
-        Config config = getConfig();
+    private void loadPlugin() {
+        Config c = getConfig();
         CommandMap map = getServer().getCommandMap();
-        map.register(config.getString("Commands.Ban"), new BanCommand(this));
-        map.register(config.getString("Commands.Unban"), new UnbanCommand(this));
-        map.register(config.getString("Commands.Check"), new CheckCommand(this));
-        map.register(config.getString("Commands.Mute"), new MuteCommand(this));
-        map.register(config.getString("Commands.Unmute"), new UnmuteCommand(this));
-        map.register(config.getString("Commands.Kick"), new KickCommand(this));
-        map.register(config.getString("Commands.Tempban"), new TempbanCommand(this));
-        map.register(config.getString("Commands.Tempmute"), new TempmuteCommand(this));
-        if (mongodb || mysql) {
-            map.register(config.getString("Commands.Banlog"), new BanlogCommand(this));
-            map.register(config.getString("Commands.Mutelog"), new MutelogCommand(this));
-            map.register(config.getString("Commands.Warn"), new WarnCommand(this));
-            map.register(config.getString("Commands.Warnlog"), new WarnlogCommand(this));
-        }
+        map.register(c.getString("Commands.BanCommand"), new BanCommand(c.getString("Commands.BanCommand")));
+        map.register(c.getString("Commands.TempbanCommand"), new TempbanCommand(c.getString("Commands.TempbanCommand")));
+        map.register(c.getString("Commands.BanlogCommand"), new BanlogCommand(c.getString("Commands.BanlogCommand")));
+        map.register(c.getString("Commands.CheckbanCommand"), new CheckbanCommand(c.getString("Commands.CheckbanCommand")));
+        map.register(c.getString("Commands.ClearbanlogCommand"), new ClearbanlogCommand(c.getString("Commands.ClearbanlogCommand")));
+        map.register(c.getString("Commands.UnbanCommand"), new UnbanCommand(c.getString("Commands.UnbanCommand")));
+        map.register(c.getString("Commands.MuteCommand"), new MuteCommand(c.getString("Commands.MuteCommand")));
+        map.register(c.getString("Commands.TempmuteCommand"), new TempmuteCommand(c.getString("Commands.TempmuteCommand")));
+        map.register(c.getString("Commands.MutelogCommand"), new MutelogCommand(c.getString("Commands.MutelogCommand")));
+        map.register(c.getString("Commands.CheckmuteCommand"), new CheckmuteCommand(c.getString("Commands.CheckmuteCommand")));
+        map.register(c.getString("Commands.ClearmutelogCommand"), new ClearmutelogCommand(c.getString("Commands.ClearmutelogCommand")));
+        map.register(c.getString("Commands.UnmuteCommand"), new UnmuteCommand(c.getString("Commands.UnmuteCommand")));
+        map.register(c.getString("Commands.WarnCommand"), new WarnCommand(c.getString("Commands.WarnCommand")));
+        map.register(c.getString("Commands.WarnlogCommand"), new WarnlogCommand(c.getString("Commands.WarnlogCommand")));
+        map.register(c.getString("Commands.ClearwarningsCommand"), new ClearwarningsCommand(c.getString("Commands.ClearwarningsCommand")));
+        map.register(c.getString("Commands.EditbanCommand"), new EditbanCommand(c.getString("Commands.EditbanCommand")));
+        map.register(c.getString("Commands.EditmuteCommand"), new EditmuteCommand(c.getString("Commands.EditmuteCommand")));
+        map.register(c.getString("Commands.KickCommand"), new KickCommand(c.getString("Commands.KickCommand")));
+
+        getServer().getPluginManager().registerEvents(new EventListener(), this);
+        loadReasons();
     }
 
     @Override
     public void onDisable() {
-        getLogger().info("Disabling BanSystem...");
+        provider.disconnect(this);
+    }
+
+    private void registerProvider(Provider provider) {
+        providers.put(provider.getProvider(), provider);
     }
 
     public static BanSystem getInstance() {
         return instance;
-    }
-
-    public boolean isMysql() {
-        return mysql;
-    }
-
-    public boolean isMongodb() {
-        return mongodb;
-    }
-
-    public boolean isYaml() {
-        return yaml;
     }
 }

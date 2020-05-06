@@ -1,100 +1,74 @@
-MongoDB: false
+Provider: Yaml
 
-MongoDBUri: ""
-Database: bansystem
-BanCollection: bans
-MuteCollection: mutes
+Mysql:
+  Host: "127.0.0.1"
+  Port: "3306"
+  User: "root"
+  Database: "bansystem"
+  Password: "cheesecake"
 
-BanReasons:
-  Count: 5
-  "1":
-    Reason: "Hacking"
-    Seconds: 3600
-  "2":
-    Reason: "Bugusing"
-    Seconds: 7200
-  "3":
-    Reason: "Reason 3"
-    Seconds: 86400
-  "4":
-    Reason: "Reason 4"
-    Seconds: 604800
-  "5":
-    Reason: "Reason 5"
-    Seconds: -1
+MongoDB:
+  Uri: "URI_LINK"
+  Database: "bansystem"
 
-MuteReasons:
-  Count: 3
-  "1":
-    Reason: "Insults"
-    Seconds: 3600
-  "2":
-    Reason: "Advertising"
-    Seconds: 7200
-  "3":
-    Reason: "Racism"
-    Seconds: -1
+Reasons:
+  BanReasons:
+    "1":
+      Reason: "Hacking"
+      Seconds: 287378
+    "2":
+      Reason: "Bugusing"
+      Seconds: 398347
+    "3":
+      Reason: "Skin/Name"
+      Seconds: 937342
+    "4":
+      Reason: "Insult"
+      Seconds: 3893784
+    "5":
+      Reason: "Teaming"
+      Seconds: 8478473
+  MuteReasons:
+    "1":
+      Reason: "Insult"
+      Seconds: 287378
+    "2":
+      Reason: "Advertising"
+      Seconds: 398347
+    "3":
+      Reason: "Spamming"
+      Seconds: 937342
+    "4":
+      Reason: "Caps"
+      Seconds: 3893784
 
-Prefix: "&8» &3BanSystem &8| &7"
-NoPermission: "&cYou have insufficient permissions to execute this command."
+WarnSystem:
+  EnableBan: false
+  MaxWarningCount: 5
+  BanReason: "Too many warnings"
+  BanSeconds: -1
 
-Days: "days"
-Day: "day"
-Hours: "hours"
-Hour: "hour"
-Minutes: "minutes"
-Minute: "minute"
-Seconds: "A few seconds"
-Permanent: "Permanent"
+Settings:
+  JoinDelay: 60
+  Debug: false
+  ConfigVersion: 2.0
 
-BanSuccess: "&aThe player &e%player% &ahas been banned."
-MuteSuccess: "&aThe player &e%player% &ahas been muted."
-KickSuccess: "&aThe player &e%player% &ahas been kicked."
-AlreadyBanned: "&cThis player is already banned."
-AlreadyMuted: "&cThis player is already muted."
-UnbanSuccess: "&aThe player &e%player% &ahas been unbanned."
-UnmuteSuccess: "&aThe player &e%player% &ahas been unmuted."
-PlayerNotBanned: "&cThis player is not banned."
-PlayerNotMuted: "&cThis player is not muted."
-PlayerNotOnline: "&cThis player is not online."
-MustNumber: "&cThe reason must be a number between 1 and %max%."
-Reasonlimit: "&cNo reason could be found under this ID."
-BanScreen: "&3You were banned. &3Reason: &7%reason% &3ID: &7%id% \n&3Remaining time: &7%time%"
-MuteScreen: "&cYou were muted from the chat.\n&cReason: &7%reason% &cID: &7%id%\n&cRemaining time: &7%time%"
-KickScreen: "&3You were kicked.\n&3Reason: &7%reason%"
-BanReasonFormat: "&eID: &7%id% &8| &eReason: &7%reason%"
-MuteReasonFormat: "&eID: &7%id% &8| &eReason: &7%reason%"
-
-Check:
-  Ban:
-    Info: "&aLoading data..."
-    Player: "&aPlayer: &e%player%"
-    Reason: "&aReason: &e%reason%"
-    ID: "&aID: &e%id%"
-    Banner: "&aBanned by: &e%banner%"
-    Date: "&aDate: &e%date%"
-    RemainingTime: "&aRemaining time: &e%time%"
-  Mute:
-    Info: "&aLoading data..."
-    Player: "&aPlayer: &e%player%"
-    Reason: "&aReason: &e%reason%"
-    ID: "&aID: &e%id%"
-    Muter: "&aMuted by: &e%muter%"
-    Date: "&aDate: &e%date%"
-    RemainingTime: "&aRemaining time: &e%time%"
-Usage:
-  BanCommand: "&7Usage: &a%command% <Player> <ID>"
-  UnbanCommand: "&7Usage: &a%command% <Player>"
-  CheckCommand: "&7Usage: &a%command% <Player> <ban|mute>"
-  MuteCommand: "&7Usage: &a%command% <Player> <ID>"
-  UnmuteCommand: "&7Usage: &a%command% <Player>"
-  KickCommand: "&7Usage: &a%command% <Player>"
 Commands:
-  Ban: "ban"
-  Mute: "mute"
-  Unban: "unban"
-  Unmute: "unmute"
-  Check: "check"
-  Kick: "kick"
-
-ConfigVersion: 1
+  BanCommand: "ban"
+  TempbanCommand: "tempban"
+  BanlogCommand: "banlog"
+  CheckbanCommand: "checkban"
+  ClearbanlogCommand: "clearbanlog"
+  EditbanCommand: "editban"
+  UnbanCommand: "unban"
+  MuteCommand: "mute"
+  TempmuteCommand: "tempmute"
+  MutelogCommand: "mutelog"
+  CheckmuteCommand: "checkmute"
+  ClearmutelogCommand: "clearmutelog"
+  EditmuteCommand: "editmute"
+  UnmuteCommand: "unmute"
+  WarnCommand: "warn"
+  WarnlogCommand: "warnlog"
+  ClearwarningsCommand: "clearwarnlog"
+  KickCommand: "kick"

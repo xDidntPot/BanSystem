@@ -1,126 +1,65 @@
 package net.llamadevelopment.bansystem.commands;
 
 import cn.nukkit.Player;
+import cn.nukkit.Server;
+import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
-import cn.nukkit.utils.Config;
+import cn.nukkit.command.data.CommandParamType;
+import cn.nukkit.command.data.CommandParameter;
+import cn.nukkit.scheduler.AsyncTask;
 import net.llamadevelopment.bansystem.BanSystem;
-import net.llamadevelopment.bansystem.components.managers.MuteManager;
-import net.llamadevelopment.bansystem.components.managers.database.MongoDBProvider;
-import net.llamadevelopment.bansystem.components.managers.database.MySqlProvider;
-import net.llamadevelopment.bansystem.components.utils.MessageUtil;
-import net.llamadevelopment.bansystem.components.utils.MuteUtil;
-import net.llamadevelopment.bansystem.components.utils.MutedPlayer;
-import org.bson.Document;
+import net.llamadevelopment.bansystem.Configuration;
+import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
+import net.llamadevelopment.bansystem.components.api.SystemSettings;
+import net.llamadevelopment.bansystem.components.data.Mute;
+import net.llamadevelopment.bansystem.components.data.MuteReason;
+import net.llamadevelopment.bansystem.components.managers.database.Provider;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Random;
+public class MuteCommand extends Command {
 
-public class MuteCommand extends CommandManager {
-
-    private BanSystem plugin;
-
-    public MuteCommand(BanSystem plugin) {
-        super(plugin, plugin.getConfig().getString("Commands.Mute"), "Mute a player.", "/mute");
-        this.plugin = plugin;
+    public MuteCommand(String name) {
+        super(name, "Mute a player.");
+        commandParameters.put("default", new CommandParameter[]{
+                new CommandParameter("player", CommandParamType.TARGET, false),
+                new CommandParameter("reason", CommandParamType.TEXT, false)
+        });
+        setPermission("bansystem.command.mute");
     }
 
-    public boolean execute(CommandSender sender, String label, String[] args) {
-        if (sender.hasPermission("bansystem.command.mute")) {
+    @Override
+    public boolean execute(CommandSender sender, String s, String[] args) {
+        Provider api = BanSystemAPI.getProvider();
+        SystemSettings settings = BanSystemAPI.getSystemSettings();
+        if (sender.hasPermission(getPermission())) {
             if (args.length == 2) {
                 String player = args[0];
-                String number = args[1];
-                try {
-                    int n = Integer.parseInt(args[1]);
-                    int seconds = plugin.getConfig().getInt("MuteReasons." + number + ".Seconds");
-                    String reason = plugin.getConfig().getString("MuteReasons." + number + ".Reason");
-                    int max = plugin.getConfig().getInt("MuteReasons.Count");
-                    if (plugin.isMongodb()) {
-                        Document document = new Document("name", player);
-                        Document found = (Document) MongoDBProvider.getMuteCollection().find(document).first();
-                        if (found != null) {
-                            sender.sendMessage(plugin.getConfig().getString("Messages.Prefix").replace("&", "§") + plugin.getConfig().getString("Messages.AlreadyMuted").replace("&", "§"));
-                            return true;
-                        }
-                    } else if (plugin.isMysql()) {
-                        try {
-                            PreparedStatement preparedStatement = MySqlProvider.getConnection().prepareStatement("SELECT * FROM mutes WHERE NAME = ?");
-                            preparedStatement.setString(1, player);
-                            ResultSet rs = preparedStatement.executeQuery();
-                            if (rs.next()) {
-                                if (rs.getString("NAME") != null) {
-                                    sender.sendMessage(plugin.getConfig().getString("Messages.Prefix").replace("&", "§") + plugin.getConfig().getString("Messages.AlreadyMuted").replace("&", "§"));
-                                    return true;
-                                }
-                            }
-                            rs.close();
-                            preparedStatement.close();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    } else if (plugin.isYaml()) {
-                        Config bans = new Config(BanSystem.getInstance().getDataFolder() + "/mutes.yml", Config.YAML);
-                        if (bans.exists("Player." + player)) {
-                            sender.sendMessage(plugin.getConfig().getString("Messages.Prefix").replace("&", "§") + plugin.getConfig().getString("Messages.AlreadyMuted").replace("&", "§"));
-                            return true;
-                        }
-                    }
-                    if (!(n > max)) {
-                        if (n >= 1) {
-                            MuteManager.setMuted(player, reason, getBanID(), sender.getName(), getDate(), seconds);
-                            MuteUtil muteUtil = MuteManager.getPlayer(player);
-                            long end = muteUtil.getEnd();
-                            String reason1 = muteUtil.getReason();
-                            String id = muteUtil.getId();
-                            String banner = muteUtil.getBanner();
-                            MutedPlayer mutedPlayer = new MutedPlayer(end, reason1, id, banner);
-                            Player player1 = BanSystem.getInstance().getServer().getPlayer(player);
-                            if (player1 != null) {
-                                BanSystem.getInstance().mutedCache.put(player1, mutedPlayer);
-                            }
-                            sender.sendMessage(plugin.getConfig().getString("Messages.Prefix").replace("&", "§") + plugin.getConfig().getString("Messages.MuteSuccess").replace("%player%", player).replace("&", "§"));
-                        } else {
-                            sender.sendMessage(plugin.getConfig().getString("Messages.Prefix").replace("&", "§") + plugin.getConfig().getString("Messages.Reasonlimit").replace("&", "§"));
-                        }
-                    } else {
-                        sender.sendMessage(plugin.getConfig().getString("Messages.Prefix").replace("&", "§") + plugin.getConfig().getString("Messages.Reasonlimit").replace("&", "§"));
-                    }
-                } catch (NumberFormatException var1) {
-                    sender.sendMessage(plugin.getConfig().getString("Messages.Prefix").replace("&", "§") + plugin.getConfig().getString("Messages.MustNumber").replace("&", "§").replace("%max%", plugin.getConfig().getString("MuteReasons.Count")));
-                    var1.getMessage();
+                String reason = args[1];
+                if (api.playerIsMuted(player)) {
+                    sender.sendMessage(Configuration.getAndReplace("PlayerIsMuted"));
+                    return true;
                 }
+                if (settings.muteReasons.get(reason) == null) {
+                    sender.sendMessage(Configuration.getAndReplace("ReasonNotFound"));
+                    return true;
+                }
+                Server.getInstance().getScheduler().scheduleAsyncTask(BanSystem.getInstance(), new AsyncTask() {
+                    @Override
+                    public void onRun() {
+                        MuteReason muteReason = settings.muteReasons.get(reason);
+                        api.mutePlayer(player, muteReason.getReason(), sender.getName(), muteReason.getSeconds());
+                        sender.sendMessage(Configuration.getAndReplace("PlayerMuted", player));
+                        Player onlinePlayer = Server.getInstance().getPlayer(player);
+                        if (onlinePlayer != null) {
+                            Mute mute = api.getMute(player);
+                            settings.cachedMute.put(player, mute);
+                        }
+                    }
+                });
             } else {
-                MessageUtil.sendMuteHelp(sender, BanSystem.getInstance());
-                sender.sendMessage(plugin.getConfig().getString("Messages.Prefix").replace("&", "§") + plugin.getConfig().getString("Usage.MuteCommand").replace("&", "§").replace("%command%", "/" + plugin.getConfig().getString("Commands.Mute")));
+                settings.muteReasons.values().forEach(reason -> sender.sendMessage(Configuration.getAndReplace("ReasonFormat", reason.getId(), reason.getReason())));
+                sender.sendMessage(Configuration.getAndReplace("MuteCommandUsage", getName()));
             }
-        } else {
-            sender.sendMessage(plugin.getConfig().getString("Messages.Prefix").replace("&", "§") + plugin.getConfig().getString("Messages.NoPermission").replace("&", "§"));
-        }
+        } else sender.sendMessage(Configuration.getAndReplace("NoPermission"));
         return false;
-    }
-
-    private String getBanID() {
-        String string = "";
-        int lastrandom = 0;
-        for (int i = 0; i < 6; i++) {
-            Random random = new Random();
-            int rand = random.nextInt(9);
-            while (rand == lastrandom) {
-                rand = random.nextInt(9);
-            }
-            lastrandom = rand;
-            string = string + rand;
-        }
-        return string;
-    }
-
-    private String getDate() {
-        Date now = new Date();
-        DateFormat dateFormat = new SimpleDateFormat("dd.MM.yy HH:mm");
-        String now1 = dateFormat.format(now);
-        return now1;
     }
 }
