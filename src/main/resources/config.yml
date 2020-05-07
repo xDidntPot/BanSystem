@@ -50,6 +50,7 @@ WarnSystem:
 
 Settings:
   JoinDelay: 60
+  Waterdog: false
   ConfigVersion: 2.0
 
 Commands:

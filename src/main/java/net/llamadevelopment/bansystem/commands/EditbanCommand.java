@@ -12,6 +12,10 @@ public class EditbanCommand extends Command {
 
     public EditbanCommand(String name) {
         super(name, "Edit the ban of a player.");
+        commandParameters.put("default", new CommandParameter[]{
+                new CommandParameter("player", CommandParamType.TARGET, false),
+                new CommandParameter("editType", false, new String[] {"reason", "time"})
+        });
         setPermission("bansystem.command.editban");
     }
 

@@ -179,11 +179,6 @@ public class YamlProvider extends Provider {
 
     @Override
     public void clearBanlog(String player) {
-        /*for (String s : banlog.getSection("Banlog." + player).getAll().getKeys(false)) {
-            Map<String, Object> map = banlog.getSection("Ban." + player).getAllMap();
-            map.remove(s);
-            banlog.set("Banlog", map);
-        }*/
         Map<String, Object> map = banlog.getSection("Banlog").getAllMap();
         map.remove(player);
         banlog.set("Banlog", map);

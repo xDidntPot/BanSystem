@@ -58,11 +58,6 @@ public class TempbanCommand extends Command {
                             public void onRun() {
                                 api.banPlayer(player, finalReason, sender.getName(), finalSeconds);
                                 sender.sendMessage(Configuration.getAndReplace("PlayerBanned", player));
-                                Player onlinePlayer = Server.getInstance().getPlayer(player);
-                                if (onlinePlayer != null) {
-                                    Ban ban = api.getBan(player);
-                                    onlinePlayer.kick(Configuration.getAndReplaceNP("BanScreen", ban.getBanID(), ban.getReason(), api.getRemainingTime(ban.getTime())), false);
-                                }
                                 if (settings.isWaterdog() && sender instanceof Player) {
                                     Player player1 = (Player) sender;
                                     Ban ban = api.getBan(player);
@@ -75,12 +70,18 @@ public class TempbanCommand extends Command {
                                         dataOutputStream.writeUTF(ban.getReason());
                                         dataOutputStream.writeUTF(ban.getBanID());
                                         dataOutputStream.writeUTF(api.getRemainingTime(ban.getTime()));
-                                        customEventPacket.eventName = "bungeecord:main";
+                                        customEventPacket.eventName = "bansystembridge:main";
                                         customEventPacket.eventData = outputStream.toByteArray();
                                         player1.dataPacket(customEventPacket);
+                                        return;
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                     }
+                                }
+                                Player onlinePlayer = Server.getInstance().getPlayer(player);
+                                if (onlinePlayer != null) {
+                                    Ban ban = api.getBan(player);
+                                    onlinePlayer.kick(Configuration.getAndReplaceNP("BanScreen", ban.getBanID(), ban.getReason(), api.getRemainingTime(ban.getTime())), false);
                                 }
                             }
                         });

@@ -15,6 +15,10 @@ public class EditmuteCommand extends Command {
 
     public EditmuteCommand(String name) {
         super(name, "Edit the mute of a player.");
+        commandParameters.put("default", new CommandParameter[]{
+                new CommandParameter("player", CommandParamType.TARGET, false),
+                new CommandParameter("editType", false, new String[] {"reason", "time"})
+        });
         setPermission("bansystem.command.editmute");
     }
 

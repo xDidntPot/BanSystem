@@ -10,7 +10,6 @@ import cn.nukkit.network.protocol.ScriptCustomEventPacket;
 import net.llamadevelopment.bansystem.Configuration;
 import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
 import net.llamadevelopment.bansystem.components.api.SystemSettings;
-import net.llamadevelopment.bansystem.components.data.Ban;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -44,7 +43,7 @@ public class KickCommand extends Command {
                         dataOutputStream.writeUTF(player);
                         dataOutputStream.writeUTF(reason);
                         dataOutputStream.writeUTF(sender.getName());
-                        customEventPacket.eventName = "bungeecord:main";
+                        customEventPacket.eventName = "bansystembridge:main";
                         customEventPacket.eventData = outputStream.toByteArray();
                         player1.dataPacket(customEventPacket);
                         return true;

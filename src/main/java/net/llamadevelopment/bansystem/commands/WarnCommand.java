@@ -54,12 +54,12 @@ public class WarnCommand extends Command {
                             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                             DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
                             try {
-                                dataOutputStream.writeUTF("banplayer");
+                                dataOutputStream.writeUTF("warnplayer");
                                 dataOutputStream.writeUTF(player);
                                 dataOutputStream.writeUTF(ban.getReason());
                                 dataOutputStream.writeUTF(ban.getBanID());
                                 dataOutputStream.writeUTF(api.getRemainingTime(ban.getTime()));
-                                customEventPacket.eventName = "bungeecord:main";
+                                customEventPacket.eventName = "bansystembridge:main";
                                 customEventPacket.eventData = outputStream.toByteArray();
                                 player1.dataPacket(customEventPacket);
                             } catch (Exception e) {
