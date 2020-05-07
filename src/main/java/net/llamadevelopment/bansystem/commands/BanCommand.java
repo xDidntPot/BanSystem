@@ -55,7 +55,7 @@ public class BanCommand extends Command {
                         Player onlinePlayer = Server.getInstance().getPlayer(player);
                         if (onlinePlayer != null) {
                             Ban ban = api.getBan(player);
-                            onlinePlayer.kick(Configuration.getAndReplaceNP("BanScreen", ban.getBanID(), ban.getReason(), api.getRemainingTime(ban.getTime())), false);
+                            onlinePlayer.kick(Configuration.getAndReplaceNP("BanScreen", ban.getReason(), ban.getBanID(), api.getRemainingTime(ban.getTime())), false);
                         }
                         if (settings.isWaterdog() && sender instanceof Player) {
                             Player player1 = (Player) sender;

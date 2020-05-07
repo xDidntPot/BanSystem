@@ -28,7 +28,7 @@ public class KickCommand extends Command {
                 for (int i = 1; i < args.length; ++i) reason = reason + args[i] + " ";
                 Player onlinePlayer = Server.getInstance().getPlayer(player);
                 if (onlinePlayer != null) {
-                    onlinePlayer.kick(Configuration.getAndReplaceNP("KickScreen", reason, sender.getName()));
+                    onlinePlayer.kick(Configuration.getAndReplaceNP("KickScreen", reason, sender.getName()), false);
                     sender.sendMessage(Configuration.getAndReplace("PlayerKicked", player));
                 } else sender.sendMessage(Configuration.getAndReplace("PlayerNotOnline", player));
             } else sender.sendMessage(Configuration.getAndReplace("KickCommandUsage", getName()));

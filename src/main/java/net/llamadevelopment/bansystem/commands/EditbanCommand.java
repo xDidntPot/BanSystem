@@ -41,7 +41,8 @@ public class EditbanCommand extends Command {
                                 sender.sendMessage(Configuration.getAndReplace("EditbanCommandUsage2", getName()));
                                 return true;
                             }
-                            api.setBanTime(player, System.currentTimeMillis() + seconds);
+                            long end = System.currentTimeMillis() + seconds * 1000L;
+                            api.setBanTime(player, end);
                             sender.sendMessage(Configuration.getAndReplace("TimeSet"));
                         } catch (NumberFormatException exception) {
                             sender.sendMessage(Configuration.getAndReplace("InvalidNumber"));
