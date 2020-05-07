@@ -10,6 +10,7 @@ import cn.nukkit.utils.Config;
 import net.llamadevelopment.bansystem.BanSystem;
 import net.llamadevelopment.bansystem.Configuration;
 import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
+import net.llamadevelopment.bansystem.components.data.Ban;
 import net.llamadevelopment.bansystem.components.managers.database.Provider;
 
 public class WarnCommand extends Command {
@@ -35,13 +36,15 @@ public class WarnCommand extends Command {
                 sender.sendMessage(Configuration.getAndReplace("PlayerWarned", player));
                 int i = api.getWarnings(player).size();
                 Config c = BanSystem.getInstance().getConfig();
+                Player onlinePlayer = Server.getInstance().getPlayer(player);
                 if (c.getBoolean("WarnSystem.EnableBan")) {
                     if (i >= c.getInt("WarnSystem.MaxWarningCount")) {
                         api.banPlayer(player, c.getString("WarnSystem.BanReason"), "System", c.getInt("WarnSystem.BanSeconds"));
+                        Ban ban = api.getBan(player);
+                        if (onlinePlayer != null) onlinePlayer.kick(Configuration.getAndReplaceNP("BanScreen", ban.getBanID(), ban.getReason(), api.getRemainingTime(ban.getTime())), false);
                         return true;
                     }
                 }
-                Player onlinePlayer = Server.getInstance().getPlayer(player);
                 if (onlinePlayer != null) onlinePlayer.kick(Configuration.getAndReplaceNP("WarnScreen", reason, sender.getName()), false);
             } else sender.sendMessage(Configuration.getAndReplace("WarnCommandUsage", getName()));
         } else sender.sendMessage(Configuration.getAndReplace("NoPermission"));

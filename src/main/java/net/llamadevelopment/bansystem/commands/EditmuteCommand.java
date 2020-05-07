@@ -12,10 +12,6 @@ public class EditmuteCommand extends Command {
 
     public EditmuteCommand(String name) {
         super(name, "Edit the mute of a player.");
-        commandParameters.put("default", new CommandParameter[]{
-                new CommandParameter("player", CommandParamType.TEXT, false),
-                new CommandParameter("type", false, new String[] {"reason", "time"})
-        });
         setPermission("bansystem.command.editmute");
     }
 
@@ -39,7 +35,12 @@ public class EditmuteCommand extends Command {
                             int time = Integer.parseInt(args[3]);
                             int seconds = 0;
                             if (type.equalsIgnoreCase("days")) seconds = time * 86400;
-                            if (type.equalsIgnoreCase("hours")) seconds = time * 3600;
+                            else if (type.equalsIgnoreCase("hours")) seconds = time * 3600;
+                            else {
+                                sender.sendMessage(Configuration.getAndReplace("EditmuteCommandUsage1", getName()));
+                                sender.sendMessage(Configuration.getAndReplace("EditmuteCommandUsage2", getName()));
+                                return true;
+                            }
                             api.setMuteTime(player, System.currentTimeMillis() + seconds);
                             sender.sendMessage(Configuration.getAndReplace("TimeSet"));
                         } catch (NumberFormatException exception) {

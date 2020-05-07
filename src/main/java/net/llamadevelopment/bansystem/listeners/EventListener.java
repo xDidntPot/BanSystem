@@ -28,11 +28,10 @@ public class EventListener implements Listener {
                 if (api.playerIsBanned(player)) {
                     instance.getServer().getScheduler().scheduleDelayedTask(instance, () -> {
                         Ban ban = api.getBan(player);
-                        event.getPlayer().kick(Configuration.getAndReplaceNP("BanScreen", ban.getBanID(), ban.getReason(), api.getRemainingTime(ban.getTime())), false);
+                        event.getPlayer().kick(Configuration.getAndReplaceNP("BanScreen", ban.getReason(), ban.getBanID(), api.getRemainingTime(ban.getTime())), false);
                     }, settings.getJoinDelay());
                 } else if (api.playerIsMuted(player)) {
                     Mute mute = api.getMute(player);
-                    settings.cachedMute.remove(player);
                     settings.cachedMute.put(player, mute);
                 }
             }

@@ -35,8 +35,8 @@ public class BanlogCommand extends Command {
                             sender.sendMessage(Configuration.getAndReplace("NoDataFound"));
                             return;
                         }
+                        sender.sendMessage(Configuration.getAndReplace("BanlogInfo", player, i));
                         api.getBanlog(player).forEach(ban -> {
-                            sender.sendMessage(Configuration.getAndReplace("BanlogInfo", player, i));
                             sender.sendMessage(Configuration.getAndReplace("BanlogPlaceholder"));
                             sender.sendMessage(Configuration.getAndReplace("BanlogReason", ban.getReason()));
                             sender.sendMessage(Configuration.getAndReplace("BanlogID", ban.getBanID()));

@@ -50,7 +50,6 @@ WarnSystem:
 
 Settings:
   JoinDelay: 60
-  Debug: false
   ConfigVersion: 2.0
 
 Commands:

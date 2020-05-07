@@ -20,7 +20,7 @@ public class TempmuteCommand extends Command {
         super(name, "Mute a player temporary.");
         commandParameters.put("default", new CommandParameter[]{
                 new CommandParameter("player", CommandParamType.TARGET, false),
-                new CommandParameter("type", false, new String[] {"days", "hours"}),
+                new CommandParameter("timeType", false, new String[] {"days", "hours"}),
                 new CommandParameter("time", CommandParamType.INT, false),
                 new CommandParameter("reason", CommandParamType.TEXT, false)
         });

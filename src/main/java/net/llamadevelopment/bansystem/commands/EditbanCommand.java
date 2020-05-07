@@ -12,10 +12,6 @@ public class EditbanCommand extends Command {
 
     public EditbanCommand(String name) {
         super(name, "Edit the ban of a player.");
-        commandParameters.put("default", new CommandParameter[]{
-                new CommandParameter("player", CommandParamType.TEXT, false),
-                new CommandParameter("type", false, new String[] {"reason", "time"})
-        });
         setPermission("bansystem.command.editban");
     }
 
@@ -39,7 +35,12 @@ public class EditbanCommand extends Command {
                             int time = Integer.parseInt(args[3]);
                             int seconds = 0;
                             if (type.equalsIgnoreCase("days")) seconds = time * 86400;
-                            if (type.equalsIgnoreCase("hours")) seconds = time * 3600;
+                            else if (type.equalsIgnoreCase("hours")) seconds = time * 3600;
+                            else {
+                                sender.sendMessage(Configuration.getAndReplace("EditbanCommandUsage1", getName()));
+                                sender.sendMessage(Configuration.getAndReplace("EditbanCommandUsage2", getName()));
+                                return true;
+                            }
                             api.setBanTime(player, System.currentTimeMillis() + seconds);
                             sender.sendMessage(Configuration.getAndReplace("TimeSet"));
                         } catch (NumberFormatException exception) {

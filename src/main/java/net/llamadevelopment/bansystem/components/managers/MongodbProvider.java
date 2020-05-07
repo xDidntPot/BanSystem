@@ -23,7 +23,6 @@ public class MongodbProvider extends Provider {
 
     Config config = BanSystem.getInstance().getConfig();
     BanSystem instance = BanSystem.getInstance();
-    boolean debug = BanSystemAPI.getSystemSettings().isDebugMode();
 
     MongoClient mongoClient;
     MongoDatabase mongoDatabase;

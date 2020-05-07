@@ -35,8 +35,8 @@ public class WarnlogCommand extends Command {
                             sender.sendMessage(Configuration.getAndReplace("NoDataFound"));
                             return;
                         }
+                        sender.sendMessage(Configuration.getAndReplace("WarnlogInfo", player, i));
                         api.getWarnings(player).forEach(warn -> {
-                            sender.sendMessage(Configuration.getAndReplace("WarnlogInfo", player, i));
                             sender.sendMessage(Configuration.getAndReplace("WarnlogPlaceholder"));
                             sender.sendMessage(Configuration.getAndReplace("WarnlogReason", warn.getReason()));
                             sender.sendMessage(Configuration.getAndReplace("WarnlogID", warn.getWarnID()));

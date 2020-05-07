@@ -10,10 +10,7 @@ import net.llamadevelopment.bansystem.components.data.Mute;
 import net.llamadevelopment.bansystem.components.data.Warn;
 import net.llamadevelopment.bansystem.components.managers.database.Provider;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +19,6 @@ public class MysqlProvider extends Provider {
 
     Config config = BanSystem.getInstance().getConfig();
     BanSystem instance = BanSystem.getInstance();
-    boolean debug = BanSystemAPI.getSystemSettings().isDebugMode();
     Connection connection;
 
     @Override
@@ -47,7 +43,13 @@ public class MysqlProvider extends Provider {
 
     @Override
     public void disconnect(BanSystem server) {
-        super.disconnect(server);
+        if (connection != null) {
+            try {
+                connection.close();
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+        }
     }
 
     public Connection getConnection() {

@@ -36,8 +36,8 @@ public class MutelogCommand extends Command {
                             sender.sendMessage(Configuration.getAndReplace("NoDataFound"));
                             return;
                         }
+                        sender.sendMessage(Configuration.getAndReplace("MutelogInfo", player, i));
                         api.getMutelog(player).forEach(mute -> {
-                            sender.sendMessage(Configuration.getAndReplace("MutelogInfo", player, i));
                             sender.sendMessage(Configuration.getAndReplace("MutelogPlaceholder"));
                             sender.sendMessage(Configuration.getAndReplace("MutelogReason", mute.getReason()));
                             sender.sendMessage(Configuration.getAndReplace("MutelogID", mute.getMuteID()));

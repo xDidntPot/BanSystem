@@ -15,7 +15,7 @@ public class BanSystemAPI {
     private static SystemSettings systemSettings;
 
     public void initBanSystemAPI() {
-        systemSettings = new SystemSettings(banSystem.getConfig().getBoolean("Settings.Debug"), banSystem.getDescription().getVersion(), banSystem.getConfig().getInt("Settings.JoinDelay"), banSystem.getConfig().getBoolean("Settings.Waterdog"));
+        systemSettings = new SystemSettings(banSystem.getDescription().getVersion(), banSystem.getConfig().getInt("Settings.JoinDelay"), banSystem.getConfig().getBoolean("Settings.Waterdog"));
     }
 
     public void setProvider(Provider provider) {

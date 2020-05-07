@@ -46,7 +46,7 @@ WarnlogInfo: "&e[0] &ahas &e[1] &aentries."
 WarnlogPlaceholder: "&8-=-=-=-=-=-=-=-"
 WarnlogReason: "&eReason: &7[0]"
 WarnlogID: "&eID: &7[0]"
-WarnlogMuter: "&eWarned by: &7[0]"
+WarnlogCreator: "&eWarned by: &7[0]"
 WarnlogDate: "&eDate: &7[0]"
 
 CheckbanInfo: "&aInformation about &e[0]&a:"
