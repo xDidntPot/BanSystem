@@ -34,27 +34,29 @@ public class KickCommand extends Command {
                 String player = args[0];
                 String reason = "";
                 for (int i = 1; i < args.length; ++i) reason = reason + args[i] + " ";
-                Player onlinePlayer = Server.getInstance().getPlayer(player);
-                if (onlinePlayer != null) {
-                    onlinePlayer.kick(Configuration.getAndReplaceNP("KickScreen", reason, sender.getName()), false);
-                    sender.sendMessage(Configuration.getAndReplace("PlayerKicked", player));
-                } else if (settings.isWaterdog() && sender instanceof Player) {
+                if (settings.isWaterdog() && sender instanceof Player) {
                     Player player1 = (Player) sender;
                     ScriptCustomEventPacket customEventPacket = new ScriptCustomEventPacket();
                     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                     DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
                     try {
-                        dataOutputStream.writeUTF("banplayer");
+                        dataOutputStream.writeUTF("kickplayer");
                         dataOutputStream.writeUTF(player);
                         dataOutputStream.writeUTF(reason);
                         dataOutputStream.writeUTF(sender.getName());
                         customEventPacket.eventName = "bungeecord:main";
                         customEventPacket.eventData = outputStream.toByteArray();
                         player1.dataPacket(customEventPacket);
+                        return true;
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
+                Player onlinePlayer = Server.getInstance().getPlayer(player);
+                if (onlinePlayer != null) {
+                    onlinePlayer.kick(Configuration.getAndReplaceNP("KickScreen", reason, sender.getName()), false);
+                    sender.sendMessage(Configuration.getAndReplace("PlayerKicked", player));
+                } else sender.sendMessage(Configuration.getAndReplace("PlayerNotOnline"));
             } else sender.sendMessage(Configuration.getAndReplace("KickCommandUsage", getName()));
         } else sender.sendMessage(Configuration.getAndReplace("NoPermission"));
         return false;

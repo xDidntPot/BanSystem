@@ -79,7 +79,7 @@ public class MysqlProvider extends Provider {
             PreparedStatement preparedStatement = getConnection().prepareStatement("SELECT * FROM bans WHERE PLAYER = ?");
             preparedStatement.setString(1, player);
             ResultSet rs = preparedStatement.executeQuery();
-            if (rs.next()) return rs.getString("PLAYER") == null;
+            if (rs.next()) return rs.getString("PLAYER") != null;
             rs.close();
             preparedStatement.close();
         } catch (Exception e) {
@@ -94,7 +94,7 @@ public class MysqlProvider extends Provider {
             PreparedStatement preparedStatement = getConnection().prepareStatement("SELECT * FROM mutes WHERE PLAYER = ?");
             preparedStatement.setString(1, player);
             ResultSet rs = preparedStatement.executeQuery();
-            if (rs.next()) return rs.getString("PLAYER") == null;
+            if (rs.next()) return rs.getString("PLAYER") != null;
             rs.close();
             preparedStatement.close();
         } catch (Exception e) {
@@ -108,11 +108,14 @@ public class MysqlProvider extends Provider {
         long current = System.currentTimeMillis();
         long end = current + seconds * 1000L;
         if (seconds == -1) end = -1L;
+        String id = BanSystemAPI.getRandomIDCode();
+        String date = BanSystemAPI.getDate();
         try {
-            update("INSERT INTO bans (PLAYER, REASON, ID, BANNER, DATE, TIME) VALUES ('" + player + "', '" + reason + "', '" + BanSystemAPI.getRandomIDCode() + "', '" + banner + "', '" + BanSystemAPI.getDate() + "', '" + end + "');");
+            update("INSERT INTO bans (PLAYER, REASON, ID, BANNER, DATE, TIME) VALUES ('" + player + "', '" + reason + "', '" + id + "', '" + banner + "', '" + date + "', '" + end + "');");
         } catch (Exception e) {
             e.printStackTrace();
         }
+        createBanlog(new Ban(player, reason, id, banner, date, end));
     }
 
     @Override
@@ -120,11 +123,14 @@ public class MysqlProvider extends Provider {
         long current = System.currentTimeMillis();
         long end = current + seconds * 1000L;
         if (seconds == -1) end = -1L;
+        String id = BanSystemAPI.getRandomIDCode();
+        String date = BanSystemAPI.getDate();
         try {
-            update("INSERT INTO mutes (PLAYER, REASON, ID, BANNER, DATE, TIME) VALUES ('" + player + "', '" + reason + "', '" + BanSystemAPI.getRandomIDCode() + "', '" + banner + "', '" + BanSystemAPI.getDate() + "', '" + end + "');");
+            update("INSERT INTO mutes (PLAYER, REASON, ID, BANNER, DATE, TIME) VALUES ('" + player + "', '" + reason + "', '" + id + "', '" + banner + "', '" + date + "', '" + end + "');");
         } catch (Exception e) {
             e.printStackTrace();
         }
+        createMutelog(new Mute(player, reason, id, banner, date, end));
     }
 
     @Override
