@@ -6,12 +6,17 @@ import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.data.CommandParamType;
 import cn.nukkit.command.data.CommandParameter;
+import cn.nukkit.network.protocol.ScriptCustomEventPacket;
 import cn.nukkit.scheduler.AsyncTask;
 import net.llamadevelopment.bansystem.BanSystem;
 import net.llamadevelopment.bansystem.Configuration;
 import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
+import net.llamadevelopment.bansystem.components.api.SystemSettings;
 import net.llamadevelopment.bansystem.components.data.Ban;
 import net.llamadevelopment.bansystem.components.managers.database.Provider;
+
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 
 public class TempbanCommand extends Command {
 
@@ -29,6 +34,7 @@ public class TempbanCommand extends Command {
     @Override
     public boolean execute(CommandSender sender, String s, String[] args) {
         Provider api = BanSystemAPI.getProvider();
+        SystemSettings settings = BanSystemAPI.getSystemSettings();
         if (sender.hasPermission(getPermission())) {
             if (args.length >= 4) {
                 String player = args[0];
@@ -56,6 +62,25 @@ public class TempbanCommand extends Command {
                                 if (onlinePlayer != null) {
                                     Ban ban = api.getBan(player);
                                     onlinePlayer.kick(Configuration.getAndReplaceNP("BanScreen", ban.getBanID(), ban.getReason(), api.getRemainingTime(ban.getTime())), false);
+                                }
+                                if (settings.isWaterdog() && sender instanceof Player) {
+                                    Player player1 = (Player) sender;
+                                    Ban ban = api.getBan(player);
+                                    ScriptCustomEventPacket customEventPacket = new ScriptCustomEventPacket();
+                                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                                    DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
+                                    try {
+                                        dataOutputStream.writeUTF("banplayer");
+                                        dataOutputStream.writeUTF(player);
+                                        dataOutputStream.writeUTF(ban.getReason());
+                                        dataOutputStream.writeUTF(ban.getBanID());
+                                        dataOutputStream.writeUTF(api.getRemainingTime(ban.getTime()));
+                                        customEventPacket.eventName = "bungeecord:main";
+                                        customEventPacket.eventData = outputStream.toByteArray();
+                                        player1.dataPacket(customEventPacket);
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
                                 }
                             }
                         });
