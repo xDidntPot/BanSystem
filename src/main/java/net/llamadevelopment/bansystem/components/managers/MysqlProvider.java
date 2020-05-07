@@ -22,7 +22,7 @@ public class MysqlProvider extends Provider {
     Connection connection;
 
     @Override
-    public void setUp(BanSystem server) {
+    public void connect(BanSystem server) {
         instance.getServer().getScheduler().scheduleAsyncTask(instance, new AsyncTask() {
             @Override
             public void onRun() {
@@ -34,8 +34,10 @@ public class MysqlProvider extends Provider {
                     update("CREATE TABLE IF NOT EXISTS warns(player VARCHAR(255), reason VARCHAR(255), id VARCHAR(255), creator VARCHAR(255), date VARCHAR(255), PRIMARY KEY (id));");
                     update("CREATE TABLE IF NOT EXISTS banlogs(player VARCHAR(255), reason VARCHAR(255), id VARCHAR(255), banner VARCHAR(255), date VARCHAR(255), PRIMARY KEY (id));");
                     update("CREATE TABLE IF NOT EXISTS mutelogs(player VARCHAR(255), reason VARCHAR(255), id VARCHAR(255), banner VARCHAR(255), date VARCHAR(255), PRIMARY KEY (id));");
+                    server.getLogger().info("[MySqlClient] Connection opened.");
                 } catch (Exception e) {
                     e.printStackTrace();
+                    server.getLogger().info("[MySqlClient] Failed to connect to database.");
                 }
             }
         });
@@ -46,8 +48,10 @@ public class MysqlProvider extends Provider {
         if (connection != null) {
             try {
                 connection.close();
+                server.getLogger().info("[MySqlClient] Connection closed.");
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
+                server.getLogger().info("[MySqlClient] Failed to close connection.");
             }
         }
     }

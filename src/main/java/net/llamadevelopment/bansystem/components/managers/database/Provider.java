@@ -10,7 +10,7 @@ import java.util.List;
 
 public class Provider {
 
-    public void setUp(BanSystem server) {
+    public void connect(BanSystem server) {
     }
 
     public void disconnect(BanSystem server) {

@@ -1,5 +1,6 @@
 package net.llamadevelopment.bansystem.components.managers;
 
+import cn.nukkit.scheduler.AsyncTask;
 import cn.nukkit.utils.Config;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
@@ -29,16 +30,21 @@ public class MongodbProvider extends Provider {
     MongoCollection<Document> banCollection, banlogCollection, muteCollection, mutelogCollection, warnCollection;
 
     @Override
-    public void setUp(BanSystem server) {
-        MongoClientURI uri = new MongoClientURI(config.getString("MongoDB.Uri"));
-        mongoClient = new MongoClient(uri);
-        mongoDatabase = mongoClient.getDatabase(config.getString("MongoDB.Database"));
-        banCollection = mongoDatabase.getCollection("bans");
-        banlogCollection = mongoDatabase.getCollection("banlog");
-        muteCollection = mongoDatabase.getCollection("mutes");
-        mutelogCollection = mongoDatabase.getCollection("mutelog");
-        warnCollection = mongoDatabase.getCollection("warns");
-        server.getLogger().info("[MongoClient] Connection opened.");
+    public void connect(BanSystem server) {
+        instance.getServer().getScheduler().scheduleAsyncTask(instance, new AsyncTask() {
+            @Override
+            public void onRun() {
+                MongoClientURI uri = new MongoClientURI(config.getString("MongoDB.Uri"));
+                mongoClient = new MongoClient(uri);
+                mongoDatabase = mongoClient.getDatabase(config.getString("MongoDB.Database"));
+                banCollection = mongoDatabase.getCollection("bans");
+                banlogCollection = mongoDatabase.getCollection("banlog");
+                muteCollection = mongoDatabase.getCollection("mutes");
+                mutelogCollection = mongoDatabase.getCollection("mutelog");
+                warnCollection = mongoDatabase.getCollection("warns");
+                server.getLogger().info("[MongoClient] Connection opened.");
+            }
+        });
     }
 
     @Override
@@ -50,39 +56,45 @@ public class MongodbProvider extends Provider {
     @Override
     public boolean playerIsBanned(String player) {
         Document document = banCollection.find(new Document("player", player)).first();
-        return document == null;
+        return document != null;
     }
 
     @Override
     public boolean playerIsMuted(String player) {
         Document document = muteCollection.find(new Document("player", player)).first();
-        return document == null;
+        return document != null;
     }
 
     @Override
     public void banPlayer(String player, String reason, String banner, int seconds) {
         long end = System.currentTimeMillis() + seconds * 1000L;
         if (seconds == -1) end = -1L;
+        String id = BanSystemAPI.getRandomIDCode();
+        String date = BanSystemAPI.getDate();
         Document document = new Document("player", player)
                 .append("reason", reason)
-                .append("id", BanSystemAPI.getRandomIDCode())
+                .append("id", id)
                 .append("banner", banner)
-                .append("date", BanSystemAPI.getDate())
+                .append("date", date)
                 .append("time", end);
         banCollection.insertOne(document);
+        createBanlog(new Ban(player, reason, id, banner, date, end));
     }
 
     @Override
     public void mutePlayer(String player, String reason, String banner, int seconds) {
         long end = System.currentTimeMillis() + seconds * 1000L;
         if (seconds == -1) end = -1L;
+        String id = BanSystemAPI.getRandomIDCode();
+        String date = BanSystemAPI.getDate();
         Document document = new Document("player", player)
                 .append("reason", reason)
-                .append("id", BanSystemAPI.getRandomIDCode())
+                .append("id", id)
                 .append("banner", banner)
-                .append("date", BanSystemAPI.getDate())
+                .append("date", date)
                 .append("time", end);
         muteCollection.insertOne(document);
+        createMutelog(new Mute(player, reason, id, banner, date, end));
     }
 
     @Override
@@ -151,7 +163,7 @@ public class MongodbProvider extends Provider {
                 .append("id", mute.getMuteID())
                 .append("banner", mute.getMuter())
                 .append("date", mute.getDate());
-        banlogCollection.insertOne(document);
+        mutelogCollection.insertOne(document);
     }
 
     @Override

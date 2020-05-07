@@ -37,10 +37,12 @@ public class BanSystem extends PluginBase {
             return;
         }
         provider = providers.get(getConfig().getString("Provider"));
-        provider.setUp(this);
+        provider.connect(this);
+        getLogger().info("§aSuccessfully loaded " + provider.getProvider() + " provider.");
         api.setProvider(provider);
         Configuration.initConfiguration();
         loadPlugin();
+        getLogger().info("§aPlugin successfully started.");
     }
 
     private void loadReasons() {

@@ -1,11 +1,9 @@
 package net.llamadevelopment.bansystem.components.managers;
 
-import cn.nukkit.plugin.PluginLogger;
 import cn.nukkit.utils.Config;
 import net.llamadevelopment.bansystem.BanSystem;
 import net.llamadevelopment.bansystem.Configuration;
 import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
-import net.llamadevelopment.bansystem.components.api.SystemSettings;
 import net.llamadevelopment.bansystem.components.data.Ban;
 import net.llamadevelopment.bansystem.components.data.Mute;
 import net.llamadevelopment.bansystem.components.data.Warn;
@@ -18,12 +16,10 @@ import java.util.Map;
 
 public class YamlProvider extends Provider {
 
-    SystemSettings settings = BanSystemAPI.getSystemSettings();
-
     Config bans, banlog, mutes, mutelog, warns;
 
     @Override
-    public void setUp(BanSystem server) {
+    public void connect(BanSystem server) {
         server.saveResource("/data/bans.yml");
         server.saveResource("/data/banlog.yml");
         server.saveResource("/data/mutes.yml");
