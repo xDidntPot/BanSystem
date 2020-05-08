@@ -10,7 +10,7 @@ import java.util.Random;
 
 public class BanSystemAPI {
 
-    private BanSystem banSystem = BanSystem.getInstance();
+    private final BanSystem banSystem = BanSystem.getInstance();
     private static Provider provider;
     private static SystemSettings systemSettings;
 

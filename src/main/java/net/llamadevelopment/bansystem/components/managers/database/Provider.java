@@ -1,6 +1,5 @@
 package net.llamadevelopment.bansystem.components.managers.database;
 
-import cn.nukkit.Server;
 import net.llamadevelopment.bansystem.BanSystem;
 import net.llamadevelopment.bansystem.components.data.Ban;
 import net.llamadevelopment.bansystem.components.data.Mute;

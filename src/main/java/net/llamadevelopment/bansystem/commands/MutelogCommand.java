@@ -8,7 +8,6 @@ import cn.nukkit.scheduler.AsyncTask;
 import net.llamadevelopment.bansystem.BanSystem;
 import net.llamadevelopment.bansystem.Configuration;
 import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
-import net.llamadevelopment.bansystem.components.api.SystemSettings;
 import net.llamadevelopment.bansystem.components.managers.database.Provider;
 
 public class MutelogCommand extends Command {

@@ -1,15 +1,21 @@
 package net.llamadevelopment.bansystem.components.managers;
 
+import cn.nukkit.Player;
+import cn.nukkit.Server;
+import cn.nukkit.network.protocol.ScriptCustomEventPacket;
 import cn.nukkit.scheduler.AsyncTask;
 import cn.nukkit.utils.Config;
 import net.llamadevelopment.bansystem.BanSystem;
 import net.llamadevelopment.bansystem.Configuration;
 import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
+import net.llamadevelopment.bansystem.components.api.SystemSettings;
 import net.llamadevelopment.bansystem.components.data.Ban;
 import net.llamadevelopment.bansystem.components.data.Mute;
 import net.llamadevelopment.bansystem.components.data.Warn;
 import net.llamadevelopment.bansystem.components.managers.database.Provider;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -17,6 +23,7 @@ import java.util.List;
 
 public class MysqlProvider extends Provider {
 
+    SystemSettings settings = BanSystemAPI.getSystemSettings();
     Config config = BanSystem.getInstance().getConfig();
     BanSystem instance = BanSystem.getInstance();
     Connection connection;
@@ -119,6 +126,31 @@ public class MysqlProvider extends Provider {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        Player player1 = Server.getInstance().getPlayer(banner);
+        if (settings.isWaterdog() && player1.isOnline()) {
+            Ban ban = getBan(player);
+            ScriptCustomEventPacket customEventPacket = new ScriptCustomEventPacket();
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
+            try {
+                dataOutputStream.writeUTF("banplayer");
+                dataOutputStream.writeUTF(player);
+                dataOutputStream.writeUTF(ban.getReason());
+                dataOutputStream.writeUTF(ban.getBanID());
+                dataOutputStream.writeUTF(getRemainingTime(ban.getTime()));
+                customEventPacket.eventName = "bansystembridge:main";
+                customEventPacket.eventData = outputStream.toByteArray();
+                player1.dataPacket(customEventPacket);
+                return;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        Player onlinePlayer = Server.getInstance().getPlayer(player);
+        if (onlinePlayer != null) {
+            Ban ban = getBan(player);
+            onlinePlayer.kick(Configuration.getAndReplaceNP("BanScreen", ban.getReason(), ban.getBanID(), getRemainingTime(ban.getTime())), false);
+        }
         createBanlog(new Ban(player, reason, id, banner, date, end));
     }
 
@@ -144,6 +176,25 @@ public class MysqlProvider extends Provider {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        Player player1 = Server.getInstance().getPlayer(creator);
+        if (settings.isWaterdog() && player1.isOnline()) {
+            ScriptCustomEventPacket customEventPacket = new ScriptCustomEventPacket();
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
+            try {
+                dataOutputStream.writeUTF("warnplayer");
+                dataOutputStream.writeUTF(player);
+                dataOutputStream.writeUTF(reason);
+                dataOutputStream.writeUTF(creator);
+                customEventPacket.eventName = "bansystembridge:main";
+                customEventPacket.eventData = outputStream.toByteArray();
+                player1.dataPacket(customEventPacket);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        Player onlinePlayer = Server.getInstance().getPlayer(player);
+        if (onlinePlayer != null) onlinePlayer.kick(Configuration.getAndReplaceNP("WarnScreen", reason, creator), false);
     }
 
     @Override
