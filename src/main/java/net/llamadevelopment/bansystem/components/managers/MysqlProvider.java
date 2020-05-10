@@ -3,7 +3,6 @@ package net.llamadevelopment.bansystem.components.managers;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.network.protocol.ScriptCustomEventPacket;
-import cn.nukkit.scheduler.AsyncTask;
 import cn.nukkit.utils.Config;
 import net.llamadevelopment.bansystem.BanSystem;
 import net.llamadevelopment.bansystem.Configuration;
@@ -20,32 +19,30 @@ import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public class MysqlProvider extends Provider {
 
     SystemSettings settings = BanSystemAPI.getSystemSettings();
     Config config = BanSystem.getInstance().getConfig();
-    BanSystem instance = BanSystem.getInstance();
+
     Connection connection;
 
     @Override
     public void connect(BanSystem server) {
-        instance.getServer().getScheduler().scheduleAsyncTask(instance, new AsyncTask() {
-            @Override
-            public void onRun() {
-                try {
-                    Class.forName("com.mysql.jdbc.Driver");
-                    connection = DriverManager.getConnection("jdbc:mysql://" + config.getString("MySql.Host") + ":" + config.getString("MySql.Port") + "/" + config.getString("MySql.Database") + "?autoReconnect=true", config.getString("MySql.User"), config.getString("MySql.Password"));
-                    update("CREATE TABLE IF NOT EXISTS bans(player VARCHAR(255), reason VARCHAR(255), id VARCHAR(255), banner VARCHAR(255), date VARCHAR(255), time BIGINT(255), PRIMARY KEY (id));");
-                    update("CREATE TABLE IF NOT EXISTS mutes(player VARCHAR(255), reason VARCHAR(255), id VARCHAR(255), banner VARCHAR(255), date VARCHAR(255), time BIGINT(255), PRIMARY KEY (id));");
-                    update("CREATE TABLE IF NOT EXISTS warns(player VARCHAR(255), reason VARCHAR(255), id VARCHAR(255), creator VARCHAR(255), date VARCHAR(255), PRIMARY KEY (id));");
-                    update("CREATE TABLE IF NOT EXISTS banlogs(player VARCHAR(255), reason VARCHAR(255), id VARCHAR(255), banner VARCHAR(255), date VARCHAR(255), PRIMARY KEY (id));");
-                    update("CREATE TABLE IF NOT EXISTS mutelogs(player VARCHAR(255), reason VARCHAR(255), id VARCHAR(255), banner VARCHAR(255), date VARCHAR(255), PRIMARY KEY (id));");
-                    server.getLogger().info("[MySqlClient] Connection opened.");
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    server.getLogger().info("[MySqlClient] Failed to connect to database.");
-                }
+        CompletableFuture.runAsync(() -> {
+            try {
+                Class.forName("com.mysql.jdbc.Driver");
+                connection = DriverManager.getConnection("jdbc:mysql://" + config.getString("MySql.Host") + ":" + config.getString("MySql.Port") + "/" + config.getString("MySql.Database") + "?autoReconnect=true", config.getString("MySql.User"), config.getString("MySql.Password"));
+                update("CREATE TABLE IF NOT EXISTS bans(player VARCHAR(255), reason VARCHAR(255), id VARCHAR(255), banner VARCHAR(255), date VARCHAR(255), time BIGINT(255), PRIMARY KEY (id));");
+                update("CREATE TABLE IF NOT EXISTS mutes(player VARCHAR(255), reason VARCHAR(255), id VARCHAR(255), banner VARCHAR(255), date VARCHAR(255), time BIGINT(255), PRIMARY KEY (id));");
+                update("CREATE TABLE IF NOT EXISTS warns(player VARCHAR(255), reason VARCHAR(255), id VARCHAR(255), creator VARCHAR(255), date VARCHAR(255), PRIMARY KEY (id));");
+                update("CREATE TABLE IF NOT EXISTS banlogs(player VARCHAR(255), reason VARCHAR(255), id VARCHAR(255), banner VARCHAR(255), date VARCHAR(255), PRIMARY KEY (id));");
+                update("CREATE TABLE IF NOT EXISTS mutelogs(player VARCHAR(255), reason VARCHAR(255), id VARCHAR(255), banner VARCHAR(255), date VARCHAR(255), PRIMARY KEY (id));");
+                server.getLogger().info("[MySqlClient] Connection opened.");
+            } catch (Exception e) {
+                e.printStackTrace();
+                server.getLogger().info("[MySqlClient] Failed to connect to database.");
             }
         });
     }
@@ -68,17 +65,14 @@ public class MysqlProvider extends Provider {
     }
 
     public void update(String query) {
-        instance.getServer().getScheduler().scheduleAsyncTask(instance, new AsyncTask() {
-            @Override
-            public void onRun() {
-                if (connection != null) {
-                    try {
-                        PreparedStatement ps = connection.prepareStatement(query);
-                        ps.executeUpdate();
-                        ps.close();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+        CompletableFuture.runAsync(() -> {
+            if (connection != null) {
+                try {
+                    PreparedStatement ps = connection.prepareStatement(query);
+                    ps.executeUpdate();
+                    ps.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         });
@@ -126,6 +120,7 @@ public class MysqlProvider extends Provider {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        createBanlog(new Ban(player, reason, id, banner, date, end));
         Player player1 = Server.getInstance().getPlayer(banner);
         if (settings.isWaterdog() && player1.isOnline()) {
             Ban ban = getBan(player);
@@ -151,7 +146,6 @@ public class MysqlProvider extends Provider {
             Ban ban = getBan(player);
             onlinePlayer.kick(Configuration.getAndReplaceNP("BanScreen", ban.getReason(), ban.getBanID(), getRemainingTime(ban.getTime())), false);
         }
-        createBanlog(new Ban(player, reason, id, banner, date, end));
     }
 
     @Override
@@ -199,32 +193,26 @@ public class MysqlProvider extends Provider {
 
     @Override
     public void unbanPlayer(String player) {
-        instance.getServer().getScheduler().scheduleAsyncTask(instance, new AsyncTask() {
-            @Override
-            public void onRun() {
-                try {
-                    PreparedStatement preparedStatement = getConnection().prepareStatement("DELETE FROM bans WHERE PLAYER = ?");
-                    preparedStatement.setString(1, player);
-                    preparedStatement.executeUpdate();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+        CompletableFuture.runAsync(() -> {
+            try {
+                PreparedStatement preparedStatement = getConnection().prepareStatement("DELETE FROM bans WHERE PLAYER = ?");
+                preparedStatement.setString(1, player);
+                preparedStatement.executeUpdate();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
     }
 
     @Override
     public void unmutePlayer(String player) {
-        instance.getServer().getScheduler().scheduleAsyncTask(instance, new AsyncTask() {
-            @Override
-            public void onRun() {
-                try {
-                    PreparedStatement preparedStatement = getConnection().prepareStatement("DELETE FROM mutes WHERE PLAYER = ?");
-                    preparedStatement.setString(1, player);
-                    preparedStatement.executeUpdate();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+        CompletableFuture.runAsync(() -> {
+            try {
+                PreparedStatement preparedStatement = getConnection().prepareStatement("DELETE FROM mutes WHERE PLAYER = ?");
+                preparedStatement.setString(1, player);
+                preparedStatement.executeUpdate();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
     }
@@ -357,81 +345,72 @@ public class MysqlProvider extends Provider {
 
     @Override
     public void clearBanlog(String player) {
-        instance.getServer().getScheduler().scheduleAsyncTask(instance, new AsyncTask() {
-            @Override
-            public void onRun() {
-                try {
-                    PreparedStatement preparedStatement = getConnection().prepareStatement("SELECT * FROM banlogs WHERE PLAYER = ?");
-                    preparedStatement.setString(1, player);
-                    ResultSet rs = preparedStatement.executeQuery();
-                    while (rs.next()) {
-                        try {
-                            PreparedStatement preparedStatement2 = getConnection().prepareStatement("DELETE FROM banlogs WHERE ID = ?");
-                            preparedStatement2.setString(1, rs.getString("ID"));
-                            preparedStatement2.executeUpdate();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+        CompletableFuture.runAsync(() -> {
+            try {
+                PreparedStatement preparedStatement = getConnection().prepareStatement("SELECT * FROM banlogs WHERE PLAYER = ?");
+                preparedStatement.setString(1, player);
+                ResultSet rs = preparedStatement.executeQuery();
+                while (rs.next()) {
+                    try {
+                        PreparedStatement preparedStatement2 = getConnection().prepareStatement("DELETE FROM banlogs WHERE ID = ?");
+                        preparedStatement2.setString(1, rs.getString("ID"));
+                        preparedStatement2.executeUpdate();
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                    rs.close();
-                    preparedStatement.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
                 }
+                rs.close();
+                preparedStatement.close();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
     }
 
     @Override
     public void clearMutelog(String player) {
-        instance.getServer().getScheduler().scheduleAsyncTask(instance, new AsyncTask() {
-            @Override
-            public void onRun() {
-                try {
-                    PreparedStatement preparedStatement = getConnection().prepareStatement("SELECT * FROM mutelogs WHERE PLAYER = ?");
-                    preparedStatement.setString(1, player);
-                    ResultSet rs = preparedStatement.executeQuery();
-                    while (rs.next()) {
-                        try {
-                            PreparedStatement preparedStatement2 = getConnection().prepareStatement("DELETE FROM mutelogs WHERE ID = ?");
-                            preparedStatement2.setString(1, rs.getString("ID"));
-                            preparedStatement2.executeUpdate();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+        CompletableFuture.runAsync(() -> {
+            try {
+                PreparedStatement preparedStatement = getConnection().prepareStatement("SELECT * FROM mutelogs WHERE PLAYER = ?");
+                preparedStatement.setString(1, player);
+                ResultSet rs = preparedStatement.executeQuery();
+                while (rs.next()) {
+                    try {
+                        PreparedStatement preparedStatement2 = getConnection().prepareStatement("DELETE FROM mutelogs WHERE ID = ?");
+                        preparedStatement2.setString(1, rs.getString("ID"));
+                        preparedStatement2.executeUpdate();
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                    rs.close();
-                    preparedStatement.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
                 }
+                rs.close();
+                preparedStatement.close();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
     }
 
     @Override
     public void clearWarns(String player) {
-        instance.getServer().getScheduler().scheduleAsyncTask(instance, new AsyncTask() {
-            @Override
-            public void onRun() {
-                try {
-                    PreparedStatement preparedStatement = getConnection().prepareStatement("SELECT * FROM warns WHERE PLAYER = ?");
-                    preparedStatement.setString(1, player);
-                    ResultSet rs = preparedStatement.executeQuery();
-                    while (rs.next()) {
-                        try {
-                            PreparedStatement preparedStatement2 = getConnection().prepareStatement("DELETE FROM warns WHERE ID = ?");
-                            preparedStatement2.setString(1, rs.getString("ID"));
-                            preparedStatement2.executeUpdate();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+        CompletableFuture.runAsync(() -> {
+            try {
+                PreparedStatement preparedStatement = getConnection().prepareStatement("SELECT * FROM warns WHERE PLAYER = ?");
+                preparedStatement.setString(1, player);
+                ResultSet rs = preparedStatement.executeQuery();
+                while (rs.next()) {
+                    try {
+                        PreparedStatement preparedStatement2 = getConnection().prepareStatement("DELETE FROM warns WHERE ID = ?");
+                        preparedStatement2.setString(1, rs.getString("ID"));
+                        preparedStatement2.executeUpdate();
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                    rs.close();
-                    preparedStatement.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
                 }
+                rs.close();
+                preparedStatement.close();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
     }

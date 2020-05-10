@@ -40,14 +40,9 @@ public class BanCommand extends Command {
                     sender.sendMessage(Configuration.getAndReplace("ReasonNotFound"));
                     return true;
                 }
-                Server.getInstance().getScheduler().scheduleAsyncTask(BanSystem.getInstance(), new AsyncTask() {
-                    @Override
-                    public void onRun() {
-                        BanReason banReason = settings.banReasons.get(reason);
-                        api.banPlayer(player, banReason.getReason(), sender.getName(), banReason.getSeconds());
-                        sender.sendMessage(Configuration.getAndReplace("PlayerBanned", player));
-                    }
-                });
+                BanReason banReason = settings.banReasons.get(reason);
+                api.banPlayer(player, banReason.getReason(), sender.getName(), banReason.getSeconds());
+                sender.sendMessage(Configuration.getAndReplace("PlayerBanned", player));
             } else {
                 settings.banReasons.values().forEach(reason -> sender.sendMessage(Configuration.getAndReplace("ReasonFormat", reason.getId(), reason.getReason())));
                 sender.sendMessage(Configuration.getAndReplace("BanCommandUsage", getName()));

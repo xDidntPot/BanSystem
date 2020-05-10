@@ -11,6 +11,8 @@ import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
 import net.llamadevelopment.bansystem.components.api.SystemSettings;
 import net.llamadevelopment.bansystem.components.managers.database.Provider;
 
+import java.util.concurrent.CompletableFuture;
+
 public class EditmuteCommand extends Command {
 
     public EditmuteCommand(String name) {
@@ -30,42 +32,46 @@ public class EditmuteCommand extends Command {
             if (args.length >= 3) {
                 String player = args[0];
                 if (args[1].equalsIgnoreCase("reason")) {
-                    if (api.playerIsMuted(player)) {
-                        String reason = "";
-                        for (int i = 2; i < args.length; ++i) reason = reason + args[i] + " ";
-                        api.setMuteReason(player, reason);
-                        Player onlinePlayer = Server.getInstance().getPlayer(player);
-                        if (onlinePlayer != null) {
-                            settings.cachedMute.remove(player);
-                            settings.cachedMute.put(player, api.getMute(player));
-                        }
-                        sender.sendMessage(Configuration.getAndReplace("ReasonSet"));
-                    } else sender.sendMessage(Configuration.getAndReplace("PlayerIsNotMuted"));
-                } else if (args.length == 4 && args[1].equalsIgnoreCase("time")) {
-                    if (api.playerIsMuted(player)) {
-                        try {
-                            String type = args[2];
-                            int time = Integer.parseInt(args[3]);
-                            int seconds = 0;
-                            if (type.equalsIgnoreCase("days")) seconds = time * 86400;
-                            else if (type.equalsIgnoreCase("hours")) seconds = time * 3600;
-                            else {
-                                sender.sendMessage(Configuration.getAndReplace("EditmuteCommandUsage1", getName()));
-                                sender.sendMessage(Configuration.getAndReplace("EditmuteCommandUsage2", getName()));
-                                return true;
-                            }
-                            long end = System.currentTimeMillis() + seconds * 1000L;
-                            api.setMuteTime(player, end);
+                    CompletableFuture.runAsync(() -> {
+                        if (api.playerIsMuted(player)) {
+                            String reason = "";
+                            for (int i = 2; i < args.length; ++i) reason = reason + args[i] + " ";
+                            api.setMuteReason(player, reason);
                             Player onlinePlayer = Server.getInstance().getPlayer(player);
                             if (onlinePlayer != null) {
                                 settings.cachedMute.remove(player);
                                 settings.cachedMute.put(player, api.getMute(player));
                             }
-                            sender.sendMessage(Configuration.getAndReplace("TimeSet"));
-                        } catch (NumberFormatException exception) {
-                            sender.sendMessage(Configuration.getAndReplace("InvalidNumber"));
-                        }
-                    } else sender.sendMessage(Configuration.getAndReplace("PlayerIsNotMuted"));
+                            sender.sendMessage(Configuration.getAndReplace("ReasonSet"));
+                        } else sender.sendMessage(Configuration.getAndReplace("PlayerIsNotMuted"));
+                    });
+                } else if (args.length == 4 && args[1].equalsIgnoreCase("time")) {
+                    CompletableFuture.runAsync(() -> {
+                        if (api.playerIsMuted(player)) {
+                            try {
+                                String type = args[2];
+                                int time = Integer.parseInt(args[3]);
+                                int seconds = 0;
+                                if (type.equalsIgnoreCase("days")) seconds = time * 86400;
+                                else if (type.equalsIgnoreCase("hours")) seconds = time * 3600;
+                                else {
+                                    sender.sendMessage(Configuration.getAndReplace("EditmuteCommandUsage1", getName()));
+                                    sender.sendMessage(Configuration.getAndReplace("EditmuteCommandUsage2", getName()));
+                                    return;
+                                }
+                                long end = System.currentTimeMillis() + seconds * 1000L;
+                                api.setMuteTime(player, end);
+                                Player onlinePlayer = Server.getInstance().getPlayer(player);
+                                if (onlinePlayer != null) {
+                                    settings.cachedMute.remove(player);
+                                    settings.cachedMute.put(player, api.getMute(player));
+                                }
+                                sender.sendMessage(Configuration.getAndReplace("TimeSet"));
+                            } catch (NumberFormatException exception) {
+                                sender.sendMessage(Configuration.getAndReplace("InvalidNumber"));
+                            }
+                        } else sender.sendMessage(Configuration.getAndReplace("PlayerIsNotMuted"));
+                    });
                 } else {
                     sender.sendMessage(Configuration.getAndReplace("EditmuteCommandUsage1", getName()));
                     sender.sendMessage(Configuration.getAndReplace("EditmuteCommandUsage2", getName()));

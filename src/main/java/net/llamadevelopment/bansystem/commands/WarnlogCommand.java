@@ -10,6 +10,8 @@ import net.llamadevelopment.bansystem.Configuration;
 import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
 import net.llamadevelopment.bansystem.components.managers.database.Provider;
 
+import java.util.concurrent.CompletableFuture;
+
 public class WarnlogCommand extends Command {
 
     public WarnlogCommand(String name) {
@@ -22,28 +24,24 @@ public class WarnlogCommand extends Command {
 
     @Override
     public boolean execute(CommandSender sender, String s, String[] args) {
-        BanSystem instance = BanSystem.getInstance();
         Provider api = BanSystemAPI.getProvider();
         if (sender.hasPermission(getPermission())) {
             if (args.length == 1) {
                 String player = args[0];
-                instance.getServer().getScheduler().scheduleAsyncTask(instance, new AsyncTask() {
-                    @Override
-                    public void onRun() {
-                        int i = api.getWarnings(player).size();
-                        if (i == 0) {
-                            sender.sendMessage(Configuration.getAndReplace("NoDataFound"));
-                            return;
-                        }
-                        sender.sendMessage(Configuration.getAndReplace("WarnlogInfo", player, i));
-                        api.getWarnings(player).forEach(warn -> {
-                            sender.sendMessage(Configuration.getAndReplace("WarnlogPlaceholder"));
-                            sender.sendMessage(Configuration.getAndReplace("WarnlogReason", warn.getReason()));
-                            sender.sendMessage(Configuration.getAndReplace("WarnlogID", warn.getWarnID()));
-                            sender.sendMessage(Configuration.getAndReplace("WarnlogCreator", warn.getCreator()));
-                            sender.sendMessage(Configuration.getAndReplace("WarnlogDate", warn.getDate()));
-                        });
+                CompletableFuture.runAsync(() -> {
+                    int i = api.getWarnings(player).size();
+                    if (i == 0) {
+                        sender.sendMessage(Configuration.getAndReplace("NoDataFound"));
+                        return;
                     }
+                    sender.sendMessage(Configuration.getAndReplace("WarnlogInfo", player, i));
+                    api.getWarnings(player).forEach(warn -> {
+                        sender.sendMessage(Configuration.getAndReplace("WarnlogPlaceholder"));
+                        sender.sendMessage(Configuration.getAndReplace("WarnlogReason", warn.getReason()));
+                        sender.sendMessage(Configuration.getAndReplace("WarnlogID", warn.getWarnID()));
+                        sender.sendMessage(Configuration.getAndReplace("WarnlogCreator", warn.getCreator()));
+                        sender.sendMessage(Configuration.getAndReplace("WarnlogDate", warn.getDate()));
+                    });
                 });
             } else sender.sendMessage(Configuration.getAndReplace("WarnlogCommandUsage", getName()));
         } else sender.sendMessage(Configuration.getAndReplace("NoPermission"));

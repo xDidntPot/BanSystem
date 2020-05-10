@@ -3,7 +3,6 @@ package net.llamadevelopment.bansystem.components.managers;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.network.protocol.ScriptCustomEventPacket;
-import cn.nukkit.scheduler.AsyncTask;
 import cn.nukkit.utils.Config;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
@@ -25,12 +24,12 @@ import java.io.DataOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public class MongodbProvider extends Provider {
 
     SystemSettings settings = BanSystemAPI.getSystemSettings();
     Config config = BanSystem.getInstance().getConfig();
-    BanSystem instance = BanSystem.getInstance();
 
     MongoClient mongoClient;
     MongoDatabase mongoDatabase;
@@ -38,19 +37,16 @@ public class MongodbProvider extends Provider {
 
     @Override
     public void connect(BanSystem server) {
-        instance.getServer().getScheduler().scheduleAsyncTask(instance, new AsyncTask() {
-            @Override
-            public void onRun() {
-                MongoClientURI uri = new MongoClientURI(config.getString("MongoDB.Uri"));
-                mongoClient = new MongoClient(uri);
-                mongoDatabase = mongoClient.getDatabase(config.getString("MongoDB.Database"));
-                banCollection = mongoDatabase.getCollection("bans");
-                banlogCollection = mongoDatabase.getCollection("banlog");
-                muteCollection = mongoDatabase.getCollection("mutes");
-                mutelogCollection = mongoDatabase.getCollection("mutelog");
-                warnCollection = mongoDatabase.getCollection("warns");
-                server.getLogger().info("[MongoClient] Connection opened.");
-            }
+        CompletableFuture.runAsync(() -> {
+            MongoClientURI uri = new MongoClientURI(config.getString("MongoDB.Uri"));
+            mongoClient = new MongoClient(uri);
+            mongoDatabase = mongoClient.getDatabase(config.getString("MongoDB.Database"));
+            banCollection = mongoDatabase.getCollection("bans");
+            banlogCollection = mongoDatabase.getCollection("banlog");
+            muteCollection = mongoDatabase.getCollection("mutes");
+            mutelogCollection = mongoDatabase.getCollection("mutelog");
+            warnCollection = mongoDatabase.getCollection("warns");
+            server.getLogger().info("[MongoClient] Connection opened.");
         });
     }
 
@@ -74,100 +70,110 @@ public class MongodbProvider extends Provider {
 
     @Override
     public void banPlayer(String player, String reason, String banner, int seconds) {
-        long end = System.currentTimeMillis() + seconds * 1000L;
-        if (seconds == -1) end = -1L;
-        String id = BanSystemAPI.getRandomIDCode();
-        String date = BanSystemAPI.getDate();
-        Document document = new Document("player", player)
-                .append("reason", reason)
-                .append("id", id)
-                .append("banner", banner)
-                .append("date", date)
-                .append("time", end);
-        banCollection.insertOne(document);
-        Player player1 = Server.getInstance().getPlayer(banner);
-        if (settings.isWaterdog() && player1.isOnline()) {
-            Ban ban = getBan(player);
-            ScriptCustomEventPacket customEventPacket = new ScriptCustomEventPacket();
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
-            try {
-                dataOutputStream.writeUTF("banplayer");
-                dataOutputStream.writeUTF(player);
-                dataOutputStream.writeUTF(ban.getReason());
-                dataOutputStream.writeUTF(ban.getBanID());
-                dataOutputStream.writeUTF(getRemainingTime(ban.getTime()));
-                customEventPacket.eventName = "bansystembridge:main";
-                customEventPacket.eventData = outputStream.toByteArray();
-                player1.dataPacket(customEventPacket);
-                return;
-            } catch (Exception e) {
-                e.printStackTrace();
+        CompletableFuture.runAsync(() -> {
+            long end = System.currentTimeMillis() + seconds * 1000L;
+            if (seconds == -1) end = -1L;
+            String id = BanSystemAPI.getRandomIDCode();
+            String date = BanSystemAPI.getDate();
+            Document document = new Document("player", player)
+                    .append("reason", reason)
+                    .append("id", id)
+                    .append("banner", banner)
+                    .append("date", date)
+                    .append("time", end);
+            banCollection.insertOne(document);
+            createBanlog(new Ban(player, reason, id, banner, date, end));
+            Player player1 = Server.getInstance().getPlayer(banner);
+            if (settings.isWaterdog() && player1.isOnline()) {
+                Ban ban = getBan(player);
+                ScriptCustomEventPacket customEventPacket = new ScriptCustomEventPacket();
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
+                try {
+                    dataOutputStream.writeUTF("banplayer");
+                    dataOutputStream.writeUTF(player);
+                    dataOutputStream.writeUTF(ban.getReason());
+                    dataOutputStream.writeUTF(ban.getBanID());
+                    dataOutputStream.writeUTF(getRemainingTime(ban.getTime()));
+                    customEventPacket.eventName = "bansystembridge:main";
+                    customEventPacket.eventData = outputStream.toByteArray();
+                    player1.dataPacket(customEventPacket);
+                    return;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
-        }
-        Player onlinePlayer = Server.getInstance().getPlayer(player);
-        if (onlinePlayer != null) {
-            Ban ban = getBan(player);
-            onlinePlayer.kick(Configuration.getAndReplaceNP("BanScreen", ban.getReason(), ban.getBanID(), getRemainingTime(ban.getTime())), false);
-        }
-        createBanlog(new Ban(player, reason, id, banner, date, end));
+            Player onlinePlayer = Server.getInstance().getPlayer(player);
+            if (onlinePlayer != null) {
+                Ban ban = getBan(player);
+                onlinePlayer.kick(Configuration.getAndReplaceNP("BanScreen", ban.getReason(), ban.getBanID(), getRemainingTime(ban.getTime())), false);
+            }
+        });
     }
 
     @Override
     public void mutePlayer(String player, String reason, String banner, int seconds) {
-        long end = System.currentTimeMillis() + seconds * 1000L;
-        if (seconds == -1) end = -1L;
-        String id = BanSystemAPI.getRandomIDCode();
-        String date = BanSystemAPI.getDate();
-        Document document = new Document("player", player)
-                .append("reason", reason)
-                .append("id", id)
-                .append("banner", banner)
-                .append("date", date)
-                .append("time", end);
-        muteCollection.insertOne(document);
-        createMutelog(new Mute(player, reason, id, banner, date, end));
+        CompletableFuture.runAsync(() -> {
+            long end = System.currentTimeMillis() + seconds * 1000L;
+            if (seconds == -1) end = -1L;
+            String id = BanSystemAPI.getRandomIDCode();
+            String date = BanSystemAPI.getDate();
+            Document document = new Document("player", player)
+                    .append("reason", reason)
+                    .append("id", id)
+                    .append("banner", banner)
+                    .append("date", date)
+                    .append("time", end);
+            muteCollection.insertOne(document);
+            createMutelog(new Mute(player, reason, id, banner, date, end));
+        });
     }
 
     @Override
     public void warnPlayer(String player, String reason, String creator) {
-        Document document = new Document("player", player)
-                .append("reason", reason)
-                .append("id", BanSystemAPI.getRandomIDCode())
-                .append("creator", creator)
-                .append("date", BanSystemAPI.getDate());
-        warnCollection.insertOne(document);
-        Player player1 = Server.getInstance().getPlayer(creator);
-        if (settings.isWaterdog() && player1.isOnline()) {
-            ScriptCustomEventPacket customEventPacket = new ScriptCustomEventPacket();
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
-            try {
-                dataOutputStream.writeUTF("warnplayer");
-                dataOutputStream.writeUTF(player);
-                dataOutputStream.writeUTF(reason);
-                dataOutputStream.writeUTF(creator);
-                customEventPacket.eventName = "bansystembridge:main";
-                customEventPacket.eventData = outputStream.toByteArray();
-                player1.dataPacket(customEventPacket);
-            } catch (Exception e) {
-                e.printStackTrace();
+        CompletableFuture.runAsync(() -> {
+            Document document = new Document("player", player)
+                    .append("reason", reason)
+                    .append("id", BanSystemAPI.getRandomIDCode())
+                    .append("creator", creator)
+                    .append("date", BanSystemAPI.getDate());
+            warnCollection.insertOne(document);
+            Player player1 = Server.getInstance().getPlayer(creator);
+            if (settings.isWaterdog() && player1.isOnline()) {
+                ScriptCustomEventPacket customEventPacket = new ScriptCustomEventPacket();
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
+                try {
+                    dataOutputStream.writeUTF("warnplayer");
+                    dataOutputStream.writeUTF(player);
+                    dataOutputStream.writeUTF(reason);
+                    dataOutputStream.writeUTF(creator);
+                    customEventPacket.eventName = "bansystembridge:main";
+                    customEventPacket.eventData = outputStream.toByteArray();
+                    player1.dataPacket(customEventPacket);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
-        }
-        Player onlinePlayer = Server.getInstance().getPlayer(player);
-        if (onlinePlayer != null) onlinePlayer.kick(Configuration.getAndReplaceNP("WarnScreen", reason, creator), false);
+            Player onlinePlayer = Server.getInstance().getPlayer(player);
+            if (onlinePlayer != null) onlinePlayer.kick(Configuration.getAndReplaceNP("WarnScreen", reason, creator), false);
+        });
     }
 
     @Override
     public void unbanPlayer(String player) {
-        MongoCollection<Document> collection = banCollection;
-        collection.deleteOne(new Document("player", player));
+        CompletableFuture.runAsync(() -> {
+            MongoCollection<Document> collection = banCollection;
+            collection.deleteOne(new Document("player", player));
+        });
     }
 
     @Override
     public void unmutePlayer(String player) {
-        MongoCollection<Document> collection = muteCollection;
-        collection.deleteOne(new Document("player", player));
+        CompletableFuture.runAsync(() -> {
+            MongoCollection<Document> collection = muteCollection;
+            collection.deleteOne(new Document("player", player));
+        });
     }
 
     @Override
@@ -199,22 +205,26 @@ public class MongodbProvider extends Provider {
 
     @Override
     public void createBanlog(Ban ban) {
-        Document document = new Document("player", ban.getPlayer())
-                .append("reason", ban.getReason())
-                .append("id", ban.getBanID())
-                .append("banner", ban.getBanner())
-                .append("date", ban.getDate());
-        banlogCollection.insertOne(document);
+        CompletableFuture.runAsync(() -> {
+            Document document = new Document("player", ban.getPlayer())
+                    .append("reason", ban.getReason())
+                    .append("id", ban.getBanID())
+                    .append("banner", ban.getBanner())
+                    .append("date", ban.getDate());
+            banlogCollection.insertOne(document);
+        });
     }
 
     @Override
     public void createMutelog(Mute mute) {
-        Document document = new Document("player", mute.getPlayer())
-                .append("reason", mute.getReason())
-                .append("id", mute.getMuteID())
-                .append("banner", mute.getMuter())
-                .append("date", mute.getDate());
-        mutelogCollection.insertOne(document);
+        CompletableFuture.runAsync(() -> {
+            Document document = new Document("player", mute.getPlayer())
+                    .append("reason", mute.getReason())
+                    .append("id", mute.getMuteID())
+                    .append("banner", mute.getMuter())
+                    .append("date", mute.getDate());
+            mutelogCollection.insertOne(document);
+        });
     }
 
     @Override
@@ -249,62 +259,76 @@ public class MongodbProvider extends Provider {
 
     @Override
     public void clearBanlog(String player) {
-        for (Document doc : banlogCollection.find(new Document("player", player))) {
-            MongoCollection<Document> collection = banlogCollection;
-            collection.deleteOne(new Document("id", doc.getString("id")));
-        }
+        CompletableFuture.runAsync(() -> {
+            for (Document doc : banlogCollection.find(new Document("player", player))) {
+                MongoCollection<Document> collection = banlogCollection;
+                collection.deleteOne(new Document("id", doc.getString("id")));
+            }
+        });
     }
 
     @Override
     public void clearMutelog(String player) {
-        for (Document doc : mutelogCollection.find(new Document("player", player))) {
-            MongoCollection<Document> collection = mutelogCollection;
-            collection.deleteOne(new Document("id", doc.getString("id")));
-        }
+        CompletableFuture.runAsync(() -> {
+            for (Document doc : mutelogCollection.find(new Document("player", player))) {
+                MongoCollection<Document> collection = mutelogCollection;
+                collection.deleteOne(new Document("id", doc.getString("id")));
+            }
+        });
     }
 
     @Override
     public void clearWarns(String player) {
-        for (Document doc : warnCollection.find(new Document("player", player))) {
-            MongoCollection<Document> collection = warnCollection;
-            collection.deleteOne(new Document("id", doc.getString("id")));
-        }
+        CompletableFuture.runAsync(() -> {
+            for (Document doc : warnCollection.find(new Document("player", player))) {
+                MongoCollection<Document> collection = warnCollection;
+                collection.deleteOne(new Document("id", doc.getString("id")));
+            }
+        });
     }
 
     @Override
     public void setBanReason(String player, String reason) {
-        Document document = new Document("player", player);
-        Document found = banCollection.find(document).first();
-        Bson newEntry = new Document("reason", reason);
-        Bson newEntrySet = new Document("$set", newEntry);
-        banCollection.updateOne(found, newEntrySet);
+        CompletableFuture.runAsync(() -> {
+            Document document = new Document("player", player);
+            Document found = banCollection.find(document).first();
+            Bson newEntry = new Document("reason", reason);
+            Bson newEntrySet = new Document("$set", newEntry);
+            banCollection.updateOne(found, newEntrySet);
+        });
     }
 
     @Override
     public void setMuteReason(String player, String reason) {
-        Document document = new Document("player", player);
-        Document found = muteCollection.find(document).first();
-        Bson newEntry = new Document("reason", reason);
-        Bson newEntrySet = new Document("$set", newEntry);
-        muteCollection.updateOne(found, newEntrySet);
+        CompletableFuture.runAsync(() -> {
+            Document document = new Document("player", player);
+            Document found = muteCollection.find(document).first();
+            Bson newEntry = new Document("reason", reason);
+            Bson newEntrySet = new Document("$set", newEntry);
+            muteCollection.updateOne(found, newEntrySet);
+        });
     }
 
     @Override
     public void setBanTime(String player, long time) {
-        Document document = new Document("player", player);
-        Document found = banCollection.find(document).first();
-        Bson newEntry = new Document("time", time);
-        Bson newEntrySet = new Document("$set", newEntry);
-        banCollection.updateOne(found, newEntrySet);
+        CompletableFuture.runAsync(() -> {
+            Document document = new Document("player", player);
+            Document found = banCollection.find(document).first();
+            Bson newEntry = new Document("time", time);
+            Bson newEntrySet = new Document("$set", newEntry);
+            banCollection.updateOne(found, newEntrySet);
+        });
     }
 
     @Override
     public void setMuteTime(String player, long time) {
-        Document document = new Document("player", player);
-        Document found = muteCollection.find(document).first();
-        Bson newEntry = new Document("time", time);
-        Bson newEntrySet = new Document("$set", newEntry);
-        muteCollection.updateOne(found, newEntrySet);
+        CompletableFuture.runAsync(() -> {
+            Document document = new Document("player", player);
+            Document found = muteCollection.find(document).first();
+            Bson newEntry = new Document("time", time);
+            Bson newEntrySet = new Document("$set", newEntry);
+            muteCollection.updateOne(found, newEntrySet);
+        });
     }
 
     @Override

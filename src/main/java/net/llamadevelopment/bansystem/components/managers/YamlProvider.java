@@ -19,6 +19,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 public class YamlProvider extends Provider {
 
@@ -27,16 +28,18 @@ public class YamlProvider extends Provider {
 
     @Override
     public void connect(BanSystem server) {
-        server.saveResource("/data/bans.yml");
-        server.saveResource("/data/banlog.yml");
-        server.saveResource("/data/mutes.yml");
-        server.saveResource("/data/mutelog.yml");
-        server.saveResource("/data/warns.yml");
-        this.bans = new Config(server.getDataFolder() + "/data/bans.yml", Config.YAML);
-        this.banlog = new Config(server.getDataFolder() + "/data/banlog.yml", Config.YAML);
-        this.mutes = new Config(server.getDataFolder() + "/data/mutes.yml", Config.YAML);
-        this.mutelog = new Config(server.getDataFolder() + "/data/mutelog.yml", Config.YAML);
-        this.warns = new Config(server.getDataFolder() + "/data/warns.yml", Config.YAML);
+        CompletableFuture.runAsync(() -> {
+            server.saveResource("/data/bans.yml");
+            server.saveResource("/data/banlog.yml");
+            server.saveResource("/data/mutes.yml");
+            server.saveResource("/data/mutelog.yml");
+            server.saveResource("/data/warns.yml");
+            this.bans = new Config(server.getDataFolder() + "/data/bans.yml", Config.YAML);
+            this.banlog = new Config(server.getDataFolder() + "/data/banlog.yml", Config.YAML);
+            this.mutes = new Config(server.getDataFolder() + "/data/mutes.yml", Config.YAML);
+            this.mutelog = new Config(server.getDataFolder() + "/data/mutelog.yml", Config.YAML);
+            this.warns = new Config(server.getDataFolder() + "/data/warns.yml", Config.YAML);
+        });
     }
 
     @Override
@@ -51,107 +54,117 @@ public class YamlProvider extends Provider {
 
     @Override
     public void banPlayer(String player, String reason, String banner, int seconds) {
-        long end = System.currentTimeMillis() + seconds * 1000L;
-        if (seconds == -1) end = -1L;
-        String id = BanSystemAPI.getRandomIDCode();
-        String date = BanSystemAPI.getDate();
-        bans.set("Ban." + player + ".Reason", reason);
-        bans.set("Ban." + player + ".ID", id);
-        bans.set("Ban." + player + ".Banner", banner);
-        bans.set("Ban." + player + ".Date", date);
-        bans.set("Ban." + player + ".Time", end);
-        bans.save();
-        bans.reload();
-        Player player1 = Server.getInstance().getPlayer(banner);
-        if (settings.isWaterdog() && player1.isOnline()) {
-            Ban ban = getBan(player);
-            ScriptCustomEventPacket customEventPacket = new ScriptCustomEventPacket();
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
-            try {
-                dataOutputStream.writeUTF("banplayer");
-                dataOutputStream.writeUTF(player);
-                dataOutputStream.writeUTF(ban.getReason());
-                dataOutputStream.writeUTF(ban.getBanID());
-                dataOutputStream.writeUTF(getRemainingTime(ban.getTime()));
-                customEventPacket.eventName = "bansystembridge:main";
-                customEventPacket.eventData = outputStream.toByteArray();
-                player1.dataPacket(customEventPacket);
-                return;
-            } catch (Exception e) {
-                e.printStackTrace();
+        CompletableFuture.runAsync(() -> {
+            long end = System.currentTimeMillis() + seconds * 1000L;
+            if (seconds == -1) end = -1L;
+            String id = BanSystemAPI.getRandomIDCode();
+            String date = BanSystemAPI.getDate();
+            bans.set("Ban." + player + ".Reason", reason);
+            bans.set("Ban." + player + ".ID", id);
+            bans.set("Ban." + player + ".Banner", banner);
+            bans.set("Ban." + player + ".Date", date);
+            bans.set("Ban." + player + ".Time", end);
+            bans.save();
+            bans.reload();
+            createBanlog(new Ban(player, reason, id, banner, date, end));
+            Player player1 = Server.getInstance().getPlayer(banner);
+            if (settings.isWaterdog() && player1.isOnline()) {
+                Ban ban = getBan(player);
+                ScriptCustomEventPacket customEventPacket = new ScriptCustomEventPacket();
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
+                try {
+                    dataOutputStream.writeUTF("banplayer");
+                    dataOutputStream.writeUTF(player);
+                    dataOutputStream.writeUTF(ban.getReason());
+                    dataOutputStream.writeUTF(ban.getBanID());
+                    dataOutputStream.writeUTF(getRemainingTime(ban.getTime()));
+                    customEventPacket.eventName = "bansystembridge:main";
+                    customEventPacket.eventData = outputStream.toByteArray();
+                    player1.dataPacket(customEventPacket);
+                    return;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
-        }
-        Player onlinePlayer = Server.getInstance().getPlayer(player);
-        if (onlinePlayer != null) {
-            Ban ban = getBan(player);
-            onlinePlayer.kick(Configuration.getAndReplaceNP("BanScreen", ban.getReason(), ban.getBanID(), getRemainingTime(ban.getTime())), false);
-        }
-        createBanlog(new Ban(player, reason, id, banner, date, end));
+            Player onlinePlayer = Server.getInstance().getPlayer(player);
+            if (onlinePlayer != null) {
+                Ban ban = getBan(player);
+                onlinePlayer.kick(Configuration.getAndReplaceNP("BanScreen", ban.getReason(), ban.getBanID(), getRemainingTime(ban.getTime())), false);
+            }
+        });
     }
 
     @Override
     public void mutePlayer(String player, String reason, String banner, int seconds) {
-        long end = System.currentTimeMillis() + seconds * 1000L;
-        if (seconds == -1) end = -1L;
-        String id = BanSystemAPI.getRandomIDCode();
-        String date = BanSystemAPI.getDate();
-        mutes.set("Mute." + player + ".Reason", reason);
-        mutes.set("Mute." + player + ".ID", id);
-        mutes.set("Mute." + player + ".Banner", banner);
-        mutes.set("Mute." + player + ".Date", date);
-        mutes.set("Mute." + player + ".Time", end);
-        mutes.save();
-        mutes.reload();
-        createMutelog(new Mute(player, reason, id, banner, date, end));
+        CompletableFuture.runAsync(() -> {
+            long end = System.currentTimeMillis() + seconds * 1000L;
+            if (seconds == -1) end = -1L;
+            String id = BanSystemAPI.getRandomIDCode();
+            String date = BanSystemAPI.getDate();
+            mutes.set("Mute." + player + ".Reason", reason);
+            mutes.set("Mute." + player + ".ID", id);
+            mutes.set("Mute." + player + ".Banner", banner);
+            mutes.set("Mute." + player + ".Date", date);
+            mutes.set("Mute." + player + ".Time", end);
+            mutes.save();
+            mutes.reload();
+            createMutelog(new Mute(player, reason, id, banner, date, end));
+        });
     }
 
     @Override
     public void warnPlayer(String player, String reason, String creator) {
-        String id = BanSystemAPI.getRandomIDCode();
-        String date = BanSystemAPI.getDate();
-        warns.set("Warn." + player + "." + id + ".Reason", reason);
-        warns.set("Warn." + player + "." + id + ".Creator", creator);
-        warns.set("Warn." + player + "." + id + ".Date", date);
-        warns.save();
-        warns.reload();
-        Player player1 = Server.getInstance().getPlayer(creator);
-        if (settings.isWaterdog() && player1.isOnline()) {
-            ScriptCustomEventPacket customEventPacket = new ScriptCustomEventPacket();
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
-            try {
-                dataOutputStream.writeUTF("warnplayer");
-                dataOutputStream.writeUTF(player);
-                dataOutputStream.writeUTF(reason);
-                dataOutputStream.writeUTF(creator);
-                customEventPacket.eventName = "bansystembridge:main";
-                customEventPacket.eventData = outputStream.toByteArray();
-                player1.dataPacket(customEventPacket);
-            } catch (Exception e) {
-                e.printStackTrace();
+        CompletableFuture.runAsync(() -> {
+            String id = BanSystemAPI.getRandomIDCode();
+            String date = BanSystemAPI.getDate();
+            warns.set("Warn." + player + "." + id + ".Reason", reason);
+            warns.set("Warn." + player + "." + id + ".Creator", creator);
+            warns.set("Warn." + player + "." + id + ".Date", date);
+            warns.save();
+            warns.reload();
+            Player player1 = Server.getInstance().getPlayer(creator);
+            if (settings.isWaterdog() && player1.isOnline()) {
+                ScriptCustomEventPacket customEventPacket = new ScriptCustomEventPacket();
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
+                try {
+                    dataOutputStream.writeUTF("warnplayer");
+                    dataOutputStream.writeUTF(player);
+                    dataOutputStream.writeUTF(reason);
+                    dataOutputStream.writeUTF(creator);
+                    customEventPacket.eventName = "bansystembridge:main";
+                    customEventPacket.eventData = outputStream.toByteArray();
+                    player1.dataPacket(customEventPacket);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
-        }
-        Player onlinePlayer = Server.getInstance().getPlayer(player);
-        if (onlinePlayer != null) onlinePlayer.kick(Configuration.getAndReplaceNP("WarnScreen", reason, creator), false);
+            Player onlinePlayer = Server.getInstance().getPlayer(player);
+            if (onlinePlayer != null) onlinePlayer.kick(Configuration.getAndReplaceNP("WarnScreen", reason, creator), false);
+        });
     }
 
     @Override
     public void unbanPlayer(String player) {
-        Map<String, Object> map = bans.getSection("Ban").getAllMap();
-        map.remove(player);
-        bans.set("Ban", map);
-        bans.save();
-        bans.reload();
+        CompletableFuture.runAsync(() -> {
+            Map<String, Object> map = bans.getSection("Ban").getAllMap();
+            map.remove(player);
+            bans.set("Ban", map);
+            bans.save();
+            bans.reload();
+        });
     }
 
     @Override
     public void unmutePlayer(String player) {
-        Map<String, Object> map = mutes.getSection("Mute").getAllMap();
-        map.remove(player);
-        mutes.set("Mute", map);
-        mutes.save();
-        mutes.reload();
+        CompletableFuture.runAsync(() -> {
+            Map<String, Object> map = mutes.getSection("Mute").getAllMap();
+            map.remove(player);
+            mutes.set("Mute", map);
+            mutes.save();
+            mutes.reload();
+        });
     }
 
     @Override
@@ -176,20 +189,24 @@ public class YamlProvider extends Provider {
 
     @Override
     public void createBanlog(Ban ban) {
-        banlog.set("Banlog." + ban.getPlayer() + "." + ban.getBanID() + ".Reason", ban.getReason());
-        banlog.set("Banlog." + ban.getPlayer() + "." + ban.getBanID() + ".Banner", ban.getBanner());
-        banlog.set("Banlog." + ban.getPlayer() + "." + ban.getBanID() + ".Date", ban.getDate());
-        banlog.save();
-        banlog.reload();
+        CompletableFuture.runAsync(() -> {
+            banlog.set("Banlog." + ban.getPlayer() + "." + ban.getBanID() + ".Reason", ban.getReason());
+            banlog.set("Banlog." + ban.getPlayer() + "." + ban.getBanID() + ".Banner", ban.getBanner());
+            banlog.set("Banlog." + ban.getPlayer() + "." + ban.getBanID() + ".Date", ban.getDate());
+            banlog.save();
+            banlog.reload();
+        });
     }
 
     @Override
     public void createMutelog(Mute mute) {
-        mutelog.set("Mutelog." + mute.getPlayer() + "." + mute.getMuteID() + ".Reason", mute.getReason());
-        mutelog.set("Mutelog." + mute.getPlayer() + "." + mute.getMuteID() + ".Muter", mute.getMuter());
-        mutelog.set("Mutelog." + mute.getPlayer() + "." + mute.getMuteID() + ".Date", mute.getDate());
-        mutelog.save();
-        mutelog.reload();
+        CompletableFuture.runAsync(() -> {
+            mutelog.set("Mutelog." + mute.getPlayer() + "." + mute.getMuteID() + ".Reason", mute.getReason());
+            mutelog.set("Mutelog." + mute.getPlayer() + "." + mute.getMuteID() + ".Muter", mute.getMuter());
+            mutelog.set("Mutelog." + mute.getPlayer() + "." + mute.getMuteID() + ".Date", mute.getDate());
+            mutelog.save();
+            mutelog.reload();
+        });
     }
 
     @Override
@@ -230,57 +247,71 @@ public class YamlProvider extends Provider {
 
     @Override
     public void clearBanlog(String player) {
-        Map<String, Object> map = banlog.getSection("Banlog").getAllMap();
-        map.remove(player);
-        banlog.set("Banlog", map);
-        banlog.save();
-        banlog.reload();
+        CompletableFuture.runAsync(() -> {
+            Map<String, Object> map = banlog.getSection("Banlog").getAllMap();
+            map.remove(player);
+            banlog.set("Banlog", map);
+            banlog.save();
+            banlog.reload();
+        });
     }
 
     @Override
     public void clearMutelog(String player) {
-        Map<String, Object> map = mutelog.getSection("Mutelog").getAllMap();
-        map.remove(player);
-        mutelog.set("Mutelog", map);
-        mutelog.save();
-        mutelog.reload();
+        CompletableFuture.runAsync(() -> {
+            Map<String, Object> map = mutelog.getSection("Mutelog").getAllMap();
+            map.remove(player);
+            mutelog.set("Mutelog", map);
+            mutelog.save();
+            mutelog.reload();
+        });
     }
 
     @Override
     public void clearWarns(String player) {
-        Map<String, Object> map = warns.getSection("Warn").getAllMap();
-        map.remove(player);
-        warns.set("Warn", map);
-        warns.save();
-        warns.reload();
+        CompletableFuture.runAsync(() -> {
+            Map<String, Object> map = warns.getSection("Warn").getAllMap();
+            map.remove(player);
+            warns.set("Warn", map);
+            warns.save();
+            warns.reload();
+        });
     }
 
     @Override
     public void setBanReason(String player, String reason) {
-        bans.set("Ban." + player + ".Reason", reason);
-        bans.save();
-        bans.reload();
+        CompletableFuture.runAsync(() -> {
+            bans.set("Ban." + player + ".Reason", reason);
+            bans.save();
+            bans.reload();
+        });
     }
 
     @Override
     public void setMuteReason(String player, String reason) {
-        mutes.set("Mute." + player + ".Reason", reason);
-        mutes.save();
-        mutes.reload();
+        CompletableFuture.runAsync(() -> {
+            mutes.set("Mute." + player + ".Reason", reason);
+            mutes.save();
+            mutes.reload();
+        });
     }
 
     @Override
     public void setBanTime(String player, long time) {
-        bans.set("Ban." + player + ".Time", time);
-        bans.save();
-        bans.reload();
+        CompletableFuture.runAsync(() -> {
+            bans.set("Ban." + player + ".Time", time);
+            bans.save();
+            bans.reload();
+        });
     }
 
     @Override
     public void setMuteTime(String player, long time) {
-        mutes.set("Mute." + player + ".Reason", time);
-        mutes.save();
-        mutes.reload();
+        CompletableFuture.runAsync(() -> {
+            mutes.set("Mute." + player + ".Time", time);
+            mutes.save();
+            mutes.reload();
+        });
     }
 
     @Override

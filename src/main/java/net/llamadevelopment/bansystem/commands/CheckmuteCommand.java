@@ -9,6 +9,8 @@ import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
 import net.llamadevelopment.bansystem.components.data.Mute;
 import net.llamadevelopment.bansystem.components.managers.database.Provider;
 
+import java.util.concurrent.CompletableFuture;
+
 public class CheckmuteCommand extends Command {
 
     public CheckmuteCommand(String name) {
@@ -25,15 +27,17 @@ public class CheckmuteCommand extends Command {
         if (sender.hasPermission(getPermission())) {
             if (args.length == 1) {
                 String player = args[0];
-                if (api.playerIsMuted(player)) {
-                    Mute mute = api.getMute(player);
-                    sender.sendMessage(Configuration.getAndReplace("CheckmuteInfo", player));
-                    sender.sendMessage(Configuration.getAndReplace("CheckmuteReason", mute.getReason()));
-                    sender.sendMessage(Configuration.getAndReplace("CheckmuteID", mute.getMuteID()));
-                    sender.sendMessage(Configuration.getAndReplace("CheckmuteMuter", mute.getMuter()));
-                    sender.sendMessage(Configuration.getAndReplace("CheckmuteDate", mute.getDate()));
-                    sender.sendMessage(Configuration.getAndReplace("CheckmuteTime", api.getRemainingTime(mute.getTime())));
-                } else sender.sendMessage(Configuration.getAndReplace("PlayerNotMuted"));
+                CompletableFuture.runAsync(() -> {
+                    if (api.playerIsMuted(player)) {
+                        Mute mute = api.getMute(player);
+                        sender.sendMessage(Configuration.getAndReplace("CheckmuteInfo", player));
+                        sender.sendMessage(Configuration.getAndReplace("CheckmuteReason", mute.getReason()));
+                        sender.sendMessage(Configuration.getAndReplace("CheckmuteID", mute.getMuteID()));
+                        sender.sendMessage(Configuration.getAndReplace("CheckmuteMuter", mute.getMuter()));
+                        sender.sendMessage(Configuration.getAndReplace("CheckmuteDate", mute.getDate()));
+                        sender.sendMessage(Configuration.getAndReplace("CheckmuteTime", api.getRemainingTime(mute.getTime())));
+                    } else sender.sendMessage(Configuration.getAndReplace("PlayerNotMuted"));
+                });
             } else sender.sendMessage(Configuration.getAndReplace("CheckmuteCommandUsage", getName()));
         } else sender.sendMessage(Configuration.getAndReplace("NoPermission"));
         return false;
