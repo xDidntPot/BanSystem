@@ -49,7 +49,7 @@ WarnSystem:
   BanSeconds: -1
 
 Settings:
-  JoinDelay: 60
+  JoinDelay: 30
   Waterdog: false
   ConfigVersion: 2.0
 
