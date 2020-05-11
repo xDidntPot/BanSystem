@@ -6,8 +6,6 @@ import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.data.CommandParamType;
 import cn.nukkit.command.data.CommandParameter;
-import cn.nukkit.scheduler.AsyncTask;
-import net.llamadevelopment.bansystem.BanSystem;
 import net.llamadevelopment.bansystem.Configuration;
 import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
 import net.llamadevelopment.bansystem.components.api.SystemSettings;
@@ -20,7 +18,7 @@ public class TempmuteCommand extends Command {
         super(name, "Mute a player temporary.");
         commandParameters.put("default", new CommandParameter[]{
                 new CommandParameter("player", CommandParamType.TARGET, false),
-                new CommandParameter("timeType", false, new String[] {"days", "hours"}),
+                new CommandParameter("timeType", false, new String[]{"days", "hours"}),
                 new CommandParameter("time", CommandParamType.INT, false),
                 new CommandParameter("reason", CommandParamType.TEXT, false)
         });
@@ -49,18 +47,13 @@ public class TempmuteCommand extends Command {
                         }
                         String finalReason = reason;
                         int finalSeconds = seconds;
-                        Server.getInstance().getScheduler().scheduleAsyncTask(BanSystem.getInstance(), new AsyncTask() {
-                            @Override
-                            public void onRun() {
-                                api.mutePlayer(player, finalReason, sender.getName(), finalSeconds);
-                                sender.sendMessage(Configuration.getAndReplace("PlayerMuted", player));
-                                Player onlinePlayer = Server.getInstance().getPlayer(player);
-                                if (onlinePlayer != null) {
-                                    Mute mute = api.getMute(player);
-                                    settings.cachedMute.put(player, mute);
-                                }
-                            }
-                        });
+                        api.mutePlayer(player, finalReason, sender.getName(), finalSeconds);
+                        sender.sendMessage(Configuration.getAndReplace("PlayerMuted", player));
+                        Player onlinePlayer = Server.getInstance().getPlayer(player);
+                        if (onlinePlayer != null) {
+                            Mute mute = api.getMute(player);
+                            settings.cachedMute.put(player, mute);
+                        }
                     } catch (NumberFormatException exception) {
                         sender.sendMessage(Configuration.getAndReplace("InvalidNumber"));
                     }

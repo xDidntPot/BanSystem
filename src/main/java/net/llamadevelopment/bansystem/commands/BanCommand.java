@@ -1,12 +1,9 @@
 package net.llamadevelopment.bansystem.commands;
 
-import cn.nukkit.Server;
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.data.CommandParamType;
 import cn.nukkit.command.data.CommandParameter;
-import cn.nukkit.scheduler.AsyncTask;
-import net.llamadevelopment.bansystem.BanSystem;
 import net.llamadevelopment.bansystem.Configuration;
 import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
 import net.llamadevelopment.bansystem.components.api.SystemSettings;

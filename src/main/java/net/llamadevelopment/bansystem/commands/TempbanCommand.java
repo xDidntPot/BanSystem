@@ -1,12 +1,9 @@
 package net.llamadevelopment.bansystem.commands;
 
-import cn.nukkit.Server;
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.data.CommandParamType;
 import cn.nukkit.command.data.CommandParameter;
-import cn.nukkit.scheduler.AsyncTask;
-import net.llamadevelopment.bansystem.BanSystem;
 import net.llamadevelopment.bansystem.Configuration;
 import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
 import net.llamadevelopment.bansystem.components.api.SystemSettings;
@@ -18,7 +15,7 @@ public class TempbanCommand extends Command {
         super(name, "Ban a player temporary.");
         commandParameters.put("default", new CommandParameter[]{
                 new CommandParameter("player", CommandParamType.TARGET, false),
-                new CommandParameter("timeType", false, new String[] {"days", "hours"}),
+                new CommandParameter("timeType", false, new String[]{"days", "hours"}),
                 new CommandParameter("time", CommandParamType.INT, false),
                 new CommandParameter("reason", CommandParamType.TEXT, false)
         });
@@ -47,13 +44,8 @@ public class TempbanCommand extends Command {
                         }
                         String finalReason = reason;
                         int finalSeconds = seconds;
-                        Server.getInstance().getScheduler().scheduleAsyncTask(BanSystem.getInstance(), new AsyncTask() {
-                            @Override
-                            public void onRun() {
-                                api.banPlayer(player, finalReason, sender.getName(), finalSeconds);
-                                sender.sendMessage(Configuration.getAndReplace("PlayerBanned", player));
-                            }
-                        });
+                        api.banPlayer(player, finalReason, sender.getName(), finalSeconds);
+                        sender.sendMessage(Configuration.getAndReplace("PlayerBanned", player));
                     } catch (NumberFormatException exception) {
                         sender.sendMessage(Configuration.getAndReplace("InvalidNumber"));
                     }

@@ -6,8 +6,6 @@ import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.data.CommandParamType;
 import cn.nukkit.command.data.CommandParameter;
-import cn.nukkit.scheduler.AsyncTask;
-import net.llamadevelopment.bansystem.BanSystem;
 import net.llamadevelopment.bansystem.Configuration;
 import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
 import net.llamadevelopment.bansystem.components.api.SystemSettings;
@@ -42,19 +40,14 @@ public class MuteCommand extends Command {
                     sender.sendMessage(Configuration.getAndReplace("ReasonNotFound"));
                     return true;
                 }
-                Server.getInstance().getScheduler().scheduleAsyncTask(BanSystem.getInstance(), new AsyncTask() {
-                    @Override
-                    public void onRun() {
-                        MuteReason muteReason = settings.muteReasons.get(reason);
-                        api.mutePlayer(player, muteReason.getReason(), sender.getName(), muteReason.getSeconds());
-                        sender.sendMessage(Configuration.getAndReplace("PlayerMuted", player));
-                        Player onlinePlayer = Server.getInstance().getPlayer(player);
-                        if (onlinePlayer != null) {
-                            Mute mute = api.getMute(player);
-                            settings.cachedMute.put(player, mute);
-                        }
-                    }
-                });
+                MuteReason muteReason = settings.muteReasons.get(reason);
+                api.mutePlayer(player, muteReason.getReason(), sender.getName(), muteReason.getSeconds());
+                sender.sendMessage(Configuration.getAndReplace("PlayerMuted", player));
+                Player onlinePlayer = Server.getInstance().getPlayer(player);
+                if (onlinePlayer != null) {
+                    Mute mute = api.getMute(player);
+                    settings.cachedMute.put(player, mute);
+                }
             } else {
                 settings.muteReasons.values().forEach(reason -> sender.sendMessage(Configuration.getAndReplace("ReasonFormat", reason.getId(), reason.getReason())));
                 sender.sendMessage(Configuration.getAndReplace("MuteCommandUsage", getName()));
