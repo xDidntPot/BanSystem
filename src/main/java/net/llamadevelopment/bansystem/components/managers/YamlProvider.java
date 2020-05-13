@@ -320,7 +320,7 @@ public class YamlProvider extends Provider {
                 minute = Configuration.getAndReplaceNP("Minute");
             }
 
-            if (minutes > 1 && days == 0 && hours == 0) {
+            if (minutes < 1 && days == 0 && hours == 0) {
                 return Configuration.getAndReplaceNP("Seconds");
             } else if (hours == 0 && days == 0) {
                 return minutes + " " + minute;
