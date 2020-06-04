@@ -31,9 +31,11 @@ public class EventListener implements Listener {
             if (api.playerIsBanned(player.getName())) {
                 instance.getServer().getScheduler().scheduleDelayedTask(instance, () -> {
                     Ban ban = api.getBan(player.getName());
-                    if (ban.getTime() < System.currentTimeMillis()) {
-                        api.unbanPlayer(player.getName());
-                        return;
+                    if (ban.getTime() != -1) {
+                        if (ban.getTime() < System.currentTimeMillis()) {
+                            api.unbanPlayer(player.getName());
+                            return;
+                        }
                     }
                     if (settings.isWaterdog()) {
                         ScriptCustomEventPacket customEventPacket = new ScriptCustomEventPacket();
