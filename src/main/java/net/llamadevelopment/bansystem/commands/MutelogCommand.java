@@ -4,7 +4,7 @@ import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.data.CommandParamType;
 import cn.nukkit.command.data.CommandParameter;
-import net.llamadevelopment.bansystem.Configuration;
+import net.llamadevelopment.bansystem.components.tools.Language;
 import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
 import net.llamadevelopment.bansystem.components.managers.database.Provider;
 
@@ -29,20 +29,20 @@ public class MutelogCommand extends Command {
                 CompletableFuture.runAsync(() -> {
                     int i = api.getMutelog(player).size();
                     if (i == 0) {
-                        sender.sendMessage(Configuration.getAndReplace("NoDataFound"));
+                        sender.sendMessage(Language.get("NoDataFound"));
                         return;
                     }
-                    sender.sendMessage(Configuration.getAndReplace("MutelogInfo", player, i));
+                    sender.sendMessage(Language.get("MutelogInfo", player, i));
                     api.getMutelog(player).forEach(mute -> {
-                        sender.sendMessage(Configuration.getAndReplace("MutelogPlaceholder"));
-                        sender.sendMessage(Configuration.getAndReplace("MutelogReason", mute.getReason()));
-                        sender.sendMessage(Configuration.getAndReplace("MutelogID", mute.getMuteID()));
-                        sender.sendMessage(Configuration.getAndReplace("MutelogMuter", mute.getMuter()));
-                        sender.sendMessage(Configuration.getAndReplace("MutelogDate", mute.getDate()));
+                        sender.sendMessage(Language.get("MutelogPlaceholder"));
+                        sender.sendMessage(Language.get("MutelogReason", mute.getReason()));
+                        sender.sendMessage(Language.get("MutelogID", mute.getMuteID()));
+                        sender.sendMessage(Language.get("MutelogMuter", mute.getMuter()));
+                        sender.sendMessage(Language.get("MutelogDate", mute.getDate()));
                     });
                 });
-            } else sender.sendMessage(Configuration.getAndReplace("MutelogCommandUsage", getName()));
-        } else sender.sendMessage(Configuration.getAndReplace("NoPermission"));
+            } else sender.sendMessage(Language.get("MutelogCommandUsage", getName()));
+        } else sender.sendMessage(Language.get("NoPermission"));
         return false;
     }
 }

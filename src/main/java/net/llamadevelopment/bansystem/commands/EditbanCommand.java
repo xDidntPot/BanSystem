@@ -4,7 +4,7 @@ import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.data.CommandParamType;
 import cn.nukkit.command.data.CommandParameter;
-import net.llamadevelopment.bansystem.Configuration;
+import net.llamadevelopment.bansystem.components.tools.Language;
 import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
 import net.llamadevelopment.bansystem.components.managers.database.Provider;
 
@@ -33,8 +33,8 @@ public class EditbanCommand extends Command {
                             String reason = "";
                             for (int i = 2; i < args.length; ++i) reason = reason + args[i] + " ";
                             api.setBanReason(player, reason);
-                            sender.sendMessage(Configuration.getAndReplace("ReasonSet"));
-                        } else sender.sendMessage(Configuration.getAndReplace("PlayerIsNotBanned"));
+                            sender.sendMessage(Language.get("ReasonSet"));
+                        } else sender.sendMessage(Language.get("PlayerIsNotBanned"));
                     });
                 } else if (args.length == 4 && args[1].equalsIgnoreCase("time")) {
                     CompletableFuture.runAsync(() -> {
@@ -46,27 +46,27 @@ public class EditbanCommand extends Command {
                                 if (type.equalsIgnoreCase("days")) seconds = time * 86400;
                                 else if (type.equalsIgnoreCase("hours")) seconds = time * 3600;
                                 else {
-                                    sender.sendMessage(Configuration.getAndReplace("EditbanCommandUsage1", getName()));
-                                    sender.sendMessage(Configuration.getAndReplace("EditbanCommandUsage2", getName()));
+                                    sender.sendMessage(Language.get("EditbanCommandUsage1", getName()));
+                                    sender.sendMessage(Language.get("EditbanCommandUsage2", getName()));
                                     return;
                                 }
                                 long end = System.currentTimeMillis() + seconds * 1000L;
                                 api.setBanTime(player, end);
-                                sender.sendMessage(Configuration.getAndReplace("TimeSet"));
+                                sender.sendMessage(Language.get("TimeSet"));
                             } catch (NumberFormatException exception) {
-                                sender.sendMessage(Configuration.getAndReplace("InvalidNumber"));
+                                sender.sendMessage(Language.get("InvalidNumber"));
                             }
-                        } else sender.sendMessage(Configuration.getAndReplace("PlayerIsNotBanned"));
+                        } else sender.sendMessage(Language.get("PlayerIsNotBanned"));
                     });
                 } else {
-                    sender.sendMessage(Configuration.getAndReplace("EditbanCommandUsage1", getName()));
-                    sender.sendMessage(Configuration.getAndReplace("EditbanCommandUsage2", getName()));
+                    sender.sendMessage(Language.get("EditbanCommandUsage1", getName()));
+                    sender.sendMessage(Language.get("EditbanCommandUsage2", getName()));
                 }
             } else {
-                sender.sendMessage(Configuration.getAndReplace("EditbanCommandUsage1", getName()));
-                sender.sendMessage(Configuration.getAndReplace("EditbanCommandUsage2", getName()));
+                sender.sendMessage(Language.get("EditbanCommandUsage1", getName()));
+                sender.sendMessage(Language.get("EditbanCommandUsage2", getName()));
             }
-        } else sender.sendMessage(Configuration.getAndReplace("NoPermission"));
+        } else sender.sendMessage(Language.get("NoPermission"));
         return false;
     }
 }

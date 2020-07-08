@@ -6,7 +6,7 @@ import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.data.CommandParamType;
 import cn.nukkit.command.data.CommandParameter;
-import net.llamadevelopment.bansystem.Configuration;
+import net.llamadevelopment.bansystem.components.tools.Language;
 import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
 import net.llamadevelopment.bansystem.components.api.SystemSettings;
 import net.llamadevelopment.bansystem.components.data.Mute;
@@ -33,26 +33,26 @@ public class MuteCommand extends Command {
                 String player = args[0];
                 String reason = args[1];
                 if (api.playerIsMuted(player)) {
-                    sender.sendMessage(Configuration.getAndReplace("PlayerIsMuted"));
+                    sender.sendMessage(Language.get("PlayerIsMuted"));
                     return true;
                 }
                 if (settings.muteReasons.get(reason) == null) {
-                    sender.sendMessage(Configuration.getAndReplace("ReasonNotFound"));
+                    sender.sendMessage(Language.get("ReasonNotFound"));
                     return true;
                 }
                 MuteReason muteReason = settings.muteReasons.get(reason);
                 api.mutePlayer(player, muteReason.getReason(), sender.getName(), muteReason.getSeconds());
-                sender.sendMessage(Configuration.getAndReplace("PlayerMuted", player));
+                sender.sendMessage(Language.get("PlayerMuted", player));
                 Player onlinePlayer = Server.getInstance().getPlayer(player);
                 if (onlinePlayer != null) {
                     Mute mute = api.getMute(player);
                     settings.cachedMute.put(player, mute);
                 }
             } else {
-                settings.muteReasons.values().forEach(reason -> sender.sendMessage(Configuration.getAndReplace("ReasonFormat", reason.getId(), reason.getReason())));
-                sender.sendMessage(Configuration.getAndReplace("MuteCommandUsage", getName()));
+                settings.muteReasons.values().forEach(reason -> sender.sendMessage(Language.get("ReasonFormat", reason.getId(), reason.getReason())));
+                sender.sendMessage(Language.get("MuteCommandUsage", getName()));
             }
-        } else sender.sendMessage(Configuration.getAndReplace("NoPermission"));
+        } else sender.sendMessage(Language.get("NoPermission"));
         return false;
     }
 }

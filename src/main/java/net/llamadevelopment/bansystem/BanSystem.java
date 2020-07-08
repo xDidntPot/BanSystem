@@ -12,6 +12,7 @@ import net.llamadevelopment.bansystem.components.managers.MongodbProvider;
 import net.llamadevelopment.bansystem.components.managers.MysqlProvider;
 import net.llamadevelopment.bansystem.components.managers.YamlProvider;
 import net.llamadevelopment.bansystem.components.managers.database.Provider;
+import net.llamadevelopment.bansystem.components.tools.Language;
 import net.llamadevelopment.bansystem.listeners.EventListener;
 
 import java.util.HashMap;
@@ -26,23 +27,28 @@ public class BanSystem extends PluginBase {
     @Override
     public void onEnable() {
         instance = this;
-        saveDefaultConfig();
-        BanSystemAPI api = new BanSystemAPI();
-        api.initBanSystemAPI();
-        registerProvider(new MongodbProvider());
-        registerProvider(new MysqlProvider());
-        registerProvider(new YamlProvider());
-        if (!providers.containsKey(getConfig().getString("Provider"))) {
-            getLogger().error("§4Please specify a valid provider: Yaml, MySql, MongoDB");
-            return;
+        try {
+            saveDefaultConfig();
+            BanSystemAPI api = new BanSystemAPI();
+            api.initBanSystemAPI();
+            registerProvider(new MongodbProvider());
+            registerProvider(new MysqlProvider());
+            registerProvider(new YamlProvider());
+            if (!providers.containsKey(getConfig().getString("Provider"))) {
+                getLogger().error("§4Please specify a valid provider: Yaml, MySql, MongoDB");
+                return;
+            }
+            provider = providers.get(getConfig().getString("Provider"));
+            provider.connect(this);
+            getLogger().info("§aSuccessfully loaded " + provider.getProvider() + " provider.");
+            api.setProvider(provider);
+            Language.init();
+            loadPlugin();
+            getLogger().info("§aBanSystem successfully started.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            getLogger().error("§4Failed to load BanSystem.");
         }
-        provider = providers.get(getConfig().getString("Provider"));
-        provider.connect(this);
-        getLogger().info("§aSuccessfully loaded " + provider.getProvider() + " provider.");
-        api.setProvider(provider);
-        Configuration.initConfiguration();
-        loadPlugin();
-        getLogger().info("§aPlugin successfully started.");
     }
 
     private void loadReasons() {

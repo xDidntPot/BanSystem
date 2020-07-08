@@ -4,7 +4,7 @@ import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.data.CommandParamType;
 import cn.nukkit.command.data.CommandParameter;
-import net.llamadevelopment.bansystem.Configuration;
+import net.llamadevelopment.bansystem.components.tools.Language;
 import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
 import net.llamadevelopment.bansystem.components.data.Ban;
 import net.llamadevelopment.bansystem.components.managers.database.Provider;
@@ -30,16 +30,16 @@ public class CheckbanCommand extends Command {
                 CompletableFuture.runAsync(() -> {
                     if (api.playerIsBanned(player)) {
                         Ban ban = api.getBan(player);
-                        sender.sendMessage(Configuration.getAndReplace("CheckbanInfo", player));
-                        sender.sendMessage(Configuration.getAndReplace("CheckbanReason", ban.getReason()));
-                        sender.sendMessage(Configuration.getAndReplace("CheckbanID", ban.getBanID()));
-                        sender.sendMessage(Configuration.getAndReplace("CheckbanBanner", ban.getBanner()));
-                        sender.sendMessage(Configuration.getAndReplace("CheckbanDate", ban.getDate()));
-                        sender.sendMessage(Configuration.getAndReplace("CheckbanTime", api.getRemainingTime(ban.getTime())));
-                    } else sender.sendMessage(Configuration.getAndReplace("PlayerNotBanned"));
+                        sender.sendMessage(Language.get("CheckbanInfo", player));
+                        sender.sendMessage(Language.get("CheckbanReason", ban.getReason()));
+                        sender.sendMessage(Language.get("CheckbanID", ban.getBanID()));
+                        sender.sendMessage(Language.get("CheckbanBanner", ban.getBanner()));
+                        sender.sendMessage(Language.get("CheckbanDate", ban.getDate()));
+                        sender.sendMessage(Language.get("CheckbanTime", api.getRemainingTime(ban.getTime())));
+                    } else sender.sendMessage(Language.get("PlayerNotBanned"));
                 });
-            } else sender.sendMessage(Configuration.getAndReplace("CheckbanCommandUsage", getName()));
-        } else sender.sendMessage(Configuration.getAndReplace("NoPermission"));
+            } else sender.sendMessage(Language.get("CheckbanCommandUsage", getName()));
+        } else sender.sendMessage(Language.get("NoPermission"));
         return false;
     }
 }

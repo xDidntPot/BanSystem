@@ -6,7 +6,7 @@ import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.data.CommandParamType;
 import cn.nukkit.command.data.CommandParameter;
-import net.llamadevelopment.bansystem.Configuration;
+import net.llamadevelopment.bansystem.components.tools.Language;
 import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
 import net.llamadevelopment.bansystem.components.api.SystemSettings;
 import net.llamadevelopment.bansystem.components.managers.database.Provider;
@@ -42,8 +42,8 @@ public class EditmuteCommand extends Command {
                                 settings.cachedMute.remove(player);
                                 settings.cachedMute.put(player, api.getMute(player));
                             }
-                            sender.sendMessage(Configuration.getAndReplace("ReasonSet"));
-                        } else sender.sendMessage(Configuration.getAndReplace("PlayerIsNotMuted"));
+                            sender.sendMessage(Language.get("ReasonSet"));
+                        } else sender.sendMessage(Language.get("PlayerIsNotMuted"));
                     });
                 } else if (args.length == 4 && args[1].equalsIgnoreCase("time")) {
                     CompletableFuture.runAsync(() -> {
@@ -55,8 +55,8 @@ public class EditmuteCommand extends Command {
                                 if (type.equalsIgnoreCase("days")) seconds = time * 86400;
                                 else if (type.equalsIgnoreCase("hours")) seconds = time * 3600;
                                 else {
-                                    sender.sendMessage(Configuration.getAndReplace("EditmuteCommandUsage1", getName()));
-                                    sender.sendMessage(Configuration.getAndReplace("EditmuteCommandUsage2", getName()));
+                                    sender.sendMessage(Language.get("EditmuteCommandUsage1", getName()));
+                                    sender.sendMessage(Language.get("EditmuteCommandUsage2", getName()));
                                     return;
                                 }
                                 long end = System.currentTimeMillis() + seconds * 1000L;
@@ -66,21 +66,21 @@ public class EditmuteCommand extends Command {
                                     settings.cachedMute.remove(player);
                                     settings.cachedMute.put(player, api.getMute(player));
                                 }
-                                sender.sendMessage(Configuration.getAndReplace("TimeSet"));
+                                sender.sendMessage(Language.get("TimeSet"));
                             } catch (NumberFormatException exception) {
-                                sender.sendMessage(Configuration.getAndReplace("InvalidNumber"));
+                                sender.sendMessage(Language.get("InvalidNumber"));
                             }
-                        } else sender.sendMessage(Configuration.getAndReplace("PlayerIsNotMuted"));
+                        } else sender.sendMessage(Language.get("PlayerIsNotMuted"));
                     });
                 } else {
-                    sender.sendMessage(Configuration.getAndReplace("EditmuteCommandUsage1", getName()));
-                    sender.sendMessage(Configuration.getAndReplace("EditmuteCommandUsage2", getName()));
+                    sender.sendMessage(Language.get("EditmuteCommandUsage1", getName()));
+                    sender.sendMessage(Language.get("EditmuteCommandUsage2", getName()));
                 }
             } else {
-                sender.sendMessage(Configuration.getAndReplace("EditmuteCommandUsage1", getName()));
-                sender.sendMessage(Configuration.getAndReplace("EditmuteCommandUsage2", getName()));
+                sender.sendMessage(Language.get("EditmuteCommandUsage1", getName()));
+                sender.sendMessage(Language.get("EditmuteCommandUsage2", getName()));
             }
-        } else sender.sendMessage(Configuration.getAndReplace("NoPermission"));
+        } else sender.sendMessage(Language.get("NoPermission"));
         return false;
     }
 }

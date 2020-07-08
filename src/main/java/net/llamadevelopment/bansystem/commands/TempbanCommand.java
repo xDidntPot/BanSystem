@@ -4,7 +4,7 @@ import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.data.CommandParamType;
 import cn.nukkit.command.data.CommandParameter;
-import net.llamadevelopment.bansystem.Configuration;
+import net.llamadevelopment.bansystem.components.tools.Language;
 import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
 import net.llamadevelopment.bansystem.components.api.SystemSettings;
 import net.llamadevelopment.bansystem.components.managers.database.Provider;
@@ -39,19 +39,19 @@ public class TempbanCommand extends Command {
                         if (timeString.equalsIgnoreCase("days")) seconds = time * 86400;
                         if (timeString.equalsIgnoreCase("hours")) seconds = time * 3600;
                         if (api.playerIsBanned(player)) {
-                            sender.sendMessage(Configuration.getAndReplace("PlayerIsBanned"));
+                            sender.sendMessage(Language.get("PlayerIsBanned"));
                             return true;
                         }
                         String finalReason = reason;
                         int finalSeconds = seconds;
                         api.banPlayer(player, finalReason, sender.getName(), finalSeconds);
-                        sender.sendMessage(Configuration.getAndReplace("PlayerBanned", player));
+                        sender.sendMessage(Language.get("PlayerBanned", player));
                     } catch (NumberFormatException exception) {
-                        sender.sendMessage(Configuration.getAndReplace("InvalidNumber"));
+                        sender.sendMessage(Language.get("InvalidNumber"));
                     }
-                } else sender.sendMessage(Configuration.getAndReplace("TempbanCommandUsage", getName()));
-            } else sender.sendMessage(Configuration.getAndReplace("TempbanCommandUsage", getName()));
-        } else sender.sendMessage(Configuration.getAndReplace("NoPermission"));
+                } else sender.sendMessage(Language.get("TempbanCommandUsage", getName()));
+            } else sender.sendMessage(Language.get("TempbanCommandUsage", getName()));
+        } else sender.sendMessage(Language.get("NoPermission"));
         return false;
     }
 }

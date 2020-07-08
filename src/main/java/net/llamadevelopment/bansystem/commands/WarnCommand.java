@@ -6,7 +6,7 @@ import cn.nukkit.command.data.CommandParamType;
 import cn.nukkit.command.data.CommandParameter;
 import cn.nukkit.utils.Config;
 import net.llamadevelopment.bansystem.BanSystem;
-import net.llamadevelopment.bansystem.Configuration;
+import net.llamadevelopment.bansystem.components.tools.Language;
 import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
 import net.llamadevelopment.bansystem.components.managers.database.Provider;
 
@@ -30,7 +30,7 @@ public class WarnCommand extends Command {
                 String reason = "";
                 for (int i = 1; i < args.length; ++i) reason = reason + args[i] + " ";
                 api.warnPlayer(player, reason, sender.getName());
-                sender.sendMessage(Configuration.getAndReplace("PlayerWarned", player));
+                sender.sendMessage(Language.get("PlayerWarned", player));
                 int i = api.getWarnings(player).size();
                 Config c = BanSystem.getInstance().getConfig();
                 if (c.getBoolean("WarnSystem.EnableBan")) {
@@ -38,8 +38,8 @@ public class WarnCommand extends Command {
                         api.banPlayer(player, c.getString("WarnSystem.BanReason"), "System", c.getInt("WarnSystem.BanSeconds"));
                     }
                 }
-            } else sender.sendMessage(Configuration.getAndReplace("WarnCommandUsage", getName()));
-        } else sender.sendMessage(Configuration.getAndReplace("NoPermission"));
+            } else sender.sendMessage(Language.get("WarnCommandUsage", getName()));
+        } else sender.sendMessage(Language.get("NoPermission"));
         return false;
     }
 }

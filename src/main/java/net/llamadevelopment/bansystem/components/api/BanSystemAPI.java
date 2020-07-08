@@ -1,5 +1,7 @@
 package net.llamadevelopment.bansystem.components.api;
 
+import lombok.Getter;
+import lombok.Setter;
 import net.llamadevelopment.bansystem.BanSystem;
 import net.llamadevelopment.bansystem.components.managers.database.Provider;
 
@@ -11,23 +13,14 @@ import java.util.Random;
 public class BanSystemAPI {
 
     private final BanSystem banSystem = BanSystem.getInstance();
+
+    @Getter @Setter
     private static Provider provider;
+    @Getter
     private static SystemSettings systemSettings;
 
     public void initBanSystemAPI() {
         systemSettings = new SystemSettings(banSystem.getDescription().getVersion(), banSystem.getConfig().getInt("Settings.JoinDelay"), banSystem.getConfig().getBoolean("Settings.Waterdog"));
-    }
-
-    public void setProvider(Provider provider) {
-        BanSystemAPI.provider = provider;
-    }
-
-    public static Provider getProvider() {
-        return provider;
-    }
-
-    public static SystemSettings getSystemSettings() {
-        return systemSettings;
     }
 
     public static String getRandomIDCode() {

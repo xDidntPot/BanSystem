@@ -4,7 +4,7 @@ import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.data.CommandParamType;
 import cn.nukkit.command.data.CommandParameter;
-import net.llamadevelopment.bansystem.Configuration;
+import net.llamadevelopment.bansystem.components.tools.Language;
 import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
 import net.llamadevelopment.bansystem.components.managers.database.Provider;
 
@@ -29,20 +29,20 @@ public class WarnlogCommand extends Command {
                 CompletableFuture.runAsync(() -> {
                     int i = api.getWarnings(player).size();
                     if (i == 0) {
-                        sender.sendMessage(Configuration.getAndReplace("NoDataFound"));
+                        sender.sendMessage(Language.get("NoDataFound"));
                         return;
                     }
-                    sender.sendMessage(Configuration.getAndReplace("WarnlogInfo", player, i));
+                    sender.sendMessage(Language.get("WarnlogInfo", player, i));
                     api.getWarnings(player).forEach(warn -> {
-                        sender.sendMessage(Configuration.getAndReplace("WarnlogPlaceholder"));
-                        sender.sendMessage(Configuration.getAndReplace("WarnlogReason", warn.getReason()));
-                        sender.sendMessage(Configuration.getAndReplace("WarnlogID", warn.getWarnID()));
-                        sender.sendMessage(Configuration.getAndReplace("WarnlogCreator", warn.getCreator()));
-                        sender.sendMessage(Configuration.getAndReplace("WarnlogDate", warn.getDate()));
+                        sender.sendMessage(Language.get("WarnlogPlaceholder"));
+                        sender.sendMessage(Language.get("WarnlogReason", warn.getReason()));
+                        sender.sendMessage(Language.get("WarnlogID", warn.getWarnID()));
+                        sender.sendMessage(Language.get("WarnlogCreator", warn.getCreator()));
+                        sender.sendMessage(Language.get("WarnlogDate", warn.getDate()));
                     });
                 });
-            } else sender.sendMessage(Configuration.getAndReplace("WarnlogCommandUsage", getName()));
-        } else sender.sendMessage(Configuration.getAndReplace("NoPermission"));
+            } else sender.sendMessage(Language.get("WarnlogCommandUsage", getName()));
+        } else sender.sendMessage(Language.get("NoPermission"));
         return false;
     }
 }

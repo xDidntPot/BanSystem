@@ -6,7 +6,7 @@ import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.data.CommandParamType;
 import cn.nukkit.command.data.CommandParameter;
-import net.llamadevelopment.bansystem.Configuration;
+import net.llamadevelopment.bansystem.components.tools.Language;
 import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
 import net.llamadevelopment.bansystem.components.api.SystemSettings;
 import net.llamadevelopment.bansystem.components.data.Mute;
@@ -42,24 +42,24 @@ public class TempmuteCommand extends Command {
                         if (timeString.equalsIgnoreCase("days")) seconds = time * 86400;
                         if (timeString.equalsIgnoreCase("hours")) seconds = time * 3600;
                         if (api.playerIsMuted(player)) {
-                            sender.sendMessage(Configuration.getAndReplace("PlayerIsMuted"));
+                            sender.sendMessage(Language.get("PlayerIsMuted"));
                             return true;
                         }
                         String finalReason = reason;
                         int finalSeconds = seconds;
                         api.mutePlayer(player, finalReason, sender.getName(), finalSeconds);
-                        sender.sendMessage(Configuration.getAndReplace("PlayerMuted", player));
+                        sender.sendMessage(Language.get("PlayerMuted", player));
                         Player onlinePlayer = Server.getInstance().getPlayer(player);
                         if (onlinePlayer != null) {
                             Mute mute = api.getMute(player);
                             settings.cachedMute.put(player, mute);
                         }
                     } catch (NumberFormatException exception) {
-                        sender.sendMessage(Configuration.getAndReplace("InvalidNumber"));
+                        sender.sendMessage(Language.get("InvalidNumber"));
                     }
-                } else sender.sendMessage(Configuration.getAndReplace("TempmuteCommandUsage", getName()));
-            } else sender.sendMessage(Configuration.getAndReplace("TempmuteCommandUsage", getName()));
-        } else sender.sendMessage(Configuration.getAndReplace("NoPermission"));
+                } else sender.sendMessage(Language.get("TempmuteCommandUsage", getName()));
+            } else sender.sendMessage(Language.get("TempmuteCommandUsage", getName()));
+        } else sender.sendMessage(Language.get("NoPermission"));
         return false;
     }
 }

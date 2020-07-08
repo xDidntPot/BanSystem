@@ -7,7 +7,7 @@ import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.data.CommandParamType;
 import cn.nukkit.command.data.CommandParameter;
 import cn.nukkit.network.protocol.ScriptCustomEventPacket;
-import net.llamadevelopment.bansystem.Configuration;
+import net.llamadevelopment.bansystem.components.tools.Language;
 import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
 import net.llamadevelopment.bansystem.components.api.SystemSettings;
 
@@ -53,11 +53,11 @@ public class KickCommand extends Command {
                 }
                 Player onlinePlayer = Server.getInstance().getPlayer(player);
                 if (onlinePlayer != null) {
-                    onlinePlayer.kick(Configuration.getAndReplaceNP("KickScreen", reason, sender.getName()), false);
-                    sender.sendMessage(Configuration.getAndReplace("PlayerKicked", player));
-                } else sender.sendMessage(Configuration.getAndReplace("PlayerNotOnline"));
-            } else sender.sendMessage(Configuration.getAndReplace("KickCommandUsage", getName()));
-        } else sender.sendMessage(Configuration.getAndReplace("NoPermission"));
+                    onlinePlayer.kick(Language.getNP("KickScreen", reason, sender.getName()), false);
+                    sender.sendMessage(Language.get("PlayerKicked", player));
+                } else sender.sendMessage(Language.get("PlayerNotOnline"));
+            } else sender.sendMessage(Language.get("KickCommandUsage", getName()));
+        } else sender.sendMessage(Language.get("NoPermission"));
         return false;
     }
 }

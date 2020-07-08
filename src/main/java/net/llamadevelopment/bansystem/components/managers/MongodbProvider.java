@@ -9,7 +9,7 @@ import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import net.llamadevelopment.bansystem.BanSystem;
-import net.llamadevelopment.bansystem.Configuration;
+import net.llamadevelopment.bansystem.components.tools.Language;
 import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
 import net.llamadevelopment.bansystem.components.api.SystemSettings;
 import net.llamadevelopment.bansystem.components.data.Ban;
@@ -25,6 +25,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class MongodbProvider extends Provider {
 
@@ -46,6 +48,8 @@ public class MongodbProvider extends Provider {
             muteCollection = mongoDatabase.getCollection("mutes");
             mutelogCollection = mongoDatabase.getCollection("mutelog");
             warnCollection = mongoDatabase.getCollection("warns");
+            Logger mongoLogger = Logger.getLogger("org.mongodb.driver");
+            mongoLogger.setLevel(Level.OFF);
             server.getLogger().info("[MongoClient] Connection opened.");
         });
     }
@@ -106,7 +110,7 @@ public class MongodbProvider extends Provider {
             Player onlinePlayer = Server.getInstance().getPlayer(player);
             if (onlinePlayer != null) {
                 Ban ban = getBan(player);
-                onlinePlayer.kick(Configuration.getAndReplaceNP("BanScreen", ban.getReason(), ban.getBanID(), getRemainingTime(ban.getTime())), false);
+                onlinePlayer.kick(Language.getNP("BanScreen", ban.getReason(), ban.getBanID(), getRemainingTime(ban.getTime())), false);
             }
         });
     }
@@ -156,7 +160,7 @@ public class MongodbProvider extends Provider {
                 }
             }
             Player onlinePlayer = Server.getInstance().getPlayer(player);
-            if (onlinePlayer != null) onlinePlayer.kick(Configuration.getAndReplaceNP("WarnScreen", reason, creator), false);
+            if (onlinePlayer != null) onlinePlayer.kick(Language.getNP("WarnScreen", reason, creator), false);
         });
     }
 
@@ -190,15 +194,6 @@ public class MongodbProvider extends Provider {
         Document document = muteCollection.find(new Document("player", player)).first();
         if (document != null) {
             return new Mute(player, document.getString("reason"), document.getString("id"), document.getString("banner"), document.getString("date"), document.getLong("time"));
-        }
-        return null;
-    }
-
-    @Override
-    public Warn getWarn(String warnID) {
-        Document document = warnCollection.find(new Document("id", warnID)).first();
-        if (document != null) {
-            return new Warn(document.getString("player"), document.getString("reason"), warnID, document.getString("creator"), document.getString("date"));
         }
         return null;
     }
@@ -334,7 +329,7 @@ public class MongodbProvider extends Provider {
     @Override
     public String getRemainingTime(long duration) {
         if (duration == -1L) {
-            return Configuration.getAndReplaceNP("Permanent");
+            return Language.getNP("Permanent");
         } else {
             SimpleDateFormat today = new SimpleDateFormat("dd.MM.yyyy");
             today.format(System.currentTimeMillis());
@@ -344,23 +339,23 @@ public class MongodbProvider extends Provider {
             int days = (int) (time / 86400000L);
             int hours = (int) (time / 3600000L % 24L);
             int minutes = (int) (time / 60000L % 60L);
-            String day = Configuration.getAndReplaceNP("Days");
+            String day = Language.getNP("Days");
             if (days == 1) {
-                day = Configuration.getAndReplaceNP("Day");
+                day = Language.getNP("Day");
             }
 
-            String hour = Configuration.getAndReplaceNP("Hours");
+            String hour = Language.getNP("Hours");
             if (hours == 1) {
-                hour = Configuration.getAndReplaceNP("Hour");
+                hour = Language.getNP("Hour");
             }
 
-            String minute = Configuration.getAndReplaceNP("Minutes");
+            String minute = Language.getNP("Minutes");
             if (minutes == 2) {
-                minute = Configuration.getAndReplaceNP("Minute");
+                minute = Language.getNP("Minute");
             }
 
             if (minutes < 1 && days == 0 && hours == 0) {
-                return Configuration.getAndReplaceNP("Seconds");
+                return Language.getNP("Seconds");
             } else if (hours == 0 && days == 0) {
                 return minutes + " " + minute;
             } else {

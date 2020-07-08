@@ -4,7 +4,7 @@ import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.data.CommandParamType;
 import cn.nukkit.command.data.CommandParameter;
-import net.llamadevelopment.bansystem.Configuration;
+import net.llamadevelopment.bansystem.components.tools.Language;
 import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
 import net.llamadevelopment.bansystem.components.api.SystemSettings;
 import net.llamadevelopment.bansystem.components.data.BanReason;
@@ -30,21 +30,21 @@ public class BanCommand extends Command {
                 String player = args[0];
                 String reason = args[1];
                 if (api.playerIsBanned(player)) {
-                    sender.sendMessage(Configuration.getAndReplace("PlayerIsBanned"));
+                    sender.sendMessage(Language.get("PlayerIsBanned"));
                     return true;
                 }
                 if (settings.banReasons.get(reason) == null) {
-                    sender.sendMessage(Configuration.getAndReplace("ReasonNotFound"));
+                    sender.sendMessage(Language.get("ReasonNotFound"));
                     return true;
                 }
                 BanReason banReason = settings.banReasons.get(reason);
                 api.banPlayer(player, banReason.getReason(), sender.getName(), banReason.getSeconds());
-                sender.sendMessage(Configuration.getAndReplace("PlayerBanned", player));
+                sender.sendMessage(Language.get("PlayerBanned", player));
             } else {
-                settings.banReasons.values().forEach(reason -> sender.sendMessage(Configuration.getAndReplace("ReasonFormat", reason.getId(), reason.getReason())));
-                sender.sendMessage(Configuration.getAndReplace("BanCommandUsage", getName()));
+                settings.banReasons.values().forEach(reason -> sender.sendMessage(Language.get("ReasonFormat", reason.getId(), reason.getReason())));
+                sender.sendMessage(Language.get("BanCommandUsage", getName()));
             }
-        } else sender.sendMessage(Configuration.getAndReplace("NoPermission"));
+        } else sender.sendMessage(Language.get("NoPermission"));
         return false;
     }
 }

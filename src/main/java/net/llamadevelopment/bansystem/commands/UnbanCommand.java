@@ -4,7 +4,7 @@ import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.data.CommandParamType;
 import cn.nukkit.command.data.CommandParameter;
-import net.llamadevelopment.bansystem.Configuration;
+import net.llamadevelopment.bansystem.components.tools.Language;
 import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
 import net.llamadevelopment.bansystem.components.managers.database.Provider;
 
@@ -26,10 +26,10 @@ public class UnbanCommand extends Command {
                 String player = args[0];
                 if (api.playerIsBanned(player)) {
                     api.unbanPlayer(player);
-                    sender.sendMessage(Configuration.getAndReplace("PlayerUnbanned", player));
-                } else sender.sendMessage(Configuration.getAndReplace("PlayerIsNotBanned"));
-            } else sender.sendMessage(Configuration.getAndReplace("UnbanCommandUsage", getName()));
-        } else sender.sendMessage(Configuration.getAndReplace("NoPermission"));
+                    sender.sendMessage(Language.get("PlayerUnbanned", player));
+                } else sender.sendMessage(Language.get("PlayerIsNotBanned"));
+            } else sender.sendMessage(Language.get("UnbanCommandUsage", getName()));
+        } else sender.sendMessage(Language.get("NoPermission"));
         return false;
     }
 }

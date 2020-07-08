@@ -5,7 +5,7 @@ import cn.nukkit.Server;
 import cn.nukkit.network.protocol.ScriptCustomEventPacket;
 import cn.nukkit.utils.Config;
 import net.llamadevelopment.bansystem.BanSystem;
-import net.llamadevelopment.bansystem.Configuration;
+import net.llamadevelopment.bansystem.components.tools.Language;
 import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
 import net.llamadevelopment.bansystem.components.api.SystemSettings;
 import net.llamadevelopment.bansystem.components.data.Ban;
@@ -89,7 +89,7 @@ public class YamlProvider extends Provider {
         Player onlinePlayer = Server.getInstance().getPlayer(player);
         if (onlinePlayer != null) {
             Ban ban = getBan(player);
-            onlinePlayer.kick(Configuration.getAndReplaceNP("BanScreen", ban.getReason(), ban.getBanID(), getRemainingTime(ban.getTime())), false);
+            onlinePlayer.kick(Language.getNP("BanScreen", ban.getReason(), ban.getBanID(), getRemainingTime(ban.getTime())), false);
         }
     }
 
@@ -136,7 +136,7 @@ public class YamlProvider extends Provider {
             }
         }
         Player onlinePlayer = Server.getInstance().getPlayer(player);
-        if (onlinePlayer != null) onlinePlayer.kick(Configuration.getAndReplaceNP("WarnScreen", reason, creator), false);
+        if (onlinePlayer != null) onlinePlayer.kick(Language.getNP("WarnScreen", reason, creator), false);
     }
 
     @Override
@@ -295,7 +295,7 @@ public class YamlProvider extends Provider {
     @Override
     public String getRemainingTime(long duration) {
         if (duration == -1L) {
-            return Configuration.getAndReplaceNP("Permanent");
+            return Language.getNP("Permanent");
         } else {
             SimpleDateFormat today = new SimpleDateFormat("dd.MM.yyyy");
             today.format(System.currentTimeMillis());
@@ -305,23 +305,23 @@ public class YamlProvider extends Provider {
             int days = (int) (time / 86400000L);
             int hours = (int) (time / 3600000L % 24L);
             int minutes = (int) (time / 60000L % 60L);
-            String day = Configuration.getAndReplaceNP("Days");
+            String day = Language.getNP("Days");
             if (days == 1) {
-                day = Configuration.getAndReplaceNP("Day");
+                day = Language.getNP("Day");
             }
 
-            String hour = Configuration.getAndReplaceNP("Hours");
+            String hour = Language.getNP("Hours");
             if (hours == 1) {
-                hour = Configuration.getAndReplaceNP("Hour");
+                hour = Language.getNP("Hour");
             }
 
-            String minute = Configuration.getAndReplaceNP("Minutes");
+            String minute = Language.getNP("Minutes");
             if (minutes == 1) {
-                minute = Configuration.getAndReplaceNP("Minute");
+                minute = Language.getNP("Minute");
             }
 
             if (minutes < 1 && days == 0 && hours == 0) {
-                return Configuration.getAndReplaceNP("Seconds");
+                return Language.getNP("Seconds");
             } else if (hours == 0 && days == 0) {
                 return minutes + " " + minute;
             } else {

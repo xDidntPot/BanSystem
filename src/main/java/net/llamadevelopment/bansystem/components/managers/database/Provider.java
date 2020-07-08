@@ -47,10 +47,6 @@ public class Provider {
         return null;
     }
 
-    public Warn getWarn(String warnID) {
-        return null;
-    }
-
     public void createBanlog(Ban ban) {
     }
 

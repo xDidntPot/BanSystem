@@ -7,7 +7,7 @@ import cn.nukkit.event.player.PlayerChatEvent;
 import cn.nukkit.event.player.PlayerPreLoginEvent;
 import cn.nukkit.network.protocol.ScriptCustomEventPacket;
 import net.llamadevelopment.bansystem.BanSystem;
-import net.llamadevelopment.bansystem.Configuration;
+import net.llamadevelopment.bansystem.components.tools.Language;
 import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
 import net.llamadevelopment.bansystem.components.api.SystemSettings;
 import net.llamadevelopment.bansystem.components.data.Ban;
@@ -53,7 +53,7 @@ public class EventListener implements Listener {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                    } else player.kick(Configuration.getAndReplaceNP("BanScreen", ban.getReason(), ban.getBanID(), api.getRemainingTime(ban.getTime())), false);
+                    } else player.kick(Language.getNP("BanScreen", ban.getReason(), ban.getBanID(), api.getRemainingTime(ban.getTime())), false);
                 }, settings.getJoinDelay());
             } else if (api.playerIsMuted(player.getName())) {
                 Mute mute = api.getMute(player.getName());
@@ -71,7 +71,7 @@ public class EventListener implements Listener {
                 settings.cachedMute.remove(mute.getPlayer());
                 return;
             }
-            event.getPlayer().sendMessage(Configuration.getAndReplaceNP("MuteScreen", mute.getReason(), mute.getMuteID(), BanSystemAPI.getProvider().getRemainingTime(mute.getTime())));
+            event.getPlayer().sendMessage(Language.getNP("MuteScreen", mute.getReason(), mute.getMuteID(), BanSystemAPI.getProvider().getRemainingTime(mute.getTime())));
             event.setCancelled(true);
         }
     }
