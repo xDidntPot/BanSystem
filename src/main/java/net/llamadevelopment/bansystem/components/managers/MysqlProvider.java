@@ -33,7 +33,7 @@ public class MysqlProvider extends Provider {
         CompletableFuture.runAsync(() -> {
             try {
                 Class.forName("com.mysql.jdbc.Driver");
-                connection = DriverManager.getConnection("jdbc:mysql://" + config.getString("MySql.Host") + ":" + config.getString("MySql.Port") + "/" + config.getString("MySql.Database") + "?autoReconnect=true", config.getString("MySql.User"), config.getString("MySql.Password"));
+                connection = DriverManager.getConnection("jdbc:mysql://" + config.getString("MySql.Host") + ":" + config.getString("MySql.Port") + "/" + config.getString("MySql.Database") + "?autoReconnect=true&useGmtMillisForDatetimes=true&serverTimezone=GMT", config.getString("MySql.User"), config.getString("MySql.Password"));
                 update("CREATE TABLE IF NOT EXISTS bans(player VARCHAR(255), reason VARCHAR(255), id VARCHAR(255), banner VARCHAR(255), date VARCHAR(255), time BIGINT(255), PRIMARY KEY (id));");
                 update("CREATE TABLE IF NOT EXISTS mutes(player VARCHAR(255), reason VARCHAR(255), id VARCHAR(255), banner VARCHAR(255), date VARCHAR(255), time BIGINT(255), PRIMARY KEY (id));");
                 update("CREATE TABLE IF NOT EXISTS warns(player VARCHAR(255), reason VARCHAR(255), id VARCHAR(255), creator VARCHAR(255), date VARCHAR(255), PRIMARY KEY (id));");
@@ -198,6 +198,7 @@ public class MysqlProvider extends Provider {
                 PreparedStatement preparedStatement = getConnection().prepareStatement("DELETE FROM bans WHERE PLAYER = ?");
                 preparedStatement.setString(1, player);
                 preparedStatement.executeUpdate();
+                preparedStatement.close();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -211,6 +212,7 @@ public class MysqlProvider extends Provider {
                 PreparedStatement preparedStatement = getConnection().prepareStatement("DELETE FROM mutes WHERE PLAYER = ?");
                 preparedStatement.setString(1, player);
                 preparedStatement.executeUpdate();
+                preparedStatement.close();
             } catch (Exception e) {
                 e.printStackTrace();
             }
