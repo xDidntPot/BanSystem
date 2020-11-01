@@ -28,69 +28,65 @@ public class BanSystem extends PluginBase {
     public void onEnable() {
         instance = this;
         try {
-            saveDefaultConfig();
+            this.saveDefaultConfig();
             BanSystemAPI api = new BanSystemAPI();
             api.initBanSystemAPI();
-            registerProvider(new MongodbProvider());
-            registerProvider(new MysqlProvider());
-            registerProvider(new YamlProvider());
+            providers.put("MongoDB", new MongodbProvider());
+            providers.put("MySql", new MysqlProvider());
+            providers.put("Yaml", new YamlProvider());
             if (!providers.containsKey(getConfig().getString("Provider"))) {
                 getLogger().error("§4Please specify a valid provider: Yaml, MySql, MongoDB");
                 return;
             }
             provider = providers.get(getConfig().getString("Provider"));
             provider.connect(this);
-            getLogger().info("§aSuccessfully loaded " + provider.getProvider() + " provider.");
-            api.setProvider(provider);
+            this.getLogger().info("§aSuccessfully loaded " + provider.getProvider() + " provider.");
+            BanSystemAPI.setProvider(provider);
             Language.init();
-            loadPlugin();
-            getLogger().info("§aBanSystem successfully started.");
+            this.loadPlugin();
+            this.getLogger().info("§aBanSystem successfully started.");
         } catch (Exception e) {
             e.printStackTrace();
-            getLogger().error("§4Failed to load BanSystem.");
+            this.getLogger().error("§4Failed to load BanSystem.");
         }
     }
 
     private void loadReasons() {
-        Config c = getConfig();
+        Config c = this.getConfig();
         SystemSettings settings = BanSystemAPI.getSystemSettings();
         for (String s : c.getSection("Reasons.BanReasons").getAll().getKeys(false)) settings.banReasons.put(s, new BanReason(c.getString("Reasons.BanReasons." + s + ".Reason"), s, c.getInt("Reasons.BanReasons." + s + ".Seconds")));
         for (String s : c.getSection("Reasons.MuteReasons").getAll().getKeys(false)) settings.muteReasons.put(s, new MuteReason(c.getString("Reasons.MuteReasons." + s + ".Reason"), s, c.getInt("Reasons.MuteReasons." + s + ".Seconds")));
     }
 
     private void loadPlugin() {
-        Config c = getConfig();
-        CommandMap map = getServer().getCommandMap();
-        map.register(c.getString("Commands.BanCommand"), new BanCommand(c.getString("Commands.BanCommand")));
-        map.register(c.getString("Commands.TempbanCommand"), new TempbanCommand(c.getString("Commands.TempbanCommand")));
-        map.register(c.getString("Commands.BanlogCommand"), new BanlogCommand(c.getString("Commands.BanlogCommand")));
-        map.register(c.getString("Commands.CheckbanCommand"), new CheckbanCommand(c.getString("Commands.CheckbanCommand")));
-        map.register(c.getString("Commands.ClearbanlogCommand"), new ClearbanlogCommand(c.getString("Commands.ClearbanlogCommand")));
-        map.register(c.getString("Commands.UnbanCommand"), new UnbanCommand(c.getString("Commands.UnbanCommand")));
-        map.register(c.getString("Commands.MuteCommand"), new MuteCommand(c.getString("Commands.MuteCommand")));
-        map.register(c.getString("Commands.TempmuteCommand"), new TempmuteCommand(c.getString("Commands.TempmuteCommand")));
-        map.register(c.getString("Commands.MutelogCommand"), new MutelogCommand(c.getString("Commands.MutelogCommand")));
-        map.register(c.getString("Commands.CheckmuteCommand"), new CheckmuteCommand(c.getString("Commands.CheckmuteCommand")));
-        map.register(c.getString("Commands.ClearmutelogCommand"), new ClearmutelogCommand(c.getString("Commands.ClearmutelogCommand")));
-        map.register(c.getString("Commands.UnmuteCommand"), new UnmuteCommand(c.getString("Commands.UnmuteCommand")));
-        map.register(c.getString("Commands.WarnCommand"), new WarnCommand(c.getString("Commands.WarnCommand")));
-        map.register(c.getString("Commands.WarnlogCommand"), new WarnlogCommand(c.getString("Commands.WarnlogCommand")));
-        map.register(c.getString("Commands.ClearwarningsCommand"), new ClearwarningsCommand(c.getString("Commands.ClearwarningsCommand")));
-        map.register(c.getString("Commands.EditbanCommand"), new EditbanCommand(c.getString("Commands.EditbanCommand")));
-        map.register(c.getString("Commands.EditmuteCommand"), new EditmuteCommand(c.getString("Commands.EditmuteCommand")));
-        map.register(c.getString("Commands.KickCommand"), new KickCommand(c.getString("Commands.KickCommand")));
+        Config config = this.getConfig();
+        CommandMap map = this.getServer().getCommandMap();
+        map.register(config.getString("Commands.BanCommand"), new BanCommand(config.getString("Commands.BanCommand")));
+        map.register(config.getString("Commands.TempbanCommand"), new TempbanCommand(config.getString("Commands.TempbanCommand")));
+        map.register(config.getString("Commands.BanlogCommand"), new BanlogCommand(config.getString("Commands.BanlogCommand")));
+        map.register(config.getString("Commands.CheckbanCommand"), new CheckbanCommand(config.getString("Commands.CheckbanCommand")));
+        map.register(config.getString("Commands.ClearbanlogCommand"), new ClearbanlogCommand(config.getString("Commands.ClearbanlogCommand")));
+        map.register(config.getString("Commands.UnbanCommand"), new UnbanCommand(config.getString("Commands.UnbanCommand")));
+        map.register(config.getString("Commands.MuteCommand"), new MuteCommand(config.getString("Commands.MuteCommand")));
+        map.register(config.getString("Commands.TempmuteCommand"), new TempmuteCommand(config.getString("Commands.TempmuteCommand")));
+        map.register(config.getString("Commands.MutelogCommand"), new MutelogCommand(config.getString("Commands.MutelogCommand")));
+        map.register(config.getString("Commands.CheckmuteCommand"), new CheckmuteCommand(config.getString("Commands.CheckmuteCommand")));
+        map.register(config.getString("Commands.ClearmutelogCommand"), new ClearmutelogCommand(config.getString("Commands.ClearmutelogCommand")));
+        map.register(config.getString("Commands.UnmuteCommand"), new UnmuteCommand(config.getString("Commands.UnmuteCommand")));
+        map.register(config.getString("Commands.WarnCommand"), new WarnCommand(config.getString("Commands.WarnCommand")));
+        map.register(config.getString("Commands.WarnlogCommand"), new WarnlogCommand(config.getString("Commands.WarnlogCommand")));
+        map.register(config.getString("Commands.ClearwarningsCommand"), new ClearwarningsCommand(config.getString("Commands.ClearwarningsCommand")));
+        map.register(config.getString("Commands.EditbanCommand"), new EditbanCommand(config.getString("Commands.EditbanCommand")));
+        map.register(config.getString("Commands.EditmuteCommand"), new EditmuteCommand(config.getString("Commands.EditmuteCommand")));
+        map.register(config.getString("Commands.KickCommand"), new KickCommand(config.getString("Commands.KickCommand")));
 
-        getServer().getPluginManager().registerEvents(new EventListener(), this);
-        loadReasons();
+        this.getServer().getPluginManager().registerEvents(new EventListener(), this);
+        this.loadReasons();
     }
 
     @Override
     public void onDisable() {
         provider.disconnect(this);
-    }
-
-    private void registerProvider(Provider provider) {
-        providers.put(provider.getProvider(), provider);
     }
 
     public static BanSystem getInstance() {

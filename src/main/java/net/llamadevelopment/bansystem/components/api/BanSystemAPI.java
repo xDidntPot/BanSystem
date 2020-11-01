@@ -14,15 +14,17 @@ public class BanSystemAPI {
 
     private final BanSystem banSystem = BanSystem.getInstance();
 
-    @Getter @Setter
+    @Getter
+    @Setter
     private static Provider provider;
     @Getter
     private static SystemSettings systemSettings;
 
     public void initBanSystemAPI() {
-        systemSettings = new SystemSettings(banSystem.getDescription().getVersion(), banSystem.getConfig().getInt("Settings.JoinDelay"), banSystem.getConfig().getBoolean("Settings.Waterdog"));
+        systemSettings = new SystemSettings(this.banSystem.getDescription().getVersion(), this.banSystem.getConfig().getInt("Settings.JoinDelay"), this.banSystem.getConfig().getBoolean("Settings.Waterdog"));
     }
 
+    @Deprecated
     public static String getRandomIDCode() {
         String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
         StringBuilder stringBuilder = new StringBuilder();
@@ -34,6 +36,7 @@ public class BanSystemAPI {
         return stringBuilder.toString();
     }
 
+    @Deprecated
     public static String getDate() {
         Date now = new Date();
         DateFormat dateFormat = new SimpleDateFormat("dd.MM.yy HH:mm");

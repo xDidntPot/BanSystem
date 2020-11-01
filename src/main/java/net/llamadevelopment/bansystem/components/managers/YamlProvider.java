@@ -23,8 +23,8 @@ import java.util.concurrent.CompletableFuture;
 
 public class YamlProvider extends Provider {
 
-    SystemSettings settings = BanSystemAPI.getSystemSettings();
-    Config bans, banlog, mutes, mutelog, warns;
+    private final SystemSettings settings = BanSystemAPI.getSystemSettings();
+    private Config bans, banlog, mutes, mutelog, warns;
 
     @Override
     public void connect(BanSystem server) {
@@ -44,12 +44,12 @@ public class YamlProvider extends Provider {
 
     @Override
     public boolean playerIsBanned(String player) {
-        return bans.exists("Ban." + player);
+        return this.bans.exists("Ban." + player);
     }
 
     @Override
     public boolean playerIsMuted(String player) {
-        return mutes.exists("Mute." + player);
+        return this.mutes.exists("Mute." + player);
     }
 
     @Override
@@ -58,17 +58,17 @@ public class YamlProvider extends Provider {
         if (seconds == -1) end = -1L;
         String id = BanSystemAPI.getRandomIDCode();
         String date = BanSystemAPI.getDate();
-        bans.set("Ban." + player + ".Reason", reason);
-        bans.set("Ban." + player + ".ID", id);
-        bans.set("Ban." + player + ".Banner", banner);
-        bans.set("Ban." + player + ".Date", date);
-        bans.set("Ban." + player + ".Time", end);
-        bans.save();
-        bans.reload();
-        createBanlog(new Ban(player, reason, id, banner, date, end));
+        this.bans.set("Ban." + player + ".Reason", reason);
+        this.bans.set("Ban." + player + ".ID", id);
+        this.bans.set("Ban." + player + ".Banner", banner);
+        this.bans.set("Ban." + player + ".Date", date);
+        this.bans.set("Ban." + player + ".Time", end);
+        this.bans.save();
+        this.bans.reload();
+        this.createBanlog(new Ban(player, reason, id, banner, date, end));
         Player player1 = Server.getInstance().getPlayer(banner);
-        if (settings.isWaterdog() && player1.isOnline()) {
-            Ban ban = getBan(player);
+        if (this.settings.isWaterdog() && player1.isOnline()) {
+            Ban ban = this.getBan(player);
             ScriptCustomEventPacket customEventPacket = new ScriptCustomEventPacket();
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
@@ -77,7 +77,7 @@ public class YamlProvider extends Provider {
                 dataOutputStream.writeUTF(player);
                 dataOutputStream.writeUTF(ban.getReason());
                 dataOutputStream.writeUTF(ban.getBanID());
-                dataOutputStream.writeUTF(getRemainingTime(ban.getTime()));
+                dataOutputStream.writeUTF(this.getRemainingTime(ban.getTime()));
                 customEventPacket.eventName = "bansystembridge:main";
                 customEventPacket.eventData = outputStream.toByteArray();
                 player1.dataPacket(customEventPacket);
@@ -88,8 +88,8 @@ public class YamlProvider extends Provider {
         }
         Player onlinePlayer = Server.getInstance().getPlayer(player);
         if (onlinePlayer != null) {
-            Ban ban = getBan(player);
-            onlinePlayer.kick(Language.getNP("BanScreen", ban.getReason(), ban.getBanID(), getRemainingTime(ban.getTime())), false);
+            Ban ban = this.getBan(player);
+            onlinePlayer.kick(Language.getNP("BanScreen", ban.getReason(), ban.getBanID(), this.getRemainingTime(ban.getTime())), false);
         }
     }
 
@@ -99,27 +99,27 @@ public class YamlProvider extends Provider {
         if (seconds == -1) end = -1L;
         String id = BanSystemAPI.getRandomIDCode();
         String date = BanSystemAPI.getDate();
-        mutes.set("Mute." + player + ".Reason", reason);
-        mutes.set("Mute." + player + ".ID", id);
-        mutes.set("Mute." + player + ".Banner", banner);
-        mutes.set("Mute." + player + ".Date", date);
-        mutes.set("Mute." + player + ".Time", end);
-        mutes.save();
-        mutes.reload();
-        createMutelog(new Mute(player, reason, id, banner, date, end));
+        this.mutes.set("Mute." + player + ".Reason", reason);
+        this.mutes.set("Mute." + player + ".ID", id);
+        this.mutes.set("Mute." + player + ".Banner", banner);
+        this.mutes.set("Mute." + player + ".Date", date);
+        this.mutes.set("Mute." + player + ".Time", end);
+        this.mutes.save();
+        this.mutes.reload();
+        this.createMutelog(new Mute(player, reason, id, banner, date, end));
     }
 
     @Override
     public void warnPlayer(String player, String reason, String creator) {
         String id = BanSystemAPI.getRandomIDCode();
         String date = BanSystemAPI.getDate();
-        warns.set("Warn." + player + "." + id + ".Reason", reason);
-        warns.set("Warn." + player + "." + id + ".Creator", creator);
-        warns.set("Warn." + player + "." + id + ".Date", date);
-        warns.save();
-        warns.reload();
+        this.warns.set("Warn." + player + "." + id + ".Reason", reason);
+        this.warns.set("Warn." + player + "." + id + ".Creator", creator);
+        this.warns.set("Warn." + player + "." + id + ".Date", date);
+        this.warns.save();
+        this.warns.reload();
         Player player1 = Server.getInstance().getPlayer(creator);
-        if (settings.isWaterdog() && player1.isOnline()) {
+        if (this.settings.isWaterdog() && player1.isOnline()) {
             ScriptCustomEventPacket customEventPacket = new ScriptCustomEventPacket();
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
@@ -141,67 +141,67 @@ public class YamlProvider extends Provider {
 
     @Override
     public void unbanPlayer(String player) {
-        Map<String, Object> map = bans.getSection("Ban").getAllMap();
+        Map<String, Object> map = this.bans.getSection("Ban").getAllMap();
         map.remove(player);
-        bans.set("Ban", map);
-        bans.save();
-        bans.reload();
+        this.bans.set("Ban", map);
+        this.bans.save();
+        this.bans.reload();
     }
 
     @Override
     public void unmutePlayer(String player) {
-        Map<String, Object> map = mutes.getSection("Mute").getAllMap();
+        Map<String, Object> map = this.mutes.getSection("Mute").getAllMap();
         map.remove(player);
-        mutes.set("Mute", map);
-        mutes.save();
-        mutes.reload();
+        this.mutes.set("Mute", map);
+        this.mutes.save();
+        this.mutes.reload();
     }
 
     @Override
     public Ban getBan(String player) {
-        String reason = bans.getString("Ban." + player + ".Reason");
-        String banID = bans.getString("Ban." + player + ".ID");
-        String banner = bans.getString("Ban." + player + ".Banner");
-        String date = bans.getString("Ban." + player + ".Date");
-        long time = bans.getLong("Ban." + player + ".Time");
+        String reason = this.bans.getString("Ban." + player + ".Reason");
+        String banID = this.bans.getString("Ban." + player + ".ID");
+        String banner = this.bans.getString("Ban." + player + ".Banner");
+        String date = this.bans.getString("Ban." + player + ".Date");
+        long time = this.bans.getLong("Ban." + player + ".Time");
         return new Ban(player, reason, banID, banner, date, time);
     }
 
     @Override
     public Mute getMute(String player) {
-        String reason = mutes.getString("Mute." + player + ".Reason");
-        String banID = mutes.getString("Mute." + player + ".ID");
-        String banner = mutes.getString("Mute." + player + ".Banner");
-        String date = mutes.getString("Mute." + player + ".Date");
-        long time = mutes.getLong("Mute." + player + ".Time");
+        String reason = this.mutes.getString("Mute." + player + ".Reason");
+        String banID = this.mutes.getString("Mute." + player + ".ID");
+        String banner = this.mutes.getString("Mute." + player + ".Banner");
+        String date = this.mutes.getString("Mute." + player + ".Date");
+        long time = this.mutes.getLong("Mute." + player + ".Time");
         return new Mute(player, reason, banID, banner, date, time);
     }
 
     @Override
     public void createBanlog(Ban ban) {
-        banlog.set("Banlog." + ban.getPlayer() + "." + ban.getBanID() + ".Reason", ban.getReason());
-        banlog.set("Banlog." + ban.getPlayer() + "." + ban.getBanID() + ".Banner", ban.getBanner());
-        banlog.set("Banlog." + ban.getPlayer() + "." + ban.getBanID() + ".Date", ban.getDate());
-        banlog.save();
-        banlog.reload();
+        this.banlog.set("Banlog." + ban.getPlayer() + "." + ban.getBanID() + ".Reason", ban.getReason());
+        this.banlog.set("Banlog." + ban.getPlayer() + "." + ban.getBanID() + ".Banner", ban.getBanner());
+        this.banlog.set("Banlog." + ban.getPlayer() + "." + ban.getBanID() + ".Date", ban.getDate());
+        this.banlog.save();
+        this.banlog.reload();
     }
 
     @Override
     public void createMutelog(Mute mute) {
-        mutelog.set("Mutelog." + mute.getPlayer() + "." + mute.getMuteID() + ".Reason", mute.getReason());
-        mutelog.set("Mutelog." + mute.getPlayer() + "." + mute.getMuteID() + ".Muter", mute.getMuter());
-        mutelog.set("Mutelog." + mute.getPlayer() + "." + mute.getMuteID() + ".Date", mute.getDate());
-        mutelog.save();
-        mutelog.reload();
+        this.mutelog.set("Mutelog." + mute.getPlayer() + "." + mute.getMuteID() + ".Reason", mute.getReason());
+        this.mutelog.set("Mutelog." + mute.getPlayer() + "." + mute.getMuteID() + ".Muter", mute.getMuter());
+        this.mutelog.set("Mutelog." + mute.getPlayer() + "." + mute.getMuteID() + ".Date", mute.getDate());
+        this.mutelog.save();
+        this.mutelog.reload();
     }
 
     @Override
     public List<Ban> getBanlog(String player) {
         List<Ban> list = new ArrayList<>();
-        for (String s : banlog.getSection("Banlog." + player).getAll().getKeys(false)) {
-            String reason = banlog.getString("Banlog." + player + "." + s + ".Reason");
-            String banner = banlog.getString("Banlog." + player + "." + s + ".Banner");
-            String date = banlog.getString("Banlog." + player + "." + s + ".Date");
+        for (String s : this.banlog.getSection("Banlog." + player).getAll().getKeys(false)) {
+            String reason = this.banlog.getString("Banlog." + player + "." + s + ".Reason");
+            String banner = this.banlog.getString("Banlog." + player + "." + s + ".Banner");
+            String date = this.banlog.getString("Banlog." + player + "." + s + ".Date");
             list.add(new Ban(player, reason, s, banner, date, 0));
         }
         return list;
@@ -210,10 +210,10 @@ public class YamlProvider extends Provider {
     @Override
     public List<Mute> getMutelog(String player) {
         List<Mute> list = new ArrayList<>();
-        for (String s : mutelog.getSection("Mutelog." + player).getAll().getKeys(false)) {
-            String reason = mutelog.getString("Mutelog." + player + "." + s + ".Reason");
-            String banner = mutelog.getString("Mutelog." + player + "." + s + ".Banner");
-            String date = mutelog.getString("Mutelog." + player + "." + s + ".Date");
+        for (String s : this.mutelog.getSection("Mutelog." + player).getAll().getKeys(false)) {
+            String reason = this.mutelog.getString("Mutelog." + player + "." + s + ".Reason");
+            String banner = this.mutelog.getString("Mutelog." + player + "." + s + ".Banner");
+            String date = this.mutelog.getString("Mutelog." + player + "." + s + ".Date");
             list.add(new Mute(player, reason, s, banner, date, 0));
         }
         return list;
@@ -222,10 +222,10 @@ public class YamlProvider extends Provider {
     @Override
     public List<Warn> getWarnings(String player) {
         List<Warn> list = new ArrayList<>();
-        for (String s : warns.getSection("Warn." + player).getAll().getKeys(false)) {
-            String reason = warns.getString("Warn." + player + "." + s + ".Reason");
-            String creator = warns.getString("Warn." + player + "." + s + ".Creator");
-            String date = warns.getString("Warn." + player + "." + s + ".Date");
+        for (String s : this.warns.getSection("Warn." + player).getAll().getKeys(false)) {
+            String reason = this.warns.getString("Warn." + player + "." + s + ".Reason");
+            String creator = this.warns.getString("Warn." + player + "." + s + ".Creator");
+            String date = this.warns.getString("Warn." + player + "." + s + ".Date");
             list.add(new Warn(player, reason, s, creator, date));
         }
         return list;
@@ -234,62 +234,62 @@ public class YamlProvider extends Provider {
     @Override
     public void clearBanlog(String player) {
         CompletableFuture.runAsync(() -> {
-            Map<String, Object> map = banlog.getSection("Banlog").getAllMap();
+            Map<String, Object> map = this.banlog.getSection("Banlog").getAllMap();
             map.remove(player);
-            banlog.set("Banlog", map);
-            banlog.save();
-            banlog.reload();
+            this.banlog.set("Banlog", map);
+            this.banlog.save();
+            this.banlog.reload();
         });
     }
 
     @Override
     public void clearMutelog(String player) {
         CompletableFuture.runAsync(() -> {
-            Map<String, Object> map = mutelog.getSection("Mutelog").getAllMap();
+            Map<String, Object> map = this.mutelog.getSection("Mutelog").getAllMap();
             map.remove(player);
-            mutelog.set("Mutelog", map);
-            mutelog.save();
-            mutelog.reload();
+            this.mutelog.set("Mutelog", map);
+            this.mutelog.save();
+            this.mutelog.reload();
         });
     }
 
     @Override
     public void clearWarns(String player) {
         CompletableFuture.runAsync(() -> {
-            Map<String, Object> map = warns.getSection("Warn").getAllMap();
+            Map<String, Object> map = this.warns.getSection("Warn").getAllMap();
             map.remove(player);
-            warns.set("Warn", map);
-            warns.save();
-            warns.reload();
+            this.warns.set("Warn", map);
+            this.warns.save();
+            this.warns.reload();
         });
     }
 
     @Override
     public void setBanReason(String player, String reason) {
-        bans.set("Ban." + player + ".Reason", reason);
-        bans.save();
-        bans.reload();
+        this.bans.set("Ban." + player + ".Reason", reason);
+        this.bans.save();
+        this.bans.reload();
     }
 
     @Override
     public void setMuteReason(String player, String reason) {
-        mutes.set("Mute." + player + ".Reason", reason);
-        mutes.save();
-        mutes.reload();
+        this.mutes.set("Mute." + player + ".Reason", reason);
+        this.mutes.save();
+        this.mutes.reload();
     }
 
     @Override
     public void setBanTime(String player, long time) {
-        bans.set("Ban." + player + ".Time", time);
-        bans.save();
-        bans.reload();
+        this.bans.set("Ban." + player + ".Time", time);
+        this.bans.save();
+        this.bans.reload();
     }
 
     @Override
     public void setMuteTime(String player, long time) {
-        mutes.set("Mute." + player + ".Time", time);
-        mutes.save();
-        mutes.reload();
+        this.mutes.set("Mute." + player + ".Time", time);
+        this.mutes.save();
+        this.mutes.reload();
     }
 
     @Override

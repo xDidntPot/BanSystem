@@ -16,9 +16,9 @@ public class SystemSettings {
     private boolean waterdog;
 
     public SystemSettings(String version, int joinDelay, boolean waterdog) {
-        setVersion(version);
-        setJoinDelay(joinDelay);
-        setWaterdog(waterdog);
+        this.setVersion(version);
+        this.setJoinDelay(joinDelay);
+        this.setWaterdog(waterdog);
     }
 
     public String getVersion() {

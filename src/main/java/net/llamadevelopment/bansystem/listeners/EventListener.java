@@ -20,24 +20,24 @@ import java.util.concurrent.CompletableFuture;
 
 public class EventListener implements Listener {
 
-    BanSystem instance = BanSystem.getInstance();
-    SystemSettings settings = BanSystemAPI.getSystemSettings();
-    Provider api = BanSystemAPI.getProvider();
+    private final BanSystem instance = BanSystem.getInstance();
+    private final SystemSettings settings = BanSystemAPI.getSystemSettings();
+    private final Provider api = BanSystemAPI.getProvider();
 
     @EventHandler
     public void on(PlayerPreLoginEvent event) {
         Player player = event.getPlayer();
         CompletableFuture.runAsync(() -> {
-            if (api.playerIsBanned(player.getName())) {
-                instance.getServer().getScheduler().scheduleDelayedTask(instance, () -> {
-                    Ban ban = api.getBan(player.getName());
+            if (this.api.playerIsBanned(player.getName())) {
+                this.instance.getServer().getScheduler().scheduleDelayedTask(this.instance, () -> {
+                    Ban ban = this.api.getBan(player.getName());
                     if (ban.getTime() != -1) {
                         if (ban.getTime() < System.currentTimeMillis()) {
-                            api.unbanPlayer(player.getName());
+                            this.api.unbanPlayer(player.getName());
                             return;
                         }
                     }
-                    if (settings.isWaterdog()) {
+                    if (this.settings.isWaterdog()) {
                         ScriptCustomEventPacket customEventPacket = new ScriptCustomEventPacket();
                         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                         DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
@@ -46,29 +46,29 @@ public class EventListener implements Listener {
                             dataOutputStream.writeUTF(player.getName());
                             dataOutputStream.writeUTF(ban.getReason());
                             dataOutputStream.writeUTF(ban.getBanID());
-                            dataOutputStream.writeUTF(api.getRemainingTime(ban.getTime()));
+                            dataOutputStream.writeUTF(this.api.getRemainingTime(ban.getTime()));
                             customEventPacket.eventName = "bansystembridge:main";
                             customEventPacket.eventData = outputStream.toByteArray();
                             player.dataPacket(customEventPacket);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                    } else player.kick(Language.getNP("BanScreen", ban.getReason(), ban.getBanID(), api.getRemainingTime(ban.getTime())), false);
-                }, settings.getJoinDelay());
-            } else if (api.playerIsMuted(player.getName())) {
-                Mute mute = api.getMute(player.getName());
-                settings.cachedMute.put(player.getName(), mute);
+                    } else player.kick(Language.getNP("BanScreen", ban.getReason(), ban.getBanID(), this.api.getRemainingTime(ban.getTime())), false);
+                }, this.settings.getJoinDelay());
+            } else if (this.api.playerIsMuted(player.getName())) {
+                Mute mute = this.api.getMute(player.getName());
+                this.settings.cachedMute.put(player.getName(), mute);
             }
         });
     }
 
     @EventHandler
     public void on(PlayerChatEvent event) {
-        if (settings.cachedMute.get(event.getPlayer().getName()) != null) {
-            Mute mute = settings.cachedMute.get(event.getPlayer().getName());
+        if (this.settings.cachedMute.get(event.getPlayer().getName()) != null) {
+            Mute mute = this.settings.cachedMute.get(event.getPlayer().getName());
             if (mute.getTime() < System.currentTimeMillis()) {
-                api.unmutePlayer(mute.getPlayer());
-                settings.cachedMute.remove(mute.getPlayer());
+                this.api.unmutePlayer(mute.getPlayer());
+                this.settings.cachedMute.remove(mute.getPlayer());
                 return;
             }
             event.getPlayer().sendMessage(Language.getNP("MuteScreen", mute.getReason(), mute.getMuteID(), BanSystemAPI.getProvider().getRemainingTime(mute.getTime())));

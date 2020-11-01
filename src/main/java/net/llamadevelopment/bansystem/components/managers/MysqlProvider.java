@@ -23,22 +23,22 @@ import java.util.concurrent.CompletableFuture;
 
 public class MysqlProvider extends Provider {
 
-    SystemSettings settings = BanSystemAPI.getSystemSettings();
-    Config config = BanSystem.getInstance().getConfig();
+    private final SystemSettings settings = BanSystemAPI.getSystemSettings();
+    private final Config config = BanSystem.getInstance().getConfig();
 
-    Connection connection;
+    private Connection connection;
 
     @Override
     public void connect(BanSystem server) {
         CompletableFuture.runAsync(() -> {
             try {
                 Class.forName("com.mysql.jdbc.Driver");
-                connection = DriverManager.getConnection("jdbc:mysql://" + config.getString("MySql.Host") + ":" + config.getString("MySql.Port") + "/" + config.getString("MySql.Database") + "?autoReconnect=true&useGmtMillisForDatetimes=true&serverTimezone=GMT", config.getString("MySql.User"), config.getString("MySql.Password"));
-                update("CREATE TABLE IF NOT EXISTS bans(player VARCHAR(255), reason VARCHAR(255), id VARCHAR(255), banner VARCHAR(255), date VARCHAR(255), time BIGINT(255), PRIMARY KEY (id));");
-                update("CREATE TABLE IF NOT EXISTS mutes(player VARCHAR(255), reason VARCHAR(255), id VARCHAR(255), banner VARCHAR(255), date VARCHAR(255), time BIGINT(255), PRIMARY KEY (id));");
-                update("CREATE TABLE IF NOT EXISTS warns(player VARCHAR(255), reason VARCHAR(255), id VARCHAR(255), creator VARCHAR(255), date VARCHAR(255), PRIMARY KEY (id));");
-                update("CREATE TABLE IF NOT EXISTS banlogs(player VARCHAR(255), reason VARCHAR(255), id VARCHAR(255), banner VARCHAR(255), date VARCHAR(255), PRIMARY KEY (id));");
-                update("CREATE TABLE IF NOT EXISTS mutelogs(player VARCHAR(255), reason VARCHAR(255), id VARCHAR(255), banner VARCHAR(255), date VARCHAR(255), PRIMARY KEY (id));");
+                this.connection = DriverManager.getConnection("jdbc:mysql://" + this.config.getString("MySql.Host") + ":" + this.config.getString("MySql.Port") + "/" + this.config.getString("MySql.Database") + "?autoReconnect=true&useGmtMillisForDatetimes=true&serverTimezone=GMT", this.config.getString("MySql.User"), this.config.getString("MySql.Password"));
+                this.update("CREATE TABLE IF NOT EXISTS bans(player VARCHAR(255), reason VARCHAR(255), id VARCHAR(255), banner VARCHAR(255), date VARCHAR(255), time BIGINT(255), PRIMARY KEY (id));");
+                this.update("CREATE TABLE IF NOT EXISTS mutes(player VARCHAR(255), reason VARCHAR(255), id VARCHAR(255), banner VARCHAR(255), date VARCHAR(255), time BIGINT(255), PRIMARY KEY (id));");
+                this.update("CREATE TABLE IF NOT EXISTS warns(player VARCHAR(255), reason VARCHAR(255), id VARCHAR(255), creator VARCHAR(255), date VARCHAR(255), PRIMARY KEY (id));");
+                this.update("CREATE TABLE IF NOT EXISTS banlogs(player VARCHAR(255), reason VARCHAR(255), id VARCHAR(255), banner VARCHAR(255), date VARCHAR(255), PRIMARY KEY (id));");
+                this.update("CREATE TABLE IF NOT EXISTS mutelogs(player VARCHAR(255), reason VARCHAR(255), id VARCHAR(255), banner VARCHAR(255), date VARCHAR(255), PRIMARY KEY (id));");
                 server.getLogger().info("[MySqlClient] Connection opened.");
             } catch (Exception e) {
                 e.printStackTrace();
@@ -49,9 +49,9 @@ public class MysqlProvider extends Provider {
 
     @Override
     public void disconnect(BanSystem server) {
-        if (connection != null) {
+        if (this.connection != null) {
             try {
-                connection.close();
+                this.connection.close();
                 server.getLogger().info("[MySqlClient] Connection closed.");
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
@@ -61,16 +61,16 @@ public class MysqlProvider extends Provider {
     }
 
     public Connection getConnection() {
-        return connection;
+        return this.connection;
     }
 
     public void update(String query) {
         CompletableFuture.runAsync(() -> {
-            if (connection != null) {
+            if (this.connection != null) {
                 try {
-                    PreparedStatement ps = connection.prepareStatement(query);
-                    ps.executeUpdate();
-                    ps.close();
+                    PreparedStatement preparedStatement = this.connection.prepareStatement(query);
+                    preparedStatement.executeUpdate();
+                    preparedStatement.close();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -81,7 +81,7 @@ public class MysqlProvider extends Provider {
     @Override
     public boolean playerIsBanned(String player) {
         try {
-            PreparedStatement preparedStatement = getConnection().prepareStatement("SELECT * FROM bans WHERE PLAYER = ?");
+            PreparedStatement preparedStatement = this.getConnection().prepareStatement("SELECT * FROM bans WHERE PLAYER = ?");
             preparedStatement.setString(1, player);
             ResultSet rs = preparedStatement.executeQuery();
             if (rs.next()) return rs.getString("PLAYER") != null;
@@ -116,14 +116,14 @@ public class MysqlProvider extends Provider {
         String id = BanSystemAPI.getRandomIDCode();
         String date = BanSystemAPI.getDate();
         try {
-            update("INSERT INTO bans (PLAYER, REASON, ID, BANNER, DATE, TIME) VALUES ('" + player + "', '" + reason + "', '" + id + "', '" + banner + "', '" + date + "', '" + end + "');");
+            this.update("INSERT INTO bans (PLAYER, REASON, ID, BANNER, DATE, TIME) VALUES ('" + player + "', '" + reason + "', '" + id + "', '" + banner + "', '" + date + "', '" + end + "');");
         } catch (Exception e) {
             e.printStackTrace();
         }
-        createBanlog(new Ban(player, reason, id, banner, date, end));
+        this.createBanlog(new Ban(player, reason, id, banner, date, end));
         Player player1 = Server.getInstance().getPlayer(banner);
-        if (settings.isWaterdog() && player1.isOnline()) {
-            Ban ban = getBan(player);
+        if (this.settings.isWaterdog() && player1.isOnline()) {
+            Ban ban = this.getBan(player);
             ScriptCustomEventPacket customEventPacket = new ScriptCustomEventPacket();
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
@@ -132,7 +132,7 @@ public class MysqlProvider extends Provider {
                 dataOutputStream.writeUTF(player);
                 dataOutputStream.writeUTF(ban.getReason());
                 dataOutputStream.writeUTF(ban.getBanID());
-                dataOutputStream.writeUTF(getRemainingTime(ban.getTime()));
+                dataOutputStream.writeUTF(this.getRemainingTime(ban.getTime()));
                 customEventPacket.eventName = "bansystembridge:main";
                 customEventPacket.eventData = outputStream.toByteArray();
                 player1.dataPacket(customEventPacket);
@@ -143,8 +143,8 @@ public class MysqlProvider extends Provider {
         }
         Player onlinePlayer = Server.getInstance().getPlayer(player);
         if (onlinePlayer != null) {
-            Ban ban = getBan(player);
-            onlinePlayer.kick(Language.getNP("BanScreen", ban.getReason(), ban.getBanID(), getRemainingTime(ban.getTime())), false);
+            Ban ban = this.getBan(player);
+            onlinePlayer.kick(Language.getNP("BanScreen", ban.getReason(), ban.getBanID(), this.getRemainingTime(ban.getTime())), false);
         }
     }
 
@@ -156,22 +156,22 @@ public class MysqlProvider extends Provider {
         String id = BanSystemAPI.getRandomIDCode();
         String date = BanSystemAPI.getDate();
         try {
-            update("INSERT INTO mutes (PLAYER, REASON, ID, BANNER, DATE, TIME) VALUES ('" + player + "', '" + reason + "', '" + id + "', '" + banner + "', '" + date + "', '" + end + "');");
+            this.update("INSERT INTO mutes (PLAYER, REASON, ID, BANNER, DATE, TIME) VALUES ('" + player + "', '" + reason + "', '" + id + "', '" + banner + "', '" + date + "', '" + end + "');");
         } catch (Exception e) {
             e.printStackTrace();
         }
-        createMutelog(new Mute(player, reason, id, banner, date, end));
+        this.createMutelog(new Mute(player, reason, id, banner, date, end));
     }
 
     @Override
     public void warnPlayer(String player, String reason, String creator) {
         try {
-            update("INSERT INTO warns (PLAYER, REASON, ID, CREATOR, DATE) VALUES ('" + player + "', '" + reason + "', '" + BanSystemAPI.getRandomIDCode() + "', '" + creator + "', '" + BanSystemAPI.getDate() + "');");
+            this.update("INSERT INTO warns (PLAYER, REASON, ID, CREATOR, DATE) VALUES ('" + player + "', '" + reason + "', '" + BanSystemAPI.getRandomIDCode() + "', '" + creator + "', '" + BanSystemAPI.getDate() + "');");
         } catch (Exception e) {
             e.printStackTrace();
         }
         Player player1 = Server.getInstance().getPlayer(creator);
-        if (settings.isWaterdog() && player1.isOnline()) {
+        if (this.settings.isWaterdog() && player1.isOnline()) {
             ScriptCustomEventPacket customEventPacket = new ScriptCustomEventPacket();
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
@@ -195,7 +195,7 @@ public class MysqlProvider extends Provider {
     public void unbanPlayer(String player) {
         CompletableFuture.runAsync(() -> {
             try {
-                PreparedStatement preparedStatement = getConnection().prepareStatement("DELETE FROM bans WHERE PLAYER = ?");
+                PreparedStatement preparedStatement = this.getConnection().prepareStatement("DELETE FROM bans WHERE PLAYER = ?");
                 preparedStatement.setString(1, player);
                 preparedStatement.executeUpdate();
                 preparedStatement.close();
@@ -209,7 +209,7 @@ public class MysqlProvider extends Provider {
     public void unmutePlayer(String player) {
         CompletableFuture.runAsync(() -> {
             try {
-                PreparedStatement preparedStatement = getConnection().prepareStatement("DELETE FROM mutes WHERE PLAYER = ?");
+                PreparedStatement preparedStatement = this.getConnection().prepareStatement("DELETE FROM mutes WHERE PLAYER = ?");
                 preparedStatement.setString(1, player);
                 preparedStatement.executeUpdate();
                 preparedStatement.close();
@@ -222,7 +222,7 @@ public class MysqlProvider extends Provider {
     @Override
     public Ban getBan(String player) {
         try {
-            PreparedStatement preparedStatement = getConnection().prepareStatement("SELECT * FROM bans WHERE PLAYER = ?");
+            PreparedStatement preparedStatement = this.getConnection().prepareStatement("SELECT * FROM bans WHERE PLAYER = ?");
             preparedStatement.setString(1, player);
             ResultSet rs = preparedStatement.executeQuery();
             if (rs.next()) {
@@ -239,7 +239,7 @@ public class MysqlProvider extends Provider {
     @Override
     public Mute getMute(String player) {
         try {
-            PreparedStatement preparedStatement = getConnection().prepareStatement("SELECT * FROM mutes WHERE PLAYER = ?");
+            PreparedStatement preparedStatement = this.getConnection().prepareStatement("SELECT * FROM mutes WHERE PLAYER = ?");
             preparedStatement.setString(1, player);
             ResultSet rs = preparedStatement.executeQuery();
             if (rs.next()) {
@@ -256,7 +256,7 @@ public class MysqlProvider extends Provider {
     @Override
     public void createBanlog(Ban ban) {
         try {
-            update("INSERT INTO banlogs (PLAYER, REASON, ID, BANNER, DATE) VALUES ('" + ban.getPlayer() + "', '" + ban.getReason() + "', '" + ban.getBanID() + "', '" + ban.getBanner() + "', '" + ban.getDate() + "');");
+            this.update("INSERT INTO banlogs (PLAYER, REASON, ID, BANNER, DATE) VALUES ('" + ban.getPlayer() + "', '" + ban.getReason() + "', '" + ban.getBanID() + "', '" + ban.getBanner() + "', '" + ban.getDate() + "');");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -265,7 +265,7 @@ public class MysqlProvider extends Provider {
     @Override
     public void createMutelog(Mute mute) {
         try {
-            update("INSERT INTO mutelogs (PLAYER, REASON, ID, BANNER, DATE) VALUES ('" + mute.getPlayer() + "', '" + mute.getReason() + "', '" + mute.getMuteID() + "', '" + mute.getMuter() + "', '" + mute.getDate() + "');");
+            this.update("INSERT INTO mutelogs (PLAYER, REASON, ID, BANNER, DATE) VALUES ('" + mute.getPlayer() + "', '" + mute.getReason() + "', '" + mute.getMuteID() + "', '" + mute.getMuter() + "', '" + mute.getDate() + "');");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -275,7 +275,7 @@ public class MysqlProvider extends Provider {
     public List<Ban> getBanlog(String player) {
         List<Ban> list = new ArrayList<>();
         try {
-            PreparedStatement preparedStatement = getConnection().prepareStatement("SELECT * FROM banlogs WHERE PLAYER = ?");
+            PreparedStatement preparedStatement = this.getConnection().prepareStatement("SELECT * FROM banlogs WHERE PLAYER = ?");
             preparedStatement.setString(1, player);
             ResultSet rs = preparedStatement.executeQuery();
             while (rs.next()) {
@@ -294,7 +294,7 @@ public class MysqlProvider extends Provider {
     public List<Mute> getMutelog(String player) {
         List<Mute> list = new ArrayList<>();
         try {
-            PreparedStatement preparedStatement = getConnection().prepareStatement("SELECT * FROM mutelogs WHERE PLAYER = ?");
+            PreparedStatement preparedStatement = this.getConnection().prepareStatement("SELECT * FROM mutelogs WHERE PLAYER = ?");
             preparedStatement.setString(1, player);
             ResultSet rs = preparedStatement.executeQuery();
             while (rs.next()) {
@@ -313,7 +313,7 @@ public class MysqlProvider extends Provider {
     public List<Warn> getWarnings(String player) {
         List<Warn> list = new ArrayList<>();
         try {
-            PreparedStatement preparedStatement = getConnection().prepareStatement("SELECT * FROM warns WHERE PLAYER = ?");
+            PreparedStatement preparedStatement = this.getConnection().prepareStatement("SELECT * FROM warns WHERE PLAYER = ?");
             preparedStatement.setString(1, player);
             ResultSet rs = preparedStatement.executeQuery();
             while (rs.next()) {
@@ -332,12 +332,12 @@ public class MysqlProvider extends Provider {
     public void clearBanlog(String player) {
         CompletableFuture.runAsync(() -> {
             try {
-                PreparedStatement preparedStatement = getConnection().prepareStatement("SELECT * FROM banlogs WHERE PLAYER = ?");
+                PreparedStatement preparedStatement = this.getConnection().prepareStatement("SELECT * FROM banlogs WHERE PLAYER = ?");
                 preparedStatement.setString(1, player);
                 ResultSet rs = preparedStatement.executeQuery();
                 while (rs.next()) {
                     try {
-                        PreparedStatement preparedStatement2 = getConnection().prepareStatement("DELETE FROM banlogs WHERE ID = ?");
+                        PreparedStatement preparedStatement2 = this.getConnection().prepareStatement("DELETE FROM banlogs WHERE ID = ?");
                         preparedStatement2.setString(1, rs.getString("ID"));
                         preparedStatement2.executeUpdate();
                     } catch (Exception e) {
@@ -356,12 +356,12 @@ public class MysqlProvider extends Provider {
     public void clearMutelog(String player) {
         CompletableFuture.runAsync(() -> {
             try {
-                PreparedStatement preparedStatement = getConnection().prepareStatement("SELECT * FROM mutelogs WHERE PLAYER = ?");
+                PreparedStatement preparedStatement = this.getConnection().prepareStatement("SELECT * FROM mutelogs WHERE PLAYER = ?");
                 preparedStatement.setString(1, player);
                 ResultSet rs = preparedStatement.executeQuery();
                 while (rs.next()) {
                     try {
-                        PreparedStatement preparedStatement2 = getConnection().prepareStatement("DELETE FROM mutelogs WHERE ID = ?");
+                        PreparedStatement preparedStatement2 = this.getConnection().prepareStatement("DELETE FROM mutelogs WHERE ID = ?");
                         preparedStatement2.setString(1, rs.getString("ID"));
                         preparedStatement2.executeUpdate();
                     } catch (Exception e) {
@@ -380,12 +380,12 @@ public class MysqlProvider extends Provider {
     public void clearWarns(String player) {
         CompletableFuture.runAsync(() -> {
             try {
-                PreparedStatement preparedStatement = getConnection().prepareStatement("SELECT * FROM warns WHERE PLAYER = ?");
+                PreparedStatement preparedStatement = this.getConnection().prepareStatement("SELECT * FROM warns WHERE PLAYER = ?");
                 preparedStatement.setString(1, player);
                 ResultSet rs = preparedStatement.executeQuery();
                 while (rs.next()) {
                     try {
-                        PreparedStatement preparedStatement2 = getConnection().prepareStatement("DELETE FROM warns WHERE ID = ?");
+                        PreparedStatement preparedStatement2 = this.getConnection().prepareStatement("DELETE FROM warns WHERE ID = ?");
                         preparedStatement2.setString(1, rs.getString("ID"));
                         preparedStatement2.executeUpdate();
                     } catch (Exception e) {
@@ -402,22 +402,22 @@ public class MysqlProvider extends Provider {
 
     @Override
     public void setBanReason(String player, String reason) {
-        update("UPDATE bans SET REASON= '" + reason + "' WHERE PLAYER= '" + player + "';");
+        this.update("UPDATE bans SET REASON= '" + reason + "' WHERE PLAYER= '" + player + "';");
     }
 
     @Override
     public void setMuteReason(String player, String reason) {
-        update("UPDATE mutes SET REASON= '" + reason + "' WHERE PLAYER= '" + player + "';");
+        this.update("UPDATE mutes SET REASON= '" + reason + "' WHERE PLAYER= '" + player + "';");
     }
 
     @Override
     public void setBanTime(String player, long time) {
-        update("UPDATE bans SET TIME= '" + time + "' WHERE PLAYER= '" + player + "';");
+        this.update("UPDATE bans SET TIME= '" + time + "' WHERE PLAYER= '" + player + "';");
     }
 
     @Override
     public void setMuteTime(String player, long time) {
-        update("UPDATE mutes SET TIME= '" + time + "' WHERE PLAYER= '" + player + "';");
+        this.update("UPDATE mutes SET TIME= '" + time + "' WHERE PLAYER= '" + player + "';");
     }
 
     @Override
