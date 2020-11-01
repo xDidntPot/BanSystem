@@ -7,7 +7,7 @@ import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.data.CommandParamType;
 import cn.nukkit.command.data.CommandParameter;
 import cn.nukkit.network.protocol.ScriptCustomEventPacket;
-import net.llamadevelopment.bansystem.components.tools.Language;
+import net.llamadevelopment.bansystem.components.language.Language;
 import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
 import net.llamadevelopment.bansystem.components.api.SystemSettings;
 

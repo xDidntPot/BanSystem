@@ -50,25 +50,96 @@ WarnSystem:
 
 Settings:
   JoinDelay: 30
-  Waterdog: false
   ConfigVersion: 2.0
 
 Commands:
-  BanCommand: "ban"
-  TempbanCommand: "tempban"
-  BanlogCommand: "banlog"
-  CheckbanCommand: "checkban"
-  ClearbanlogCommand: "clearbanlog"
-  EditbanCommand: "editban"
-  UnbanCommand: "unban"
-  MuteCommand: "mute"
-  TempmuteCommand: "tempmute"
-  MutelogCommand: "mutelog"
-  CheckmuteCommand: "checkmute"
-  ClearmutelogCommand: "clearmutelog"
-  EditmuteCommand: "editmute"
-  UnmuteCommand: "unmute"
-  WarnCommand: "warn"
-  WarnlogCommand: "warnlog"
-  ClearwarningsCommand: "clearwarnlog"
-  KickCommand: "kick"
+  Ban:
+    Name: "ban"
+    Description: "Ban a player"
+    Permission: "bansystem.command.ban"
+    Aliases: {"pban"}
+  Tempban:
+    Name: "tempban"
+    Description: "Ban a player temporary"
+    Permission: "bansystem.command.tempban"
+    Aliases: { "tban" }
+  Banlog:
+    Name: "banlog"
+    Description: "Get the ban history of a player"
+    Permission: "bansystem.command.banlog"
+    Aliases: { "blog", "banhistory" }
+  Checkban:
+    Name: "checkban"
+    Description: "Check if a player is banned"
+    Permission: "bansystem.command.checkban"
+    Aliases: { "cban" }
+  Clearbanlog:
+    Name: "clearbanlog"
+    Description: "Clear all ban entries of a player"
+    Permission: "bansystem.command.clearbanlog"
+    Aliases: { "cblog" }
+  Editban:
+    Name: "editban"
+    Description: "Edit the ban of a player"
+    Permission: "bansystem.command.editban"
+    Aliases: { "eban" }
+  Unban:
+    Name: "unban"
+    Description: "Cancel an active ban"
+    Permission: "bansystem.command.unban"
+    Aliases: { "uban", "cancelban" }
+  Mute:
+    Name: "mute"
+    Description: "Mute a player from the chat"
+    Permission: "bansystem.command.mute"
+    Aliases: { "pmute" }
+  Tempmute:
+    Name: "tempmute"
+    Description: "Mute a player temporary from the chat"
+    Permission: "bansystem.command.tempmute"
+    Aliases: { "tmute" }
+  Mutelog:
+    Name: "mutelog"
+    Description: "Get the mute history of a player"
+    Permission: "bansystem.command.mutelog"
+    Aliases: { "mlog", "mutehistory" }
+  Checkmute:
+    Name: "checkmute"
+    Description: "Check if a player is muted"
+    Permission: "bansystem.command.checkmute"
+    Aliases: { "cmute" }
+  Clearmutelog:
+    Name: "clearmutelog"
+    Description: "Clear all mute entries of a player"
+    Permission: "bansystem.command.clearmutelog"
+    Aliases: { "cmlog" }
+  Editmute:
+    Name: "editmute"
+    Description: "Edit the mute of a player"
+    Permission: "bansystem.command.editmute"
+    Aliases: { "emute" }
+  Unmute:
+    Name: "unmute"
+    Description: "Cancel an active mute"
+    Permission: "bansystem.command.unmute"
+    Aliases: { "umute", "cancelmute" }
+  Warn:
+    Name: "warn"
+    Description: "Warn a player"
+    Permission: "bansystem.command.warn"
+    Aliases: { "pwarn" }
+  Warnlog:
+    Name: "warnlog"
+    Description: "Get the warn history of a player"
+    Permission: "bansystem.command.warnlog"
+    Aliases: { "wlog", "warnhistory" }
+  Clearwarnings:
+    Name: "clearwarnings"
+    Description: "Clear all warn entries of a player"
+    Permission: "bansystem.command.clearwarnings"
+    Aliases: { "cwlog" }
+  Kick:
+    Name: "kick"
+    Description: "Kick a player"
+    Permission: "bansystem.command.kick"
+    Aliases: { "pkick" }

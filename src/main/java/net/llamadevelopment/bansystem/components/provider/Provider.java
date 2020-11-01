@@ -1,4 +1,4 @@
-package net.llamadevelopment.bansystem.components.managers.database;
+package net.llamadevelopment.bansystem.components.provider;
 
 import net.llamadevelopment.bansystem.BanSystem;
 import net.llamadevelopment.bansystem.components.data.Ban;
@@ -6,6 +6,8 @@ import net.llamadevelopment.bansystem.components.data.Mute;
 import net.llamadevelopment.bansystem.components.data.Warn;
 
 import java.util.List;
+import java.util.Set;
+import java.util.function.Consumer;
 
 public class Provider {
 
@@ -13,6 +15,14 @@ public class Provider {
     }
 
     public void disconnect(BanSystem server) {
+    }
+
+    public void playerIsBanned(String player, Consumer<Boolean> isBanned) {
+
+    }
+
+    public void playerIsMuted(String player, Consumer<Boolean> isMuted) {
+
     }
 
     public boolean playerIsBanned(String player) {
@@ -39,6 +49,14 @@ public class Provider {
     public void unmutePlayer(String player) {
     }
 
+    public void getBan(String player, Consumer<Ban> ban) {
+
+    }
+
+    public void getMute(String player, Consumer<Mute> mute) {
+
+    }
+
     public Ban getBan(String player) {
         return null;
     }
@@ -51,6 +69,18 @@ public class Provider {
     }
 
     public void createMutelog(Mute mute) {
+    }
+
+    public void getBanLog(String player, Consumer<Set<Ban>> banlog) {
+
+    }
+
+    public void getMuteLog(String player, Consumer<Set<Mute>> mutelog) {
+
+    }
+
+    public void getWarnLog(String player, Consumer<Set<Warn>> warnlog) {
+
     }
 
     public List<Ban> getBanlog(String player) {

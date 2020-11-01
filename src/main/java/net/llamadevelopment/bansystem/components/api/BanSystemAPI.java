@@ -3,7 +3,8 @@ package net.llamadevelopment.bansystem.components.api;
 import lombok.Getter;
 import lombok.Setter;
 import net.llamadevelopment.bansystem.BanSystem;
-import net.llamadevelopment.bansystem.components.managers.database.Provider;
+import net.llamadevelopment.bansystem.components.provider.Provider;
+import net.llamadevelopment.bansystem.components.language.Language;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -17,6 +18,7 @@ public class BanSystemAPI {
     @Getter
     @Setter
     private static Provider provider;
+
     @Getter
     private static SystemSettings systemSettings;
 
@@ -42,4 +44,42 @@ public class BanSystemAPI {
         DateFormat dateFormat = new SimpleDateFormat("dd.MM.yy HH:mm");
         return dateFormat.format(now);
     }
+
+    public static String getRemainingTime(long duration) {
+        if (duration == -1L) {
+            return Language.getNP("Permanent");
+        } else {
+            SimpleDateFormat today = new SimpleDateFormat("dd.MM.yyyy");
+            today.format(System.currentTimeMillis());
+            SimpleDateFormat future = new SimpleDateFormat("dd.MM.yyyy");
+            future.format(duration);
+            long time = future.getCalendar().getTimeInMillis() - today.getCalendar().getTimeInMillis();
+            int days = (int) (time / 86400000L);
+            int hours = (int) (time / 3600000L % 24L);
+            int minutes = (int) (time / 60000L % 60L);
+            String day = Language.getNP("Days");
+            if (days == 1) {
+                day = Language.getNP("Day");
+            }
+
+            String hour = Language.getNP("Hours");
+            if (hours == 1) {
+                hour = Language.getNP("Hour");
+            }
+
+            String minute = Language.getNP("Minutes");
+            if (minutes == 1) {
+                minute = Language.getNP("Minute");
+            }
+
+            if (minutes < 1 && days == 0 && hours == 0) {
+                return Language.getNP("Seconds");
+            } else if (hours == 0 && days == 0) {
+                return minutes + " " + minute;
+            } else {
+                return days == 0 ? hours + " " + hour + " " + minutes + " " + minute : days + " " + day + " " + hours + " " + hour + " " + minutes + " " + minute;
+            }
+        }
+    }
+
 }

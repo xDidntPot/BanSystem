@@ -7,12 +7,12 @@ import cn.nukkit.event.player.PlayerChatEvent;
 import cn.nukkit.event.player.PlayerPreLoginEvent;
 import cn.nukkit.network.protocol.ScriptCustomEventPacket;
 import net.llamadevelopment.bansystem.BanSystem;
-import net.llamadevelopment.bansystem.components.tools.Language;
+import net.llamadevelopment.bansystem.components.language.Language;
 import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
 import net.llamadevelopment.bansystem.components.api.SystemSettings;
 import net.llamadevelopment.bansystem.components.data.Ban;
 import net.llamadevelopment.bansystem.components.data.Mute;
-import net.llamadevelopment.bansystem.components.managers.database.Provider;
+import net.llamadevelopment.bansystem.components.provider.Provider;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;

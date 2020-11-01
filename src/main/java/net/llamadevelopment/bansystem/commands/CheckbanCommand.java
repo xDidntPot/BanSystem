@@ -4,10 +4,10 @@ import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.data.CommandParamType;
 import cn.nukkit.command.data.CommandParameter;
-import net.llamadevelopment.bansystem.components.tools.Language;
+import net.llamadevelopment.bansystem.components.language.Language;
 import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
 import net.llamadevelopment.bansystem.components.data.Ban;
-import net.llamadevelopment.bansystem.components.managers.database.Provider;
+import net.llamadevelopment.bansystem.components.provider.Provider;
 
 import java.util.concurrent.CompletableFuture;
 

@@ -8,11 +8,11 @@ import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
 import net.llamadevelopment.bansystem.components.api.SystemSettings;
 import net.llamadevelopment.bansystem.components.data.BanReason;
 import net.llamadevelopment.bansystem.components.data.MuteReason;
-import net.llamadevelopment.bansystem.components.managers.MongodbProvider;
-import net.llamadevelopment.bansystem.components.managers.MysqlProvider;
-import net.llamadevelopment.bansystem.components.managers.YamlProvider;
-import net.llamadevelopment.bansystem.components.managers.database.Provider;
-import net.llamadevelopment.bansystem.components.tools.Language;
+import net.llamadevelopment.bansystem.components.provider.MongodbProvider;
+import net.llamadevelopment.bansystem.components.provider.MysqlProvider;
+import net.llamadevelopment.bansystem.components.provider.YamlProvider;
+import net.llamadevelopment.bansystem.components.provider.Provider;
+import net.llamadevelopment.bansystem.components.language.Language;
 import net.llamadevelopment.bansystem.listeners.EventListener;
 
 import java.util.HashMap;

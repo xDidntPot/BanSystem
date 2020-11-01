@@ -6,9 +6,9 @@ import cn.nukkit.command.data.CommandParamType;
 import cn.nukkit.command.data.CommandParameter;
 import cn.nukkit.utils.Config;
 import net.llamadevelopment.bansystem.BanSystem;
-import net.llamadevelopment.bansystem.components.tools.Language;
+import net.llamadevelopment.bansystem.components.language.Language;
 import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
-import net.llamadevelopment.bansystem.components.managers.database.Provider;
+import net.llamadevelopment.bansystem.components.provider.Provider;
 
 public class WarnCommand extends Command {
 
