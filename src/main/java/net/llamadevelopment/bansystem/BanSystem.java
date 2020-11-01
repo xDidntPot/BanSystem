@@ -21,7 +21,7 @@ import java.util.Map;
 public class BanSystem extends PluginBase {
 
     private static BanSystem instance;
-    public static Provider provider;
+    public Provider provider;
     private static final Map<String, Provider> providers = new HashMap<>();
 
     @Override
@@ -61,23 +61,23 @@ public class BanSystem extends PluginBase {
     private void loadPlugin() {
         Config config = this.getConfig();
         CommandMap map = this.getServer().getCommandMap();
-        map.register(config.getString("Commands.BanCommand"), new BanCommand(config.getString("Commands.BanCommand")));
+        map.register(config.getString("Commands.BanCommand"), new BanCommand(this));
         map.register(config.getString("Commands.TempbanCommand"), new TempbanCommand(config.getString("Commands.TempbanCommand")));
-        map.register(config.getString("Commands.BanlogCommand"), new BanlogCommand(config.getString("Commands.BanlogCommand")));
-        map.register(config.getString("Commands.CheckbanCommand"), new CheckbanCommand(config.getString("Commands.CheckbanCommand")));
-        map.register(config.getString("Commands.ClearbanlogCommand"), new ClearbanlogCommand(config.getString("Commands.ClearbanlogCommand")));
+        map.register(config.getString("Commands.BanlogCommand"), new BanlogCommand(this));
+        map.register(config.getString("Commands.CheckbanCommand"), new CheckbanCommand(this));
+        map.register(config.getString("Commands.ClearbanlogCommand"), new ClearbanlogCommand(this));
         map.register(config.getString("Commands.UnbanCommand"), new UnbanCommand(config.getString("Commands.UnbanCommand")));
         map.register(config.getString("Commands.MuteCommand"), new MuteCommand(config.getString("Commands.MuteCommand")));
         map.register(config.getString("Commands.TempmuteCommand"), new TempmuteCommand(config.getString("Commands.TempmuteCommand")));
         map.register(config.getString("Commands.MutelogCommand"), new MutelogCommand(config.getString("Commands.MutelogCommand")));
-        map.register(config.getString("Commands.CheckmuteCommand"), new CheckmuteCommand(config.getString("Commands.CheckmuteCommand")));
-        map.register(config.getString("Commands.ClearmutelogCommand"), new ClearmutelogCommand(config.getString("Commands.ClearmutelogCommand")));
+        map.register(config.getString("Commands.CheckmuteCommand"), new CheckmuteCommand(this));
+        map.register(config.getString("Commands.ClearmutelogCommand"), new ClearmutelogCommand(this));
         map.register(config.getString("Commands.UnmuteCommand"), new UnmuteCommand(config.getString("Commands.UnmuteCommand")));
         map.register(config.getString("Commands.WarnCommand"), new WarnCommand(config.getString("Commands.WarnCommand")));
         map.register(config.getString("Commands.WarnlogCommand"), new WarnlogCommand(config.getString("Commands.WarnlogCommand")));
-        map.register(config.getString("Commands.ClearwarningsCommand"), new ClearwarningsCommand(config.getString("Commands.ClearwarningsCommand")));
-        map.register(config.getString("Commands.EditbanCommand"), new EditbanCommand(config.getString("Commands.EditbanCommand")));
-        map.register(config.getString("Commands.EditmuteCommand"), new EditmuteCommand(config.getString("Commands.EditmuteCommand")));
+        map.register(config.getString("Commands.ClearwarningsCommand"), new ClearwarningsCommand(this));
+        map.register(config.getString("Commands.EditbanCommand"), new EditbanCommand(this));
+        map.register(config.getString("Commands.EditmuteCommand"), new EditmuteCommand(this));
         map.register(config.getString("Commands.KickCommand"), new KickCommand(config.getString("Commands.KickCommand")));
 
         this.getServer().getPluginManager().registerEvents(new EventListener(), this);
