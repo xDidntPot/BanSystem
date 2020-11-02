@@ -53,14 +53,52 @@ public class MongodbProvider extends Provider {
 
     @Override
     public void playerIsBanned(String player, Consumer<Boolean> isBanned) {
-        Document document = this.banCollection.find(new Document("player", player)).first();
-        isBanned.accept(document != null);
+        CompletableFuture.runAsync(() -> {
+            Document document = this.banCollection.find(new Document("player", player)).first();
+            isBanned.accept(document != null);
+        });
     }
 
     @Override
     public void playerIsMuted(String player, Consumer<Boolean> isMuted) {
-        Document document = this.muteCollection.find(new Document("player", player)).first();
-        isMuted.accept(document != null);
+        CompletableFuture.runAsync(() -> {
+            Document document = this.muteCollection.find(new Document("player", player)).first();
+            isMuted.accept(document != null);
+        });
+    }
+
+    @Override
+    public void banIdExists(String id, boolean history, Consumer<Boolean> exists) {
+        CompletableFuture.runAsync(() -> {
+            Document document;
+            if (history) {
+                document = this.banlogCollection.find(new Document("id", id)).first();
+            } else {
+                document = this.banCollection.find(new Document("id", id)).first();
+            }
+            exists.accept(document != null);
+        });
+    }
+
+    @Override
+    public void muteIdExists(String id, boolean history, Consumer<Boolean> exists) {
+        CompletableFuture.runAsync(() -> {
+            Document document;
+            if (history) {
+                document = this.mutelogCollection.find(new Document("id", id)).first();
+            } else {
+                document = this.muteCollection.find(new Document("id", id)).first();
+            }
+            exists.accept(document != null);
+        });
+    }
+
+    @Override
+    public void warnIdExists(String id, Consumer<Boolean> exists) {
+        CompletableFuture.runAsync(() -> {
+            Document document = this.warnCollection.find(new Document("id", id)).first();
+            exists.accept(document != null);
+        });
     }
 
     @Override
@@ -80,8 +118,9 @@ public class MongodbProvider extends Provider {
             this.createBanlog(new Ban(player, reason, id, banner, date, end));
             Player onlinePlayer = Server.getInstance().getPlayer(player);
             if (onlinePlayer != null) {
-                Ban ban = this.getBan(player);
-                onlinePlayer.kick(Language.getNP("BanScreen", ban.getReason(), ban.getBanID(), this.getRemainingTime(ban.getTime())), false);
+                this.getBan(player, ban -> {
+                    onlinePlayer.kick(Language.getNP("BanScreen", ban.getReason(), ban.getBanID(), BanSystemAPI.getRemainingTime(ban.getTime())), false);
+                });
             }
         });
     }
@@ -150,6 +189,36 @@ public class MongodbProvider extends Provider {
             Document document = this.muteCollection.find(new Document("player", player)).first();
             if (document != null) {
                 mute.accept(new Mute(player, document.getString("reason"), document.getString("id"), document.getString("banner"), document.getString("date"), document.getLong("time")));
+            }
+        });
+    }
+
+    @Override
+    public void getBanById(String id, boolean history, Consumer<Ban> ban) {
+        CompletableFuture.runAsync(() -> {
+            if (history) {
+                Document document = this.banlogCollection.find(new Document("id", id)).first();
+                assert document != null;
+                ban.accept(new Ban(document.getString("player"), document.getString("reason"), document.getString("id"), document.getString("banner"), document.getString("date"), 0));
+            } else {
+                Document document = this.banCollection.find(new Document("id", id)).first();
+                assert document != null;
+                ban.accept(new Ban(document.getString("player"), document.getString("reason"), document.getString("id"), document.getString("banner"), document.getString("date"), document.getLong("time")));
+            }
+        });
+    }
+
+    @Override
+    public void getMuteById(String id, boolean history, Consumer<Mute> mute) {
+        CompletableFuture.runAsync(() -> {
+            if (history) {
+                Document document = this.mutelogCollection.find(new Document("id", id)).first();
+                assert document != null;
+                mute.accept(new Mute(document.getString("player"), document.getString("reason"), document.getString("id"), document.getString("banner"), document.getString("date"), 0));
+            } else {
+                Document document = this.muteCollection.find(new Document("id", id)).first();
+                assert document != null;
+                mute.accept(new Mute(document.getString("player"), document.getString("reason"), document.getString("id"), document.getString("banner"), document.getString("date"), document.getLong("time")));
             }
         });
     }
@@ -289,6 +358,21 @@ public class MongodbProvider extends Provider {
             Bson newEntrySet = new Document("$set", newEntry);
             this.muteCollection.updateOne(found, newEntrySet);
         });
+    }
+
+    @Override
+    public void deleteBan(String id) {
+        CompletableFuture.runAsync(() -> this.banlogCollection.findOneAndDelete(new Document("id", id)));
+    }
+
+    @Override
+    public void deleteMute(String id) {
+        CompletableFuture.runAsync(() -> this.mutelogCollection.findOneAndDelete(new Document("id", id)));
+    }
+
+    @Override
+    public void deleteWarn(String id) {
+        CompletableFuture.runAsync(() -> this.warnCollection.findOneAndDelete(new Document("id", id)));
     }
 
     @Override

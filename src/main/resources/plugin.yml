@@ -1,5 +1,6 @@
 name: BanSystemNK
-version: 2.0.4-SNAPSHOT
+version: 2.1.0-SNAPSHOT
 api: 1.0.0
 author: Mundschutziii
 main: net.llamadevelopment.bansystem.BanSystem
+description: An advanced punishment tool

@@ -57,7 +57,7 @@ Commands:
     Name: "ban"
     Description: "Ban a player"
     Permission: "bansystem.command.ban"
-    Aliases: {"pban"}
+    Aliases: { "pban" }
   Tempban:
     Name: "tempban"
     Description: "Ban a player temporary"

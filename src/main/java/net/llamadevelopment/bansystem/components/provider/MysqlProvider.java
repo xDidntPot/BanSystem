@@ -24,57 +24,59 @@ public class MysqlProvider extends Provider {
 
     @Override
     public void connect(BanSystem server) {
-        try {
-            client = new MySqlClient(
-                    server.getConfig().getString("MySql.Host"),
-                    server.getConfig().getString("MySql.Port"),
-                    server.getConfig().getString("MySql.User"),
-                    server.getConfig().getString("MySql.Password"),
-                    server.getConfig().getString("MySql.Database")
-            );
+        CompletableFuture.runAsync(() -> {
+            try {
+                this.client = new MySqlClient(
+                        server.getConfig().getString("MySql.Host"),
+                        server.getConfig().getString("MySql.Port"),
+                        server.getConfig().getString("MySql.User"),
+                        server.getConfig().getString("MySql.Password"),
+                        server.getConfig().getString("MySql.Database")
+                );
 
-            this.client.createTable("bans", "id",
-                    new SqlColumn("player", SqlColumn.Type.VARCHAR, 64)
-                            .append("reason", SqlColumn.Type.VARCHAR, 128)
-                            .append("id", SqlColumn.Type.VARCHAR, 64)
-                            .append("banner", SqlColumn.Type.VARCHAR, 64)
-                            .append("date", SqlColumn.Type.VARCHAR, 64)
-                            .append("time", SqlColumn.Type.BIGINT, 128));
+                this.client.createTable("bans", "id",
+                        new SqlColumn("player", SqlColumn.Type.VARCHAR, 64)
+                                .append("reason", SqlColumn.Type.VARCHAR, 128)
+                                .append("id", SqlColumn.Type.VARCHAR, 64)
+                                .append("banner", SqlColumn.Type.VARCHAR, 64)
+                                .append("date", SqlColumn.Type.VARCHAR, 64)
+                                .append("time", SqlColumn.Type.BIGINT, 128));
 
-            this.client.createTable("mutes", "id",
-                    new SqlColumn("player", SqlColumn.Type.VARCHAR, 64)
-                            .append("reason", SqlColumn.Type.VARCHAR, 128)
-                            .append("id", SqlColumn.Type.VARCHAR, 64)
-                            .append("banner", SqlColumn.Type.VARCHAR, 64)
-                            .append("date", SqlColumn.Type.VARCHAR, 64)
-                            .append("time", SqlColumn.Type.BIGINT, 128));
+                this.client.createTable("mutes", "id",
+                        new SqlColumn("player", SqlColumn.Type.VARCHAR, 64)
+                                .append("reason", SqlColumn.Type.VARCHAR, 128)
+                                .append("id", SqlColumn.Type.VARCHAR, 64)
+                                .append("banner", SqlColumn.Type.VARCHAR, 64)
+                                .append("date", SqlColumn.Type.VARCHAR, 64)
+                                .append("time", SqlColumn.Type.BIGINT, 128));
 
-            this.client.createTable("warns", "id",
-                    new SqlColumn("player", SqlColumn.Type.VARCHAR, 64)
-                            .append("reason", SqlColumn.Type.VARCHAR, 128)
-                            .append("id", SqlColumn.Type.VARCHAR, 64)
-                            .append("creator", SqlColumn.Type.VARCHAR, 64)
-                            .append("date", SqlColumn.Type.VARCHAR, 64));
+                this.client.createTable("warns", "id",
+                        new SqlColumn("player", SqlColumn.Type.VARCHAR, 64)
+                                .append("reason", SqlColumn.Type.VARCHAR, 128)
+                                .append("id", SqlColumn.Type.VARCHAR, 64)
+                                .append("creator", SqlColumn.Type.VARCHAR, 64)
+                                .append("date", SqlColumn.Type.VARCHAR, 64));
 
-            this.client.createTable("banlogs", "id",
-                    new SqlColumn("player", SqlColumn.Type.VARCHAR, 64)
-                            .append("reason", SqlColumn.Type.VARCHAR, 128)
-                            .append("id", SqlColumn.Type.VARCHAR, 64)
-                            .append("banner", SqlColumn.Type.VARCHAR, 64)
-                            .append("date", SqlColumn.Type.VARCHAR, 64));
+                this.client.createTable("banlogs", "id",
+                        new SqlColumn("player", SqlColumn.Type.VARCHAR, 64)
+                                .append("reason", SqlColumn.Type.VARCHAR, 128)
+                                .append("id", SqlColumn.Type.VARCHAR, 64)
+                                .append("banner", SqlColumn.Type.VARCHAR, 64)
+                                .append("date", SqlColumn.Type.VARCHAR, 64));
 
-            this.client.createTable("mutelogs", "id",
-                    new SqlColumn("player", SqlColumn.Type.VARCHAR, 64)
-                            .append("reason", SqlColumn.Type.VARCHAR, 128)
-                            .append("id", SqlColumn.Type.VARCHAR, 64)
-                            .append("banner", SqlColumn.Type.VARCHAR, 64)
-                            .append("date", SqlColumn.Type.VARCHAR, 64));
+                this.client.createTable("mutelogs", "id",
+                        new SqlColumn("player", SqlColumn.Type.VARCHAR, 64)
+                                .append("reason", SqlColumn.Type.VARCHAR, 128)
+                                .append("id", SqlColumn.Type.VARCHAR, 64)
+                                .append("banner", SqlColumn.Type.VARCHAR, 64)
+                                .append("date", SqlColumn.Type.VARCHAR, 64));
 
-            server.getLogger().info("[MySqlClient] Connection opened.");
-        } catch (Exception e) {
-            e.printStackTrace();
-            server.getLogger().info("[MySqlClient] Failed to connect to database.");
-        }
+                server.getLogger().info("[MySqlClient] Connection opened.");
+            } catch (Exception e) {
+                e.printStackTrace();
+                server.getLogger().info("[MySqlClient] Failed to connect to database.");
+            }
+        });
     }
 
     @Override
@@ -104,6 +106,40 @@ public class MysqlProvider extends Provider {
     }
 
     @Override
+    public void banIdExists(String id, boolean history, Consumer<Boolean> exists) {
+        CompletableFuture.runAsync(() -> {
+            SqlDocument document;
+            if (history) {
+                document = this.client.find("banlogs", "id", id).first();
+            } else {
+                document = this.client.find("bans", "id", id).first();
+            }
+            exists.accept(document != null);
+        });
+    }
+
+    @Override
+    public void muteIdExists(String id, boolean history, Consumer<Boolean> exists) {
+        CompletableFuture.runAsync(() -> {
+            SqlDocument document;
+            if (history) {
+                document = this.client.find("mutelogs", "id", id).first();
+            } else {
+                document = this.client.find("mutes", "id", id).first();
+            }
+            exists.accept(document != null);
+        });
+    }
+
+    @Override
+    public void warnIdExists(String id, Consumer<Boolean> exists) {
+        CompletableFuture.runAsync(() -> {
+            SqlDocument document = this.client.find("warns", "id", id).first();
+            exists.accept(document != null);
+        });
+    }
+
+    @Override
     public void banPlayer(String player, String reason, String banner, int seconds) {
         CompletableFuture.runAsync(() -> {
             long current = System.currentTimeMillis();
@@ -120,8 +156,9 @@ public class MysqlProvider extends Provider {
             this.createBanlog(new Ban(player, reason, id, banner, date, end));
             Player onlinePlayer = Server.getInstance().getPlayer(player);
             if (onlinePlayer != null) {
-                Ban ban = this.getBan(player);
-                onlinePlayer.kick(Language.getNP("BanScreen", ban.getReason(), ban.getBanID(), this.getRemainingTime(ban.getTime())), false);
+                this.getBan(player, ban -> {
+                    onlinePlayer.kick(Language.getNP("BanScreen", ban.getReason(), ban.getBanID(), BanSystemAPI.getRemainingTime(ban.getTime())), false);
+                });
             }
         });
     }
@@ -180,6 +217,32 @@ public class MysqlProvider extends Provider {
         CompletableFuture.runAsync(() -> {
             SqlDocument document = this.client.find("mutes", "player", player).first();
             mute.accept(new Mute(player, document.getString("reason"), document.getString("id"), document.getString("banner"), document.getString("date"), document.getLong("time")));
+        });
+    }
+
+    @Override
+    public void getBanById(String id, boolean history, Consumer<Ban> ban) {
+        CompletableFuture.runAsync(() -> {
+            if (history) {
+                SqlDocument document = this.client.find("banlogs", "id", id).first();
+                ban.accept(new Ban(document.getString("player"), document.getString("reason"), document.getString("id"), document.getString("banner"), document.getString("date"), 0));
+            } else {
+                SqlDocument document = this.client.find("bans", "id", id).first();
+                ban.accept(new Ban(document.getString("player"), document.getString("reason"), document.getString("id"), document.getString("banner"), document.getString("date"), document.getLong("time")));
+            }
+        });
+    }
+
+    @Override
+    public void getMuteById(String id, boolean history, Consumer<Mute> mute) {
+        CompletableFuture.runAsync(() -> {
+            if (history) {
+                SqlDocument document = this.client.find("mutelogs", "id", id).first();
+                mute.accept(new Mute(document.getString("player"), document.getString("reason"), document.getString("id"), document.getString("banner"), document.getString("date"), 0));
+            } else {
+                SqlDocument document = this.client.find("mutes", "id", id).first();
+                mute.accept(new Mute(document.getString("player"), document.getString("reason"), document.getString("id"), document.getString("banner"), document.getString("date"), document.getLong("time")));
+            }
         });
     }
 
@@ -273,6 +336,21 @@ public class MysqlProvider extends Provider {
     @Override
     public void setMuteTime(String player, long time) {
         CompletableFuture.runAsync(() -> this.client.update("mutes", "player", player, new SqlDocument("time", time)));
+    }
+
+    @Override
+    public void deleteBan(String id) {
+        CompletableFuture.runAsync(() -> this.client.delete("banlogs", new SqlDocument("id", id)));
+    }
+
+    @Override
+    public void deleteMute(String id) {
+        CompletableFuture.runAsync(() -> this.client.delete("mutelogs", new SqlDocument("id", id)));
+    }
+
+    @Override
+    public void deleteWarn(String id) {
+        CompletableFuture.runAsync(() -> this.client.delete("warns", new SqlDocument("id", id)));
     }
 
     @Override

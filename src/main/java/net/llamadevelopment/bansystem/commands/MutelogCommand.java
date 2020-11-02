@@ -1,39 +1,37 @@
 package net.llamadevelopment.bansystem.commands;
 
-import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
+import cn.nukkit.command.PluginCommand;
 import cn.nukkit.command.data.CommandParamType;
 import cn.nukkit.command.data.CommandParameter;
+import net.llamadevelopment.bansystem.BanSystem;
 import net.llamadevelopment.bansystem.components.language.Language;
-import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
-import net.llamadevelopment.bansystem.components.provider.Provider;
 
-import java.util.concurrent.CompletableFuture;
+public class MutelogCommand extends PluginCommand<BanSystem> {
 
-public class MutelogCommand extends Command {
-
-    public MutelogCommand(String name) {
-        super(name, "Get the mute history of a player.");
-        commandParameters.put("default", new CommandParameter[]{
+    public MutelogCommand(BanSystem owner) {
+        super(owner.getConfig().getString("Commands.Mutelog.Kick"), owner);
+        this.commandParameters.put("default", new CommandParameter[]{
                 new CommandParameter("player", CommandParamType.TARGET, false)
         });
-        setPermission("bansystem.command.mutelog");
+        this.setDescription(owner.getConfig().getString("Commands.Mutelog.Description"));
+        this.setPermission(owner.getConfig().getString("Commands.Mutelog.Permission"));
+        this.setAliases(owner.getConfig().getStringList("Commands.Mutelog.Aliases").toArray(new String[]{}));
     }
 
     @Override
     public boolean execute(CommandSender sender, String s, String[] args) {
-        Provider api = BanSystemAPI.getProvider();
-        if (sender.hasPermission(getPermission())) {
+        if (sender.hasPermission(this.getPermission())) {
             if (args.length == 1) {
                 String player = args[0];
-                CompletableFuture.runAsync(() -> {
-                    int i = api.getMutelog(player).size();
+                this.getPlugin().provider.getMuteLog(player, mutelog -> {
+                    int i = mutelog.size();
                     if (i == 0) {
                         sender.sendMessage(Language.get("NoDataFound"));
                         return;
                     }
                     sender.sendMessage(Language.get("MutelogInfo", player, i));
-                    api.getMutelog(player).forEach(mute -> {
+                    mutelog.forEach(mute -> {
                         sender.sendMessage(Language.get("MutelogPlaceholder"));
                         sender.sendMessage(Language.get("MutelogReason", mute.getReason()));
                         sender.sendMessage(Language.get("MutelogID", mute.getMuteID()));
@@ -41,8 +39,9 @@ public class MutelogCommand extends Command {
                         sender.sendMessage(Language.get("MutelogDate", mute.getDate()));
                     });
                 });
-            } else sender.sendMessage(Language.get("MutelogCommandUsage", getName()));
+            } else sender.sendMessage(Language.get("MutelogCommandUsage", this.getName()));
         } else sender.sendMessage(Language.get("NoPermission"));
         return false;
     }
+
 }

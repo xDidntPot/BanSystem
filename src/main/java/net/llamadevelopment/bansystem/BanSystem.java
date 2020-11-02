@@ -3,6 +3,7 @@ package net.llamadevelopment.bansystem;
 import cn.nukkit.command.CommandMap;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.utils.Config;
+import lombok.Getter;
 import net.llamadevelopment.bansystem.commands.*;
 import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
 import net.llamadevelopment.bansystem.components.api.SystemSettings;
@@ -20,9 +21,11 @@ import java.util.Map;
 
 public class BanSystem extends PluginBase {
 
-    private static BanSystem instance;
     public Provider provider;
     private static final Map<String, Provider> providers = new HashMap<>();
+
+    @Getter
+    private static BanSystem instance;
 
     @Override
     public void onEnable() {
@@ -34,14 +37,14 @@ public class BanSystem extends PluginBase {
             providers.put("MongoDB", new MongodbProvider());
             providers.put("MySql", new MysqlProvider());
             providers.put("Yaml", new YamlProvider());
-            if (!providers.containsKey(getConfig().getString("Provider"))) {
-                getLogger().error("§4Please specify a valid provider: Yaml, MySql, MongoDB");
+            if (!providers.containsKey(this.getConfig().getString("Provider"))) {
+                this.getLogger().error("§4Please specify a valid provider: Yaml, MySql, MongoDB");
                 return;
             }
-            provider = providers.get(getConfig().getString("Provider"));
-            provider.connect(this);
-            this.getLogger().info("§aSuccessfully loaded " + provider.getProvider() + " provider.");
-            BanSystemAPI.setProvider(provider);
+            this.provider = providers.get(this.getConfig().getString("Provider"));
+            this.provider.connect(this);
+            this.getLogger().info("§aSuccessfully loaded " + this.provider.getProvider() + " provider.");
+            BanSystemAPI.setProvider(this.provider);
             Language.init();
             this.loadPlugin();
             this.getLogger().info("§aBanSystem successfully started.");
@@ -62,23 +65,23 @@ public class BanSystem extends PluginBase {
         Config config = this.getConfig();
         CommandMap map = this.getServer().getCommandMap();
         map.register(config.getString("Commands.BanCommand"), new BanCommand(this));
-        map.register(config.getString("Commands.TempbanCommand"), new TempbanCommand(config.getString("Commands.TempbanCommand")));
+        map.register(config.getString("Commands.TempbanCommand"), new TempbanCommand(this));
         map.register(config.getString("Commands.BanlogCommand"), new BanlogCommand(this));
         map.register(config.getString("Commands.CheckbanCommand"), new CheckbanCommand(this));
         map.register(config.getString("Commands.ClearbanlogCommand"), new ClearbanlogCommand(this));
-        map.register(config.getString("Commands.UnbanCommand"), new UnbanCommand(config.getString("Commands.UnbanCommand")));
-        map.register(config.getString("Commands.MuteCommand"), new MuteCommand(config.getString("Commands.MuteCommand")));
-        map.register(config.getString("Commands.TempmuteCommand"), new TempmuteCommand(config.getString("Commands.TempmuteCommand")));
-        map.register(config.getString("Commands.MutelogCommand"), new MutelogCommand(config.getString("Commands.MutelogCommand")));
+        map.register(config.getString("Commands.UnbanCommand"), new UnbanCommand(this));
+        map.register(config.getString("Commands.MuteCommand"), new MuteCommand(this));
+        map.register(config.getString("Commands.TempmuteCommand"), new TempmuteCommand(this));
+        map.register(config.getString("Commands.MutelogCommand"), new MutelogCommand(this));
         map.register(config.getString("Commands.CheckmuteCommand"), new CheckmuteCommand(this));
         map.register(config.getString("Commands.ClearmutelogCommand"), new ClearmutelogCommand(this));
-        map.register(config.getString("Commands.UnmuteCommand"), new UnmuteCommand(config.getString("Commands.UnmuteCommand")));
-        map.register(config.getString("Commands.WarnCommand"), new WarnCommand(config.getString("Commands.WarnCommand")));
-        map.register(config.getString("Commands.WarnlogCommand"), new WarnlogCommand(config.getString("Commands.WarnlogCommand")));
+        map.register(config.getString("Commands.UnmuteCommand"), new UnmuteCommand(this));
+        map.register(config.getString("Commands.WarnCommand"), new WarnCommand(this));
+        map.register(config.getString("Commands.WarnlogCommand"), new WarnlogCommand(this));
         map.register(config.getString("Commands.ClearwarningsCommand"), new ClearwarningsCommand(this));
         map.register(config.getString("Commands.EditbanCommand"), new EditbanCommand(this));
         map.register(config.getString("Commands.EditmuteCommand"), new EditmuteCommand(this));
-        map.register(config.getString("Commands.KickCommand"), new KickCommand(config.getString("Commands.KickCommand")));
+        map.register(config.getString("Commands.KickCommand"), new KickCommand(this));
 
         this.getServer().getPluginManager().registerEvents(new EventListener(), this);
         this.loadReasons();
@@ -86,10 +89,7 @@ public class BanSystem extends PluginBase {
 
     @Override
     public void onDisable() {
-        provider.disconnect(this);
+        this.provider.disconnect(this);
     }
 
-    public static BanSystem getInstance() {
-        return instance;
-    }
 }
