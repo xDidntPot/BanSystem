@@ -10,7 +10,7 @@ import net.llamadevelopment.bansystem.components.language.Language;
 public class MutelogCommand extends PluginCommand<BanSystem> {
 
     public MutelogCommand(BanSystem owner) {
-        super(owner.getConfig().getString("Commands.Mutelog.Kick"), owner);
+        super(owner.getConfig().getString("Commands.Mutelog.Name"), owner);
         this.commandParameters.put("default", new CommandParameter[]{
                 new CommandParameter("player", CommandParamType.TARGET, false)
         });
