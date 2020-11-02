@@ -46,43 +46,46 @@ public class YamlProvider extends Provider {
 
     @Override
     public void banIdExists(String id, boolean history, Consumer<Boolean> exists) {
+        boolean b = false;
         if (history) {
             for (String s : this.banlog.getSection("Banlog").getAll().getKeys(false)) {
                 boolean idSet = this.banlog.exists("Banlog." + s + "." + id);
-                if (idSet) exists.accept(true);
+                if (idSet) b = true;
             }
         } else {
             for (String s : this.bans.getSection("Ban").getAll().getKeys(false)) {
                 String idSet = this.bans.getString("Ban." + s + ".ID");
-                if (id.equals(idSet)) exists.accept(true);
+                if (id.equals(idSet)) b = true;
             }
         }
-        exists.accept(false);
+        exists.accept(b);
     }
 
     @Override
     public void muteIdExists(String id, boolean history, Consumer<Boolean> exists) {
+        boolean b = false;
         if (history) {
             for (String s : this.mutelog.getSection("Mutelog").getAll().getKeys(false)) {
                 boolean idSet = this.mutelog.exists("Mutelog." + s + "." + id);
-                if (idSet) exists.accept(true);
+                if (idSet) b = true;
             }
         } else {
             for (String s : this.mutes.getSection("Mute").getAll().getKeys(false)) {
                 String idSet = this.mutes.getString("Mute." + s + ".ID");
-                if (id.equals(idSet)) exists.accept(true);
+                if (id.equals(idSet)) b = true;
             }
         }
-        exists.accept(false);
+        exists.accept(b);
     }
 
     @Override
     public void warnIdExists(String id, Consumer<Boolean> exists) {
+        boolean b = false;
         for (String s : this.warns.getSection("Warn").getAll().getKeys(false)) {
             boolean idSet = this.warns.exists("Warn." + s + "." + id);
-            if (idSet) exists.accept(true);
+            if (idSet) b = true;
         }
-        exists.accept(false);
+        exists.accept(b);
     }
 
     @Override

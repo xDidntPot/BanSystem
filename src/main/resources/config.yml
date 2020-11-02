@@ -57,89 +57,104 @@ Commands:
     Name: "ban"
     Description: "Ban a player"
     Permission: "bansystem.command.ban"
-    Aliases: { "pban" }
+    Aliases: [ "pban" ]
   Tempban:
     Name: "tempban"
     Description: "Ban a player temporary"
     Permission: "bansystem.command.tempban"
-    Aliases: { "tban" }
+    Aliases: [ "tban" ]
   Banlog:
     Name: "banlog"
     Description: "Get the ban history of a player"
     Permission: "bansystem.command.banlog"
-    Aliases: { "blog", "banhistory" }
+    Aliases: [ "blog", "banhistory" ]
   Checkban:
     Name: "checkban"
     Description: "Check if a player is banned"
     Permission: "bansystem.command.checkban"
-    Aliases: { "cban" }
+    Aliases: [ "cban" ]
   Clearbanlog:
     Name: "clearbanlog"
     Description: "Clear all ban entries of a player"
     Permission: "bansystem.command.clearbanlog"
-    Aliases: { "cblog" }
+    Aliases: [ "cblog" ]
   Editban:
     Name: "editban"
     Description: "Edit the ban of a player"
     Permission: "bansystem.command.editban"
-    Aliases: { "eban" }
+    Aliases: [ "eban" ]
   Unban:
     Name: "unban"
     Description: "Cancel an active ban"
     Permission: "bansystem.command.unban"
-    Aliases: { "uban", "cancelban" }
+    Aliases: [ "uban", "cancelban" ]
   Mute:
     Name: "mute"
     Description: "Mute a player from the chat"
     Permission: "bansystem.command.mute"
-    Aliases: { "pmute" }
+    Aliases: [ "pmute" ]
   Tempmute:
     Name: "tempmute"
     Description: "Mute a player temporary from the chat"
     Permission: "bansystem.command.tempmute"
-    Aliases: { "tmute" }
+    Aliases: [ "tmute" ]
   Mutelog:
     Name: "mutelog"
     Description: "Get the mute history of a player"
     Permission: "bansystem.command.mutelog"
-    Aliases: { "mlog", "mutehistory" }
+    Aliases: [ "mlog", "mutehistory" ]
   Checkmute:
     Name: "checkmute"
     Description: "Check if a player is muted"
     Permission: "bansystem.command.checkmute"
-    Aliases: { "cmute" }
+    Aliases: [ "cmute" ]
   Clearmutelog:
     Name: "clearmutelog"
     Description: "Clear all mute entries of a player"
     Permission: "bansystem.command.clearmutelog"
-    Aliases: { "cmlog" }
+    Aliases: [ "cmlog" ]
   Editmute:
     Name: "editmute"
     Description: "Edit the mute of a player"
     Permission: "bansystem.command.editmute"
-    Aliases: { "emute" }
+    Aliases: [ "emute" ]
   Unmute:
     Name: "unmute"
     Description: "Cancel an active mute"
     Permission: "bansystem.command.unmute"
-    Aliases: { "umute", "cancelmute" }
+    Aliases: [ "umute", "cancelmute" ]
   Warn:
     Name: "warn"
     Description: "Warn a player"
     Permission: "bansystem.command.warn"
-    Aliases: { "pwarn" }
+    Aliases: [ "pwarn" ]
   Warnlog:
     Name: "warnlog"
     Description: "Get the warn history of a player"
     Permission: "bansystem.command.warnlog"
-    Aliases: { "wlog", "warnhistory" }
+    Aliases: [ "wlog", "warnhistory" ]
   Clearwarnings:
     Name: "clearwarnings"
     Description: "Clear all warn entries of a player"
     Permission: "bansystem.command.clearwarnings"
-    Aliases: { "cwlog" }
+    Aliases: [ "cwlog" ]
   Kick:
     Name: "kick"
     Description: "Kick a player"
     Permission: "bansystem.command.kick"
-    Aliases: { "pkick" }
+    Aliases: [ "pkick" ]
+  Deleteban:
+    Name: "deleteban"
+    Description: "Delete a ban entry"
+    Permission: "bansystem.command.deleteban"
+    Aliases: [ "dban", "removeban" ]
+  Deletemute:
+    Name: "deletemute"
+    Description: "Delete a mute entry"
+    Permission: "bansystem.command.deletemute"
+    Aliases: [ "dmute", "removemute" ]
+  Deletewarn:
+    Name: "deletewarn"
+    Description: "Delete a warn entry"
+    Permission: "bansystem.command.deletewarn"
+    Aliases: [ "dwarn", "removewarn" ]

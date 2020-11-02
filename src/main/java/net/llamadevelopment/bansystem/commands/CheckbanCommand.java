@@ -35,7 +35,20 @@ public class CheckbanCommand extends PluginCommand<BanSystem> {
                             sender.sendMessage(Language.get("CheckbanDate", ban.getDate()));
                             sender.sendMessage(Language.get("CheckbanTime", BanSystemAPI.getRemainingTime(ban.getTime())));
                         });
-                    } else sender.sendMessage(Language.get("PlayerNotBanned"));
+                    } else {
+                        this.getPlugin().provider.banIdExists(player, false, exists -> {
+                            if (exists) {
+                                this.getPlugin().provider.getBanById(player, false, ban -> {
+                                    sender.sendMessage(Language.get("CheckbanIdInfo", ban.getBanID()));
+                                    sender.sendMessage(Language.get("CheckbanIdPlayer", ban.getPlayer()));
+                                    sender.sendMessage(Language.get("CheckbanIdReason", ban.getReason()));
+                                    sender.sendMessage(Language.get("CheckbanIdBanner", ban.getBanner()));
+                                    sender.sendMessage(Language.get("CheckbanIdDate", ban.getDate()));
+                                    sender.sendMessage(Language.get("CheckbanIdTime", BanSystemAPI.getRemainingTime(ban.getTime())));
+                                });
+                            } else sender.sendMessage(Language.get("PlayerNotBanned"));
+                        });
+                    }
                 });
             } else sender.sendMessage(Language.get("CheckbanCommandUsage", this.getName()));
         } else sender.sendMessage(Language.get("NoPermission"));

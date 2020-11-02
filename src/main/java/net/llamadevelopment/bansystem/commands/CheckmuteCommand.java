@@ -35,7 +35,22 @@ public class CheckmuteCommand extends PluginCommand<BanSystem> {
                             sender.sendMessage(Language.get("CheckmuteDate", mute.getDate()));
                             sender.sendMessage(Language.get("CheckmuteTime", BanSystemAPI.getRemainingTime(mute.getTime())));
                         });
-                    } else sender.sendMessage(Language.get("PlayerNotMuted"));
+                    } else {
+                        this.getPlugin().provider.muteIdExists(player, false, exists -> {
+                            if (exists) {
+                                this.getPlugin().provider.getMuteById(player, false, mute -> {
+                                    sender.sendMessage(Language.get("CheckmuteIdInfo", mute.getMuteID()));
+                                    sender.sendMessage(Language.get("CheckmuteIdPlayer", mute.getPlayer()));
+                                    sender.sendMessage(Language.get("CheckmuteIdReason", mute.getReason()));
+                                    sender.sendMessage(Language.get("CheckmuteIdMuter", mute.getMuter()));
+                                    sender.sendMessage(Language.get("CheckmuteIdDate", mute.getDate()));
+                                    sender.sendMessage(Language.get("CheckmuteIdTime", BanSystemAPI.getRemainingTime(mute.getTime())));
+                                });
+                                return;
+                            }
+                            sender.sendMessage(Language.get("PlayerNotMuted"));
+                        });
+                    }
                 });
             } else sender.sendMessage(Language.get("CheckmuteCommandUsage", this.getName()));
         } else sender.sendMessage(Language.get("NoPermission"));

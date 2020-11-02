@@ -62,26 +62,28 @@ public class BanSystem extends PluginBase {
     }
 
     private void loadPlugin() {
-        Config config = this.getConfig();
         CommandMap map = this.getServer().getCommandMap();
-        map.register(config.getString("Commands.BanCommand"), new BanCommand(this));
-        map.register(config.getString("Commands.TempbanCommand"), new TempbanCommand(this));
-        map.register(config.getString("Commands.BanlogCommand"), new BanlogCommand(this));
-        map.register(config.getString("Commands.CheckbanCommand"), new CheckbanCommand(this));
-        map.register(config.getString("Commands.ClearbanlogCommand"), new ClearbanlogCommand(this));
-        map.register(config.getString("Commands.UnbanCommand"), new UnbanCommand(this));
-        map.register(config.getString("Commands.MuteCommand"), new MuteCommand(this));
-        map.register(config.getString("Commands.TempmuteCommand"), new TempmuteCommand(this));
-        map.register(config.getString("Commands.MutelogCommand"), new MutelogCommand(this));
-        map.register(config.getString("Commands.CheckmuteCommand"), new CheckmuteCommand(this));
-        map.register(config.getString("Commands.ClearmutelogCommand"), new ClearmutelogCommand(this));
-        map.register(config.getString("Commands.UnmuteCommand"), new UnmuteCommand(this));
-        map.register(config.getString("Commands.WarnCommand"), new WarnCommand(this));
-        map.register(config.getString("Commands.WarnlogCommand"), new WarnlogCommand(this));
-        map.register(config.getString("Commands.ClearwarningsCommand"), new ClearwarningsCommand(this));
-        map.register(config.getString("Commands.EditbanCommand"), new EditbanCommand(this));
-        map.register(config.getString("Commands.EditmuteCommand"), new EditmuteCommand(this));
-        map.register(config.getString("Commands.KickCommand"), new KickCommand(this));
+        map.register("bansystem", new BanCommand(this));
+        map.register("bansystem", new TempbanCommand(this));
+        map.register("bansystem", new BanlogCommand(this));
+        map.register("bansystem", new CheckbanCommand(this));
+        map.register("bansystem", new ClearbanlogCommand(this));
+        map.register("bansystem", new UnbanCommand(this));
+        map.register("bansystem", new MuteCommand(this));
+        map.register("bansystem", new TempmuteCommand(this));
+        map.register("bansystem", new MutelogCommand(this));
+        map.register("bansystem", new CheckmuteCommand(this));
+        map.register("bansystem", new ClearmutelogCommand(this));
+        map.register("bansystem", new UnmuteCommand(this));
+        map.register("bansystem", new WarnCommand(this));
+        map.register("bansystem", new WarnlogCommand(this));
+        map.register("bansystem", new ClearwarningsCommand(this));
+        map.register("bansystem", new EditbanCommand(this));
+        map.register("bansystem", new EditmuteCommand(this));
+        map.register("bansystem", new KickCommand(this));
+        map.register("bansystem", new DeletebanCommand(this));
+        map.register("bansystem", new DeletemuteCommand(this));
+        map.register("bansystem", new DeletewarnCommand(this));
 
         this.getServer().getPluginManager().registerEvents(new EventListener(), this);
         this.loadReasons();
