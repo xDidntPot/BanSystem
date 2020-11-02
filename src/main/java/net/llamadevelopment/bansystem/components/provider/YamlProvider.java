@@ -1,29 +1,21 @@
-package net.llamadevelopment.bansystem.components.managers;
+package net.llamadevelopment.bansystem.components.provider;
 
 import cn.nukkit.Player;
 import cn.nukkit.Server;
-import cn.nukkit.network.protocol.ScriptCustomEventPacket;
 import cn.nukkit.utils.Config;
 import net.llamadevelopment.bansystem.BanSystem;
-import net.llamadevelopment.bansystem.components.tools.Language;
+import net.llamadevelopment.bansystem.components.language.Language;
 import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
-import net.llamadevelopment.bansystem.components.api.SystemSettings;
 import net.llamadevelopment.bansystem.components.data.Ban;
 import net.llamadevelopment.bansystem.components.data.Mute;
 import net.llamadevelopment.bansystem.components.data.Warn;
-import net.llamadevelopment.bansystem.components.managers.database.Provider;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 public class YamlProvider extends Provider {
 
-    private final SystemSettings settings = BanSystemAPI.getSystemSettings();
     private Config bans, banlog, mutes, mutelog, warns;
 
     @Override
@@ -43,13 +35,57 @@ public class YamlProvider extends Provider {
     }
 
     @Override
-    public boolean playerIsBanned(String player) {
-        return this.bans.exists("Ban." + player);
+    public void playerIsBanned(String player, Consumer<Boolean> isBanned) {
+        isBanned.accept(this.bans.exists("Ban." + player));
     }
 
     @Override
-    public boolean playerIsMuted(String player) {
-        return this.mutes.exists("Mute." + player);
+    public void playerIsMuted(String player, Consumer<Boolean> isMuted) {
+        isMuted.accept(this.mutes.exists("Mute." + player));
+    }
+
+    @Override
+    public void banIdExists(String id, boolean history, Consumer<Boolean> exists) {
+        boolean b = false;
+        if (history) {
+            for (String s : this.banlog.getSection("Banlog").getAll().getKeys(false)) {
+                boolean idSet = this.banlog.exists("Banlog." + s + "." + id);
+                if (idSet) b = true;
+            }
+        } else {
+            for (String s : this.bans.getSection("Ban").getAll().getKeys(false)) {
+                String idSet = this.bans.getString("Ban." + s + ".ID");
+                if (id.equals(idSet)) b = true;
+            }
+        }
+        exists.accept(b);
+    }
+
+    @Override
+    public void muteIdExists(String id, boolean history, Consumer<Boolean> exists) {
+        boolean b = false;
+        if (history) {
+            for (String s : this.mutelog.getSection("Mutelog").getAll().getKeys(false)) {
+                boolean idSet = this.mutelog.exists("Mutelog." + s + "." + id);
+                if (idSet) b = true;
+            }
+        } else {
+            for (String s : this.mutes.getSection("Mute").getAll().getKeys(false)) {
+                String idSet = this.mutes.getString("Mute." + s + ".ID");
+                if (id.equals(idSet)) b = true;
+            }
+        }
+        exists.accept(b);
+    }
+
+    @Override
+    public void warnIdExists(String id, Consumer<Boolean> exists) {
+        boolean b = false;
+        for (String s : this.warns.getSection("Warn").getAll().getKeys(false)) {
+            boolean idSet = this.warns.exists("Warn." + s + "." + id);
+            if (idSet) b = true;
+        }
+        exists.accept(b);
     }
 
     @Override
@@ -66,30 +102,11 @@ public class YamlProvider extends Provider {
         this.bans.save();
         this.bans.reload();
         this.createBanlog(new Ban(player, reason, id, banner, date, end));
-        Player player1 = Server.getInstance().getPlayer(banner);
-        if (this.settings.isWaterdog() && player1.isOnline()) {
-            Ban ban = this.getBan(player);
-            ScriptCustomEventPacket customEventPacket = new ScriptCustomEventPacket();
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
-            try {
-                dataOutputStream.writeUTF("banplayer");
-                dataOutputStream.writeUTF(player);
-                dataOutputStream.writeUTF(ban.getReason());
-                dataOutputStream.writeUTF(ban.getBanID());
-                dataOutputStream.writeUTF(this.getRemainingTime(ban.getTime()));
-                customEventPacket.eventName = "bansystembridge:main";
-                customEventPacket.eventData = outputStream.toByteArray();
-                player1.dataPacket(customEventPacket);
-                return;
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
         Player onlinePlayer = Server.getInstance().getPlayer(player);
         if (onlinePlayer != null) {
-            Ban ban = this.getBan(player);
-            onlinePlayer.kick(Language.getNP("BanScreen", ban.getReason(), ban.getBanID(), this.getRemainingTime(ban.getTime())), false);
+            this.getBan(player, ban -> {
+                onlinePlayer.kick(Language.getNP("BanScreen", ban.getReason(), ban.getBanID(), BanSystemAPI.getRemainingTime(ban.getTime())), false);
+            });
         }
     }
 
@@ -118,23 +135,6 @@ public class YamlProvider extends Provider {
         this.warns.set("Warn." + player + "." + id + ".Date", date);
         this.warns.save();
         this.warns.reload();
-        Player player1 = Server.getInstance().getPlayer(creator);
-        if (this.settings.isWaterdog() && player1.isOnline()) {
-            ScriptCustomEventPacket customEventPacket = new ScriptCustomEventPacket();
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
-            try {
-                dataOutputStream.writeUTF("warnplayer");
-                dataOutputStream.writeUTF(player);
-                dataOutputStream.writeUTF(reason);
-                dataOutputStream.writeUTF(creator);
-                customEventPacket.eventName = "bansystembridge:main";
-                customEventPacket.eventData = outputStream.toByteArray();
-                player1.dataPacket(customEventPacket);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
         Player onlinePlayer = Server.getInstance().getPlayer(player);
         if (onlinePlayer != null) onlinePlayer.kick(Language.getNP("WarnScreen", reason, creator), false);
     }
@@ -158,23 +158,73 @@ public class YamlProvider extends Provider {
     }
 
     @Override
-    public Ban getBan(String player) {
+    public void getBan(String player, Consumer<Ban> ban) {
         String reason = this.bans.getString("Ban." + player + ".Reason");
         String banID = this.bans.getString("Ban." + player + ".ID");
         String banner = this.bans.getString("Ban." + player + ".Banner");
         String date = this.bans.getString("Ban." + player + ".Date");
         long time = this.bans.getLong("Ban." + player + ".Time");
-        return new Ban(player, reason, banID, banner, date, time);
+        ban.accept(new Ban(player, reason, banID, banner, date, time));
     }
 
     @Override
-    public Mute getMute(String player) {
+    public void getMute(String player, Consumer<Mute> mute) {
         String reason = this.mutes.getString("Mute." + player + ".Reason");
         String banID = this.mutes.getString("Mute." + player + ".ID");
         String banner = this.mutes.getString("Mute." + player + ".Banner");
         String date = this.mutes.getString("Mute." + player + ".Date");
         long time = this.mutes.getLong("Mute." + player + ".Time");
-        return new Mute(player, reason, banID, banner, date, time);
+        mute.accept(new Mute(player, reason, banID, banner, date, time));
+    }
+
+    @Override
+    public void getBanById(String id, boolean history, Consumer<Ban> ban) {
+        if (history) {
+            for (String s : this.banlog.getSection("Banlog").getAll().getKeys(false)) {
+                if (this.banlog.exists("Banlog." + s + "." + id)) {
+                    String reason = this.banlog.getString("Banlog." + s + "." + id + ".Reason");
+                    String banner = this.banlog.getString("Banlog." + s + "." + id + ".Banner");
+                    String date = this.banlog.getString("Banlog." + s + "." + id + ".Date");
+                    ban.accept(new Ban(s, reason, id, banner, date, 0));
+                }
+            }
+        } else {
+            for (String s : this.bans.getSection("Ban").getAll().getKeys(false)) {
+                String idSet = this.bans.getString("Ban." + s + ".ID");
+                if (id.equals(idSet)) {
+                    String reason = this.bans.getString("Ban." + s + ".Reason");
+                    String banner = this.bans.getString("Ban." + s + ".Banner");
+                    String date = this.bans.getString("Ban." + s + ".Date");
+                    long time = this.bans.getLong("Ban." + s + ".Time");
+                    ban.accept(new Ban(s, reason, id, banner, date, time));
+                }
+            }
+        }
+    }
+
+    @Override
+    public void getMuteById(String id, boolean history, Consumer<Mute> mute) {
+        if (history) {
+            for (String s : this.mutelog.getSection("Mutelog").getAll().getKeys(false)) {
+                if (this.mutelog.exists("Mutelog." + s + "." + id)) {
+                    String reason = this.mutelog.getString("Mutelog." + s + "." + id + ".Reason");
+                    String banner = this.mutelog.getString("Mutelog." + s + "." + id + ".Muter");
+                    String date = this.mutelog.getString("Mutelog." + s + "." + id + ".Date");
+                    mute.accept(new Mute(s, reason, id, banner, date, 0));
+                }
+            }
+        } else {
+            for (String s : this.mutes.getSection("Mute").getAll().getKeys(false)) {
+                String idSet = this.mutes.getString("Mute." + s + ".ID");
+                if (id.equals(idSet)) {
+                    String reason = this.mutes.getString("Mute." + s + ".Reason");
+                    String banner = this.mutes.getString("Mute." + s + ".Banner");
+                    String date = this.mutes.getString("Mute." + s + ".Date");
+                    long time = this.mutes.getLong("Mute." + s + ".Time");
+                    mute.accept(new Mute(s, reason, id, banner, date, time));
+                }
+            }
+        }
     }
 
     @Override
@@ -196,39 +246,39 @@ public class YamlProvider extends Provider {
     }
 
     @Override
-    public List<Ban> getBanlog(String player) {
-        List<Ban> list = new ArrayList<>();
+    public void getBanLog(String player, Consumer<Set<Ban>> banlog) {
+        Set<Ban> list = new HashSet<>();
         for (String s : this.banlog.getSection("Banlog." + player).getAll().getKeys(false)) {
             String reason = this.banlog.getString("Banlog." + player + "." + s + ".Reason");
             String banner = this.banlog.getString("Banlog." + player + "." + s + ".Banner");
             String date = this.banlog.getString("Banlog." + player + "." + s + ".Date");
             list.add(new Ban(player, reason, s, banner, date, 0));
         }
-        return list;
+        banlog.accept(list);
     }
 
     @Override
-    public List<Mute> getMutelog(String player) {
-        List<Mute> list = new ArrayList<>();
+    public void getMuteLog(String player, Consumer<Set<Mute>> mutelog) {
+        Set<Mute> list = new HashSet<>();
         for (String s : this.mutelog.getSection("Mutelog." + player).getAll().getKeys(false)) {
             String reason = this.mutelog.getString("Mutelog." + player + "." + s + ".Reason");
             String banner = this.mutelog.getString("Mutelog." + player + "." + s + ".Banner");
             String date = this.mutelog.getString("Mutelog." + player + "." + s + ".Date");
             list.add(new Mute(player, reason, s, banner, date, 0));
         }
-        return list;
+        mutelog.accept(list);
     }
 
     @Override
-    public List<Warn> getWarnings(String player) {
-        List<Warn> list = new ArrayList<>();
+    public void getWarnLog(String player, Consumer<Set<Warn>> warnlog) {
+        Set<Warn> list = new HashSet<>();
         for (String s : this.warns.getSection("Warn." + player).getAll().getKeys(false)) {
             String reason = this.warns.getString("Warn." + player + "." + s + ".Reason");
             String creator = this.warns.getString("Warn." + player + "." + s + ".Creator");
             String date = this.warns.getString("Warn." + player + "." + s + ".Date");
             list.add(new Warn(player, reason, s, creator, date));
         }
-        return list;
+        warnlog.accept(list);
     }
 
     @Override
@@ -293,39 +343,40 @@ public class YamlProvider extends Provider {
     }
 
     @Override
-    public String getRemainingTime(long duration) {
-        if (duration == -1L) {
-            return Language.getNP("Permanent");
-        } else {
-            SimpleDateFormat today = new SimpleDateFormat("dd.MM.yyyy");
-            today.format(System.currentTimeMillis());
-            SimpleDateFormat future = new SimpleDateFormat("dd.MM.yyyy");
-            future.format(duration);
-            long time = future.getCalendar().getTimeInMillis() - today.getCalendar().getTimeInMillis();
-            int days = (int) (time / 86400000L);
-            int hours = (int) (time / 3600000L % 24L);
-            int minutes = (int) (time / 60000L % 60L);
-            String day = Language.getNP("Days");
-            if (days == 1) {
-                day = Language.getNP("Day");
+    public void deleteBan(String id) {
+        for (String s : this.banlog.getSection("Banlog").getAll().getKeys(false)) {
+            if (this.banlog.exists("Banlog." + s + "." + id)) {
+                Map<String, Object> map = this.banlog.getSection("Banlog." + s).getAllMap();
+                map.remove(id);
+                this.banlog.set("Banlog." + s, map);
+                this.banlog.save();
+                this.banlog.reload();
             }
+        }
+    }
 
-            String hour = Language.getNP("Hours");
-            if (hours == 1) {
-                hour = Language.getNP("Hour");
+    @Override
+    public void deleteMute(String id) {
+        for (String s : this.mutelog.getSection("Mutelog").getAll().getKeys(false)) {
+            if (this.mutelog.exists("Mutelog." + s + "." + id)) {
+                Map<String, Object> map = this.mutelog.getSection("Mutelog." + s).getAllMap();
+                map.remove(id);
+                this.mutelog.set("Mutelog." + s, map);
+                this.mutelog.save();
+                this.mutelog.reload();
             }
+        }
+    }
 
-            String minute = Language.getNP("Minutes");
-            if (minutes == 1) {
-                minute = Language.getNP("Minute");
-            }
-
-            if (minutes < 1 && days == 0 && hours == 0) {
-                return Language.getNP("Seconds");
-            } else if (hours == 0 && days == 0) {
-                return minutes + " " + minute;
-            } else {
-                return days == 0 ? hours + " " + hour + " " + minutes + " " + minute : days + " " + day + " " + hours + " " + hour + " " + minutes + " " + minute;
+    @Override
+    public void deleteWarn(String id) {
+        for (String s : this.warns.getSection("Warn").getAll().getKeys(false)) {
+            if (this.warns.exists("Warn." + s + "." + id)) {
+                Map<String, Object> map = this.warns.getSection("Warn." + s).getAllMap();
+                map.remove(id);
+                this.warns.set("Warn." + s, map);
+                this.warns.save();
+                this.warns.reload();
             }
         }
     }
@@ -334,4 +385,5 @@ public class YamlProvider extends Provider {
     public String getProvider() {
         return "Yaml";
     }
+
 }

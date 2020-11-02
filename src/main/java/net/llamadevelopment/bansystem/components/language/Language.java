@@ -1,4 +1,4 @@
-package net.llamadevelopment.bansystem.components.tools;
+package net.llamadevelopment.bansystem.components.language;
 
 import cn.nukkit.utils.Config;
 import net.llamadevelopment.bansystem.BanSystem;

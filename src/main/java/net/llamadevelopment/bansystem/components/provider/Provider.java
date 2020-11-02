@@ -1,11 +1,12 @@
-package net.llamadevelopment.bansystem.components.managers.database;
+package net.llamadevelopment.bansystem.components.provider;
 
 import net.llamadevelopment.bansystem.BanSystem;
 import net.llamadevelopment.bansystem.components.data.Ban;
 import net.llamadevelopment.bansystem.components.data.Mute;
 import net.llamadevelopment.bansystem.components.data.Warn;
 
-import java.util.List;
+import java.util.Set;
+import java.util.function.Consumer;
 
 public class Provider {
 
@@ -15,12 +16,24 @@ public class Provider {
     public void disconnect(BanSystem server) {
     }
 
-    public boolean playerIsBanned(String player) {
-        return false;
+    public void playerIsBanned(String player, Consumer<Boolean> isBanned) {
+
     }
 
-    public boolean playerIsMuted(String player) {
-        return false;
+    public void playerIsMuted(String player, Consumer<Boolean> isMuted) {
+
+    }
+
+    public void banIdExists(String id, boolean history, Consumer<Boolean> exists) {
+
+    }
+
+    public void muteIdExists(String id, boolean history, Consumer<Boolean> exists) {
+
+    }
+
+    public void warnIdExists(String id, Consumer<Boolean> exists) {
+
     }
 
     public void banPlayer(String player, String reason, String banner, int seconds) {
@@ -39,12 +52,20 @@ public class Provider {
     public void unmutePlayer(String player) {
     }
 
-    public Ban getBan(String player) {
-        return null;
+    public void getBan(String player, Consumer<Ban> ban) {
+
     }
 
-    public Mute getMute(String player) {
-        return null;
+    public void getMute(String player, Consumer<Mute> mute) {
+
+    }
+
+    public void getBanById(String id, boolean history, Consumer<Ban> ban) {
+
+    }
+
+    public void getMuteById(String id, boolean history, Consumer<Mute> mute) {
+
     }
 
     public void createBanlog(Ban ban) {
@@ -53,16 +74,16 @@ public class Provider {
     public void createMutelog(Mute mute) {
     }
 
-    public List<Ban> getBanlog(String player) {
-        return null;
+    public void getBanLog(String player, Consumer<Set<Ban>> banlog) {
+
     }
 
-    public List<Mute> getMutelog(String player) {
-        return null;
+    public void getMuteLog(String player, Consumer<Set<Mute>> mutelog) {
+
     }
 
-    public List<Warn> getWarnings(String player) {
-        return null;
+    public void getWarnLog(String player, Consumer<Set<Warn>> warnlog) {
+
     }
 
     public void clearBanlog(String player) {
@@ -93,8 +114,16 @@ public class Provider {
 
     }
 
-    public String getRemainingTime(long duration) {
-        return null;
+    public void deleteBan(String id) {
+
+    }
+
+    public void deleteMute(String id) {
+
+    }
+
+    public void deleteWarn(String id) {
+
     }
 
     public String getProvider() {
