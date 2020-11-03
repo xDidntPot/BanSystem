@@ -262,7 +262,7 @@ public class YamlProvider extends Provider {
         Set<Mute> list = new HashSet<>();
         for (String s : this.mutelog.getSection("Mutelog." + player).getAll().getKeys(false)) {
             String reason = this.mutelog.getString("Mutelog." + player + "." + s + ".Reason");
-            String banner = this.mutelog.getString("Mutelog." + player + "." + s + ".Banner");
+            String banner = this.mutelog.getString("Mutelog." + player + "." + s + ".Muter");
             String date = this.mutelog.getString("Mutelog." + player + "." + s + ".Date");
             list.add(new Mute(player, reason, s, banner, date, 0));
         }
