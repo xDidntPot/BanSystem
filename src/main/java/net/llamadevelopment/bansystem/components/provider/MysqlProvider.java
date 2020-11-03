@@ -3,6 +3,7 @@ package net.llamadevelopment.bansystem.components.provider;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import net.llamadevelopment.bansystem.BanSystem;
+import net.llamadevelopment.bansystem.components.event.*;
 import net.llamadevelopment.bansystem.components.simplesqlclient.MySqlClient;
 import net.llamadevelopment.bansystem.components.simplesqlclient.objects.SqlColumn;
 import net.llamadevelopment.bansystem.components.simplesqlclient.objects.SqlDocument;
@@ -153,13 +154,13 @@ public class MysqlProvider extends Provider {
                     .append("banner", banner)
                     .append("date", date)
                     .append("time", end));
-            this.createBanlog(new Ban(player, reason, id, banner, date, end));
+            Ban ban = new Ban(player, reason, id, banner, date, end);
+            this.createBanlog(ban);
             Player onlinePlayer = Server.getInstance().getPlayer(player);
             if (onlinePlayer != null) {
-                this.getBan(player, ban -> {
-                    onlinePlayer.kick(Language.getNP("BanScreen", ban.getReason(), ban.getBanID(), BanSystemAPI.getRemainingTime(ban.getTime())), false);
-                });
+                onlinePlayer.kick(Language.getNP("BanScreen", ban.getReason(), ban.getBanID(), BanSystemAPI.getRemainingTime(ban.getTime())), false);
             }
+            Server.getInstance().getPluginManager().callEvent(new PlayerBanEvent(ban));
         });
     }
 
@@ -177,18 +178,23 @@ public class MysqlProvider extends Provider {
                     .append("banner", banner)
                     .append("date", date)
                     .append("time", end));
-            this.createMutelog(new Mute(player, reason, id, banner, date, end));
+            Mute mute = new Mute(player, reason, id, banner, date, end);
+            this.createMutelog(mute);
+            Server.getInstance().getPluginManager().callEvent(new PlayerMuteEvent(mute));
         });
     }
 
     @Override
     public void warnPlayer(String player, String reason, String creator) {
         CompletableFuture.runAsync(() -> {
+            String id = BanSystemAPI.getRandomIDCode();
+            String date = BanSystemAPI.getDate();
             this.client.insert("warns", new SqlDocument("player", player)
                     .append("reason", reason)
-                    .append("id", BanSystemAPI.getRandomIDCode())
+                    .append("id", id)
                     .append("creator", creator)
-                    .append("date", BanSystemAPI.getDate()));
+                    .append("date", date));
+            Server.getInstance().getPluginManager().callEvent(new PlayerWarnEvent(new Warn(player, reason, id, creator, date)));
             Player onlinePlayer = Server.getInstance().getPlayer(player);
             if (onlinePlayer != null) onlinePlayer.kick(Language.getNP("WarnScreen", reason, creator), false);
         });
@@ -196,12 +202,18 @@ public class MysqlProvider extends Provider {
 
     @Override
     public void unbanPlayer(String player) {
-        CompletableFuture.runAsync(() -> this.client.delete("bans", "player", player));
+        CompletableFuture.runAsync(() -> {
+            this.client.delete("bans", "player", player);
+            Server.getInstance().getPluginManager().callEvent(new PlayerUnbanEvent(player));
+        });
     }
 
     @Override
     public void unmutePlayer(String player) {
-        CompletableFuture.runAsync(() -> this.client.delete("mutes", "player", player));
+        CompletableFuture.runAsync(() -> {
+            this.client.delete("mutes", "player", player);
+            Server.getInstance().getPluginManager().callEvent(new PlayerUnmuteEvent(player));
+        });
     }
 
     @Override
@@ -299,6 +311,7 @@ public class MysqlProvider extends Provider {
         CompletableFuture.runAsync(() -> {
             SqlDocumentSet documentSet = this.client.find("banlogs", "player", player);
             documentSet.getAll().forEach(document -> this.client.delete("banlogs", "id", document.getString("id")));
+            Server.getInstance().getPluginManager().callEvent(new ClearBanlogEvent(player));
         });
     }
 
@@ -307,6 +320,7 @@ public class MysqlProvider extends Provider {
         CompletableFuture.runAsync(() -> {
             SqlDocumentSet documentSet = this.client.find("mutelogs", "player", player);
             documentSet.getAll().forEach(document -> this.client.delete("mutelogs", "id", document.getString("id")));
+            Server.getInstance().getPluginManager().callEvent(new ClearMutelogEvent(player));
         });
     }
 
@@ -315,6 +329,7 @@ public class MysqlProvider extends Provider {
         CompletableFuture.runAsync(() -> {
             SqlDocumentSet documentSet = this.client.find("warns", "player", player);
             documentSet.getAll().forEach(document -> this.client.delete("warns", "id", document.getString("id")));
+            Server.getInstance().getPluginManager().callEvent(new ClearWarnlogEvent(player));
         });
     }
 
@@ -340,17 +355,26 @@ public class MysqlProvider extends Provider {
 
     @Override
     public void deleteBan(String id) {
-        CompletableFuture.runAsync(() -> this.client.delete("banlogs", new SqlDocument("id", id)));
+        CompletableFuture.runAsync(() -> {
+            this.client.delete("banlogs", new SqlDocument("id", id));
+            Server.getInstance().getPluginManager().callEvent(new DeleteBanEvent(id));
+        });
     }
 
     @Override
     public void deleteMute(String id) {
-        CompletableFuture.runAsync(() -> this.client.delete("mutelogs", new SqlDocument("id", id)));
+        CompletableFuture.runAsync(() -> {
+            this.client.delete("mutelogs", new SqlDocument("id", id));
+            Server.getInstance().getPluginManager().callEvent(new DeleteMuteEvent(id));
+        });
     }
 
     @Override
     public void deleteWarn(String id) {
-        CompletableFuture.runAsync(() -> this.client.delete("warns", new SqlDocument("id", id)));
+        CompletableFuture.runAsync(() -> {
+            this.client.delete("warns", new SqlDocument("id", id));
+            Server.getInstance().getPluginManager().callEvent(new DeleteWarnEvent(id));
+        });
     }
 
     @Override
