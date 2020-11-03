@@ -7,6 +7,7 @@ import cn.nukkit.command.PluginCommand;
 import cn.nukkit.command.data.CommandParamType;
 import cn.nukkit.command.data.CommandParameter;
 import net.llamadevelopment.bansystem.BanSystem;
+import net.llamadevelopment.bansystem.components.event.PlayerKickEvent;
 import net.llamadevelopment.bansystem.components.language.Language;
 
 public class KickCommand extends PluginCommand<BanSystem> {
@@ -32,6 +33,7 @@ public class KickCommand extends PluginCommand<BanSystem> {
                 Player onlinePlayer = Server.getInstance().getPlayer(player);
                 if (onlinePlayer != null) {
                     onlinePlayer.kick(Language.getNP("KickScreen", reason, sender.getName()), false);
+                    Server.getInstance().getPluginManager().callEvent(new PlayerKickEvent(player, sender.getName()));
                     sender.sendMessage(Language.get("PlayerKicked", player));
                 } else sender.sendMessage(Language.get("PlayerNotOnline"));
             } else sender.sendMessage(Language.get("KickCommandUsage", this.getName()));
