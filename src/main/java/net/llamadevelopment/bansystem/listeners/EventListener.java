@@ -30,11 +30,11 @@ public class EventListener implements Listener {
                             return;
                         }
                     }
-                    Server.getInstance().getPluginManager().callEvent(new BanSystemJoinEvent(player.getName(), true));
+                    Server.getInstance().getPluginManager().callEvent(new BanSystemJoinEvent(player, true));
                     player.kick(Language.getNP("BanScreen", ban.getReason(), ban.getBanID(), BanSystemAPI.getRemainingTime(ban.getTime())), false);
                 }), this.settings.getJoinDelay());
             } else {
-                Server.getInstance().getPluginManager().callEvent(new BanSystemJoinEvent(player.getName(), false));
+                Server.getInstance().getPluginManager().callEvent(new BanSystemJoinEvent(player, false));
                 this.instance.provider.playerIsMuted(player.getName(), isMuted -> {
                     if (isMuted) {
                         this.instance.provider.getMute(player.getName(), mute -> this.settings.cachedMute.put(player.getName(), mute));

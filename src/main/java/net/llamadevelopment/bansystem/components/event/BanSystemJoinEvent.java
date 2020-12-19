@@ -1,5 +1,6 @@
 package net.llamadevelopment.bansystem.components.event;
 
+import cn.nukkit.Player;
 import cn.nukkit.event.HandlerList;
 import cn.nukkit.event.player.PlayerEvent;
 import lombok.AllArgsConstructor;
@@ -9,7 +10,7 @@ import lombok.Getter;
 @Getter
 public class BanSystemJoinEvent extends PlayerEvent {
 
-    private final String joiner;
+    private final Player joiner;
     private final boolean isBanned;
     private static final HandlerList handlers = new HandlerList();
 
