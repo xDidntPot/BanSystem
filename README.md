@@ -78,7 +78,7 @@ deletewarn    |/deletewarn \<ID>|    bansystem.command.deletewarn
 
 ---
 
-###Maven
+Maven
 ```xml
 
 <repository>
@@ -93,7 +93,7 @@ deletewarn    |/deletewarn \<ID>|    bansystem.command.deletewarn
 </dependency>
 ```
 
-###API
+API
 
 ```java
 import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
@@ -113,7 +113,7 @@ public class Test {
 }
 ```
 
-###Events
+Events
 
 ```java
 import cn.nukkit.event.EventHandler;
