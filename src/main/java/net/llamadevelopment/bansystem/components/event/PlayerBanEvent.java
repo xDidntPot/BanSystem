@@ -13,4 +13,8 @@ public class PlayerBanEvent extends PlayerEvent {
     private final Ban ban;
     private static final HandlerList handlers = new HandlerList();
 
+    public static HandlerList getHandlers() {
+        return handlers;
+    }
+
 }

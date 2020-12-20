@@ -14,4 +14,8 @@ public class BanSystemJoinEvent extends PlayerEvent {
     private final boolean isBanned;
     private static final HandlerList handlers = new HandlerList();
 
+    public static HandlerList getHandlers() {
+        return handlers;
+    }
+
 }

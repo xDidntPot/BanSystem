@@ -13,4 +13,8 @@ public class PlayerMuteEvent extends PlayerEvent {
     private final Mute mute;
     private static final HandlerList handlers = new HandlerList();
 
+    public static HandlerList getHandlers() {
+        return handlers;
+    }
+
 }

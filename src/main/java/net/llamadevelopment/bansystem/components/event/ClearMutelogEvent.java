@@ -12,4 +12,8 @@ public class ClearMutelogEvent extends Event {
     private final String target;
     private static final HandlerList handlers = new HandlerList();
 
+    public static HandlerList getHandlers() {
+        return handlers;
+    }
+
 }

@@ -13,4 +13,8 @@ public class PlayerKickEvent extends PlayerEvent {
     private final String executor;
     private static final HandlerList handlers = new HandlerList();
 
+    public static HandlerList getHandlers() {
+        return handlers;
+    }
+
 }

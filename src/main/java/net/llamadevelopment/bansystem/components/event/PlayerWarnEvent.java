@@ -13,4 +13,8 @@ public class PlayerWarnEvent extends PlayerEvent {
     private final Warn warn;
     private static final HandlerList handlers = new HandlerList();
 
+    public static HandlerList getHandlers() {
+        return handlers;
+    }
+
 }
