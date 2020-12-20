@@ -42,7 +42,7 @@ Support for Nukkit 2.0 is available soon!
 
 * [BanSystem UI-Addon](https://cloudburstmc.org/resources/bansystem-ui-addon.468/download) - _Manage the BanSystem in a UI_
 * [BanSystem Discord-Addon](https://cloudburstmc.org/resources/bansystem-discord-addon.575/download) - _Get notifications of BanSystem in your Discord_
-* [BanSystem Duplicate Account Prevention-Addon](https://cloudburstmc.org/resources/bansystem-discord-addon.575/download) - _Get notifications of BanSystem in your Discord_
+* [BanSystem Duplicate Account Prevention-Addon](https://cloudburstmc.org/resources/bansystem-duplicated-account-prevention-addon.612/download) - _Get a player info and see wich duplicated accounts this player owns_
 
 ---
 
