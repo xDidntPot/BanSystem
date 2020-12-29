@@ -372,42 +372,66 @@ public class MysqlProvider extends Provider {
 
     @Override
     public void setBanReason(String player, String reason) {
-        CompletableFuture.runAsync(() -> this.client.update("bans", "player", player, new SqlDocument("reason", reason)));
+        CompletableFuture.runAsync(() -> {
+            Server.getInstance().getPluginManager().callEvent(new EditBanReasonEvent(player, reason, "null"));
+            this.client.update("bans", "player", player, new SqlDocument("reason", reason));
+        });
     }
 
     @Override
     public void setMuteReason(String player, String reason) {
-        CompletableFuture.runAsync(() -> this.client.update("mutes", "player", player, new SqlDocument("reason", reason)));
+        CompletableFuture.runAsync(() -> {
+            this.client.update("mutes", "player", player, new SqlDocument("reason", reason));
+            Server.getInstance().getPluginManager().callEvent(new EditMuteReasonEvent(player, reason, "null"));
+        });
     }
 
     @Override
     public void setBanTime(String player, long time) {
-        CompletableFuture.runAsync(() -> this.client.update("bans", "player", player, new SqlDocument("time", time)));
+        CompletableFuture.runAsync(() -> {
+            this.client.update("bans", "player", player, new SqlDocument("time", time));
+            Server.getInstance().getPluginManager().callEvent(new EditBanTimeEvent(player, time, "null"));
+        });
     }
 
     @Override
     public void setMuteTime(String player, long time) {
-        CompletableFuture.runAsync(() -> this.client.update("mutes", "player", player, new SqlDocument("time", time)));
+        CompletableFuture.runAsync(() -> {
+            this.client.update("mutes", "player", player, new SqlDocument("time", time));
+            Server.getInstance().getPluginManager().callEvent(new EditMuteTimeEvent(player, time, "null"));
+        });
     }
 
     @Override
     public void setBanReason(String player, String reason, String executor) {
-        CompletableFuture.runAsync(() -> this.client.update("bans", "player", player, new SqlDocument("reason", reason)));
+        CompletableFuture.runAsync(() -> {
+            this.client.update("bans", "player", player, new SqlDocument("reason", reason));
+            Server.getInstance().getPluginManager().callEvent(new EditBanReasonEvent(player, reason, executor));
+        });
     }
 
     @Override
     public void setMuteReason(String player, String reason, String executor) {
-        CompletableFuture.runAsync(() -> this.client.update("mutes", "player", player, new SqlDocument("reason", reason)));
+        CompletableFuture.runAsync(() -> {
+            this.client.update("mutes", "player", player, new SqlDocument("reason", reason));
+            Server.getInstance().getPluginManager().callEvent(new EditMuteReasonEvent(player, reason, executor));
+        });
     }
 
     @Override
     public void setBanTime(String player, long time, String executor) {
-        CompletableFuture.runAsync(() -> this.client.update("bans", "player", player, new SqlDocument("time", time)));
+        CompletableFuture.runAsync(() -> {
+            this.client.update("bans", "player", player, new SqlDocument("time", time));
+            Server.getInstance().getPluginManager().callEvent(new EditBanTimeEvent(player, time, executor));
+        });
     }
 
     @Override
     public void setMuteTime(String player, long time, String executor) {
-        CompletableFuture.runAsync(() -> this.client.update("mutes", "player", player, new SqlDocument("time", time)));
+        CompletableFuture.runAsync(() -> {
+            this.client.update("mutes", "player", player, new SqlDocument("time", time));
+            Server.getInstance().getPluginManager().callEvent(new EditMuteTimeEvent(player, time, executor));
+        });
     }
 
     @Override

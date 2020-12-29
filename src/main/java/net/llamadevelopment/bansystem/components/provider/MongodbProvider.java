@@ -7,12 +7,11 @@ import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import net.llamadevelopment.bansystem.BanSystem;
-import net.llamadevelopment.bansystem.components.api.API;
-import net.llamadevelopment.bansystem.components.event.*;
-import net.llamadevelopment.bansystem.components.language.Language;
 import net.llamadevelopment.bansystem.components.data.Ban;
 import net.llamadevelopment.bansystem.components.data.Mute;
 import net.llamadevelopment.bansystem.components.data.Warn;
+import net.llamadevelopment.bansystem.components.event.*;
+import net.llamadevelopment.bansystem.components.language.Language;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
@@ -384,6 +383,7 @@ public class MongodbProvider extends Provider {
             Bson newEntrySet = new Document("$set", newEntry);
             assert found != null;
             this.banCollection.updateOne(found, newEntrySet);
+            Server.getInstance().getPluginManager().callEvent(new EditBanReasonEvent(player, reason, "null"));
         });
     }
 
@@ -396,6 +396,7 @@ public class MongodbProvider extends Provider {
             Bson newEntrySet = new Document("$set", newEntry);
             assert found != null;
             this.muteCollection.updateOne(found, newEntrySet);
+            Server.getInstance().getPluginManager().callEvent(new EditMuteReasonEvent(player, reason, "null"));
         });
     }
 
@@ -408,6 +409,7 @@ public class MongodbProvider extends Provider {
             Bson newEntrySet = new Document("$set", newEntry);
             assert found != null;
             this.banCollection.updateOne(found, newEntrySet);
+            Server.getInstance().getPluginManager().callEvent(new EditBanTimeEvent(player, time, "null"));
         });
     }
 
@@ -419,6 +421,7 @@ public class MongodbProvider extends Provider {
             Bson newEntry = new Document("time", time);
             Bson newEntrySet = new Document("$set", newEntry);
             this.muteCollection.updateOne(found, newEntrySet);
+            Server.getInstance().getPluginManager().callEvent(new EditMuteTimeEvent(player, time, "null"));
         });
     }
 
@@ -431,6 +434,7 @@ public class MongodbProvider extends Provider {
             Bson newEntrySet = new Document("$set", newEntry);
             assert found != null;
             this.banCollection.updateOne(found, newEntrySet);
+            Server.getInstance().getPluginManager().callEvent(new EditBanReasonEvent(player, reason, executor));
         });
     }
 
@@ -443,6 +447,7 @@ public class MongodbProvider extends Provider {
             Bson newEntrySet = new Document("$set", newEntry);
             assert found != null;
             this.muteCollection.updateOne(found, newEntrySet);
+            Server.getInstance().getPluginManager().callEvent(new EditMuteReasonEvent(player, reason, executor));
         });
     }
 
@@ -455,6 +460,7 @@ public class MongodbProvider extends Provider {
             Bson newEntrySet = new Document("$set", newEntry);
             assert found != null;
             this.banCollection.updateOne(found, newEntrySet);
+            Server.getInstance().getPluginManager().callEvent(new EditBanTimeEvent(player, time, executor));
         });
     }
 
@@ -466,6 +472,7 @@ public class MongodbProvider extends Provider {
             Bson newEntry = new Document("time", time);
             Bson newEntrySet = new Document("$set", newEntry);
             this.muteCollection.updateOne(found, newEntrySet);
+            Server.getInstance().getPluginManager().callEvent(new EditMuteTimeEvent(player, time, executor));
         });
     }
 

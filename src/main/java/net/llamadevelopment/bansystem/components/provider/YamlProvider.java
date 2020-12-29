@@ -4,13 +4,15 @@ import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.utils.Config;
 import net.llamadevelopment.bansystem.BanSystem;
-import net.llamadevelopment.bansystem.components.event.*;
-import net.llamadevelopment.bansystem.components.language.Language;
 import net.llamadevelopment.bansystem.components.data.Ban;
 import net.llamadevelopment.bansystem.components.data.Mute;
 import net.llamadevelopment.bansystem.components.data.Warn;
+import net.llamadevelopment.bansystem.components.event.*;
+import net.llamadevelopment.bansystem.components.language.Language;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
@@ -380,6 +382,7 @@ public class YamlProvider extends Provider {
 
     @Override
     public void setBanReason(String player, String reason) {
+        Server.getInstance().getPluginManager().callEvent(new EditBanReasonEvent(player, reason, "null"));
         this.bans.set("Ban." + player + ".Reason", reason);
         this.bans.save();
         this.bans.reload();
@@ -387,6 +390,7 @@ public class YamlProvider extends Provider {
 
     @Override
     public void setMuteReason(String player, String reason) {
+        Server.getInstance().getPluginManager().callEvent(new EditMuteReasonEvent(player, reason, "null"));
         this.mutes.set("Mute." + player + ".Reason", reason);
         this.mutes.save();
         this.mutes.reload();
@@ -394,6 +398,7 @@ public class YamlProvider extends Provider {
 
     @Override
     public void setBanTime(String player, long time) {
+        Server.getInstance().getPluginManager().callEvent(new EditBanTimeEvent(player, time, "null"));
         this.bans.set("Ban." + player + ".Time", time);
         this.bans.save();
         this.bans.reload();
@@ -401,6 +406,7 @@ public class YamlProvider extends Provider {
 
     @Override
     public void setMuteTime(String player, long time) {
+        Server.getInstance().getPluginManager().callEvent(new EditMuteTimeEvent(player, time, "null"));
         this.mutes.set("Mute." + player + ".Time", time);
         this.mutes.save();
         this.mutes.reload();
@@ -408,6 +414,7 @@ public class YamlProvider extends Provider {
 
     @Override
     public void setBanReason(String player, String reason, String executor) {
+        Server.getInstance().getPluginManager().callEvent(new EditBanReasonEvent(player, reason, executor));
         this.bans.set("Ban." + player + ".Reason", reason);
         this.bans.save();
         this.bans.reload();
@@ -415,6 +422,7 @@ public class YamlProvider extends Provider {
 
     @Override
     public void setMuteReason(String player, String reason, String executor) {
+        Server.getInstance().getPluginManager().callEvent(new EditMuteReasonEvent(player, reason, executor));
         this.mutes.set("Mute." + player + ".Reason", reason);
         this.mutes.save();
         this.mutes.reload();
@@ -422,6 +430,7 @@ public class YamlProvider extends Provider {
 
     @Override
     public void setBanTime(String player, long time, String executor) {
+        Server.getInstance().getPluginManager().callEvent(new EditBanTimeEvent(player, time, executor));
         this.bans.set("Ban." + player + ".Time", time);
         this.bans.save();
         this.bans.reload();
@@ -429,6 +438,7 @@ public class YamlProvider extends Provider {
 
     @Override
     public void setMuteTime(String player, long time, String executor) {
+        Server.getInstance().getPluginManager().callEvent(new EditMuteTimeEvent(player, time, executor));
         this.mutes.set("Mute." + player + ".Time", time);
         this.mutes.save();
         this.mutes.reload();
