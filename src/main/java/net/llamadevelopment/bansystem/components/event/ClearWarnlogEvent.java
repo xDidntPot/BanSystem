@@ -10,6 +10,7 @@ import lombok.Getter;
 public class ClearWarnlogEvent extends PlayerEvent {
 
     private final String target;
+    private final String executor;
     private static final HandlerList handlers = new HandlerList();
 
     public static HandlerList getHandlers() {

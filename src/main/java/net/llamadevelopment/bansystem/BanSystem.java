@@ -5,8 +5,7 @@ import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.utils.Config;
 import lombok.Getter;
 import net.llamadevelopment.bansystem.commands.*;
-import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
-import net.llamadevelopment.bansystem.components.api.SystemSettings;
+import net.llamadevelopment.bansystem.components.api.API;
 import net.llamadevelopment.bansystem.components.data.BanReason;
 import net.llamadevelopment.bansystem.components.data.MuteReason;
 import net.llamadevelopment.bansystem.components.provider.MongodbProvider;
@@ -22,30 +21,27 @@ import java.util.Map;
 public class BanSystem extends PluginBase {
 
     public Provider provider;
-    private static final Map<String, Provider> providers = new HashMap<>();
+    private final Map<String, Provider> providers = new HashMap<>();
 
     @Getter
-    private static BanSystem instance;
+    private static API api;
 
     @Override
     public void onEnable() {
-        instance = this;
         try {
             this.saveDefaultConfig();
-            BanSystemAPI api = new BanSystemAPI();
-            api.initBanSystemAPI();
-            providers.put("MongoDB", new MongodbProvider());
-            providers.put("MySql", new MysqlProvider());
-            providers.put("Yaml", new YamlProvider());
-            if (!providers.containsKey(this.getConfig().getString("Provider"))) {
+            this.providers.put("MongoDB", new MongodbProvider());
+            this.providers.put("MySql", new MysqlProvider());
+            this.providers.put("Yaml", new YamlProvider());
+            if (!this.providers.containsKey(this.getConfig().getString("Provider"))) {
                 this.getLogger().error("§4Please specify a valid provider: Yaml, MySql, MongoDB");
                 return;
             }
-            this.provider = providers.get(this.getConfig().getString("Provider"));
+            this.provider = this.providers.get(this.getConfig().getString("Provider"));
             this.provider.connect(this);
             this.getLogger().info("§aSuccessfully loaded " + this.provider.getProvider() + " provider.");
-            BanSystemAPI.setProvider(this.provider);
-            Language.init();
+            api = new API(this.provider, this.getConfig().getInt("Settings.JoinDelay"));
+            Language.init(this);
             this.loadPlugin();
             this.getLogger().info("§aBanSystem successfully started.");
         } catch (Exception e) {
@@ -56,9 +52,8 @@ public class BanSystem extends PluginBase {
 
     private void loadReasons() {
         Config c = this.getConfig();
-        SystemSettings settings = BanSystemAPI.getSystemSettings();
-        for (String s : c.getSection("Reasons.BanReasons").getAll().getKeys(false)) settings.banReasons.put(s, new BanReason(c.getString("Reasons.BanReasons." + s + ".Reason"), s, c.getInt("Reasons.BanReasons." + s + ".Seconds")));
-        for (String s : c.getSection("Reasons.MuteReasons").getAll().getKeys(false)) settings.muteReasons.put(s, new MuteReason(c.getString("Reasons.MuteReasons." + s + ".Reason"), s, c.getInt("Reasons.MuteReasons." + s + ".Seconds")));
+        for (String s : c.getSection("Reasons.BanReasons").getAll().getKeys(false)) this.provider.banReasons.put(s, new BanReason(c.getString("Reasons.BanReasons." + s + ".Reason"), s, c.getInt("Reasons.BanReasons." + s + ".Seconds")));
+        for (String s : c.getSection("Reasons.MuteReasons").getAll().getKeys(false)) this.provider.muteReasons.put(s, new MuteReason(c.getString("Reasons.MuteReasons." + s + ".Reason"), s, c.getInt("Reasons.MuteReasons." + s + ".Seconds")));
     }
 
     private void loadPlugin() {
@@ -85,7 +80,7 @@ public class BanSystem extends PluginBase {
         map.register("bansystem", new DeletemuteCommand(this));
         map.register("bansystem", new DeletewarnCommand(this));
 
-        this.getServer().getPluginManager().registerEvents(new EventListener(), this);
+        this.getServer().getPluginManager().registerEvents(new EventListener(this), this);
         this.loadReasons();
     }
 

@@ -96,18 +96,19 @@ Maven
 API
 
 ```java
+import net.llamadevelopment.bansystem.components.api.API;
 import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
 
 public class Test {
 
-    private Provider api = BanSystemAPI.getProvider();
+    private Provider api = API.getProvider();
 
     public void test() {
-        BanSystemAPI.getProvider().getBan("testuser", ban -> {
+        this.api.getBan("testuser", ban -> {
             System.out.println("Player is banned for: " + ban.getReason());
         });
-        
-        BanSystemAPI.getProvider().unbanPlayer("testuser");
+
+        this.api.unbanPlayer("testuser", "byME");
     }
 
 }
@@ -118,7 +119,7 @@ Events
 ```java
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.Listener;
-import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
+import net.llamadevelopment.bansystem.components.api.API;
 import net.llamadevelopment.bansystem.components.event.PlayerBanEvent;
 import net.llamadevelopment.bansystem.components.event.PlayerUnbanEvent;
 
@@ -131,9 +132,9 @@ public class Test implements Listener {
 
     @EventHandler
     public void on(PlayerUnbanEvent event) {
-        System.out.println("Player " + event.getTarget() + " was unbanned!");
+        System.out.println("Player " + event.getTarget() + " was unbanned by " + event.getExecutor() + "!");
     }
-    
+
 }
 ```
 

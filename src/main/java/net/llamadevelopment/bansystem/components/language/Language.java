@@ -11,10 +11,10 @@ public class Language {
     public static HashMap<String, String> messages = new HashMap<>();
     public static String prefix;
 
-    public static void init() {
+    public static void init(BanSystem instance) {
         messages.clear();
-        BanSystem.getInstance().saveResource("messages.yml");
-        Config m = new Config(BanSystem.getInstance().getDataFolder() + "/messages.yml");
+        instance.saveResource("messages.yml");
+        Config m = new Config(instance.getDataFolder() + "/messages.yml");
         for (Map.Entry<String, Object> map : m.getAll().entrySet()) {
             String key = map.getKey();
             if (map.getValue() instanceof String) {

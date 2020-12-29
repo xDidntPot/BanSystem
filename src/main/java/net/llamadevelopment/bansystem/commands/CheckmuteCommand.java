@@ -6,7 +6,6 @@ import cn.nukkit.command.data.CommandParamType;
 import cn.nukkit.command.data.CommandParameter;
 import net.llamadevelopment.bansystem.BanSystem;
 import net.llamadevelopment.bansystem.components.language.Language;
-import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
 
 public class CheckmuteCommand extends PluginCommand<BanSystem> {
 
@@ -33,7 +32,7 @@ public class CheckmuteCommand extends PluginCommand<BanSystem> {
                             sender.sendMessage(Language.get("CheckmuteID", mute.getMuteID()));
                             sender.sendMessage(Language.get("CheckmuteMuter", mute.getMuter()));
                             sender.sendMessage(Language.get("CheckmuteDate", mute.getDate()));
-                            sender.sendMessage(Language.get("CheckmuteTime", BanSystemAPI.getRemainingTime(mute.getTime())));
+                            sender.sendMessage(Language.get("CheckmuteTime", this.getPlugin().provider.getRemainingTime(mute.getTime())));
                         });
                     } else {
                         this.getPlugin().provider.muteIdExists(player, false, exists -> {
@@ -44,7 +43,7 @@ public class CheckmuteCommand extends PluginCommand<BanSystem> {
                                     sender.sendMessage(Language.get("CheckmuteIdReason", mute.getReason()));
                                     sender.sendMessage(Language.get("CheckmuteIdMuter", mute.getMuter()));
                                     sender.sendMessage(Language.get("CheckmuteIdDate", mute.getDate()));
-                                    sender.sendMessage(Language.get("CheckmuteIdTime", BanSystemAPI.getRemainingTime(mute.getTime())));
+                                    sender.sendMessage(Language.get("CheckmuteIdTime", this.getPlugin().provider.getRemainingTime(mute.getTime())));
                                 });
                                 return;
                             }

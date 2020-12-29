@@ -8,8 +8,6 @@ import cn.nukkit.command.data.CommandParamType;
 import cn.nukkit.command.data.CommandParameter;
 import net.llamadevelopment.bansystem.BanSystem;
 import net.llamadevelopment.bansystem.components.language.Language;
-import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
-import net.llamadevelopment.bansystem.components.api.SystemSettings;
 
 public class TempmuteCommand extends PluginCommand<BanSystem> {
 
@@ -52,8 +50,7 @@ public class TempmuteCommand extends PluginCommand<BanSystem> {
                             Player onlinePlayer = Server.getInstance().getPlayer(player);
                             if (onlinePlayer != null) {
                                 this.getPlugin().provider.getMute(player, mute -> {
-                                    SystemSettings settings = BanSystemAPI.getSystemSettings();
-                                    settings.cachedMute.put(player, mute);
+                                    this.getPlugin().provider.cachedMutes.put(player, mute);
                                 });
                             }
                         });

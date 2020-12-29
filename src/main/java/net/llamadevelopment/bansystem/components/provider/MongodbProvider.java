@@ -7,9 +7,9 @@ import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import net.llamadevelopment.bansystem.BanSystem;
+import net.llamadevelopment.bansystem.components.api.API;
 import net.llamadevelopment.bansystem.components.event.*;
 import net.llamadevelopment.bansystem.components.language.Language;
-import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
 import net.llamadevelopment.bansystem.components.data.Ban;
 import net.llamadevelopment.bansystem.components.data.Mute;
 import net.llamadevelopment.bansystem.components.data.Warn;
@@ -107,8 +107,8 @@ public class MongodbProvider extends Provider {
         CompletableFuture.runAsync(() -> {
             long end = System.currentTimeMillis() + seconds * 1000L;
             if (seconds == -1) end = -1L;
-            String id = BanSystemAPI.getRandomIDCode();
-            String date = BanSystemAPI.getDate();
+            String id = this.getRandomIDCode();
+            String date = this.getDate();
             Document document = new Document("player", player)
                     .append("reason", reason)
                     .append("id", id)
@@ -120,7 +120,7 @@ public class MongodbProvider extends Provider {
             this.createBanlog(ban);
             Player onlinePlayer = Server.getInstance().getPlayer(player);
             if (onlinePlayer != null) {
-                onlinePlayer.kick(Language.getNP("BanScreen", ban.getReason(), ban.getBanID(), BanSystemAPI.getRemainingTime(ban.getTime())), false);
+                onlinePlayer.kick(Language.getNP("BanScreen", ban.getReason(), ban.getBanID(), this.getRemainingTime(ban.getTime())), false);
             }
             Server.getInstance().getPluginManager().callEvent(new PlayerBanEvent(ban));
         });
@@ -131,8 +131,8 @@ public class MongodbProvider extends Provider {
         CompletableFuture.runAsync(() -> {
             long end = System.currentTimeMillis() + seconds * 1000L;
             if (seconds == -1) end = -1L;
-            String id = BanSystemAPI.getRandomIDCode();
-            String date = BanSystemAPI.getDate();
+            String id = this.getRandomIDCode();
+            String date = this.getDate();
             Document document = new Document("player", player)
                     .append("reason", reason)
                     .append("id", id)
@@ -149,8 +149,8 @@ public class MongodbProvider extends Provider {
     @Override
     public void warnPlayer(String player, String reason, String creator) {
         CompletableFuture.runAsync(() -> {
-            String id = BanSystemAPI.getRandomIDCode();
-            String date = BanSystemAPI.getDate();
+            String id = this.getRandomIDCode();
+            String date = this.getDate();
             Document document = new Document("player", player)
                     .append("reason", reason)
                     .append("id", id)
@@ -168,7 +168,7 @@ public class MongodbProvider extends Provider {
         CompletableFuture.runAsync(() -> {
             MongoCollection<Document> collection = this.banCollection;
             collection.deleteOne(new Document("player", player));
-            Server.getInstance().getPluginManager().callEvent(new PlayerUnbanEvent(player));
+            Server.getInstance().getPluginManager().callEvent(new PlayerUnbanEvent(player, "null"));
         });
     }
 
@@ -177,7 +177,25 @@ public class MongodbProvider extends Provider {
         CompletableFuture.runAsync(() -> {
             MongoCollection<Document> collection = this.muteCollection;
             collection.deleteOne(new Document("player", player));
-            Server.getInstance().getPluginManager().callEvent(new PlayerUnmuteEvent(player));
+            Server.getInstance().getPluginManager().callEvent(new PlayerUnmuteEvent(player, "null"));
+        });
+    }
+
+    @Override
+    public void unbanPlayer(String player, String executor) {
+        CompletableFuture.runAsync(() -> {
+            MongoCollection<Document> collection = this.banCollection;
+            collection.deleteOne(new Document("player", player));
+            Server.getInstance().getPluginManager().callEvent(new PlayerUnbanEvent(player, executor));
+        });
+    }
+
+    @Override
+    public void unmutePlayer(String player, String executor) {
+        CompletableFuture.runAsync(() -> {
+            MongoCollection<Document> collection = this.muteCollection;
+            collection.deleteOne(new Document("player", player));
+            Server.getInstance().getPluginManager().callEvent(new PlayerUnmuteEvent(player, executor));
         });
     }
 
@@ -297,7 +315,7 @@ public class MongodbProvider extends Provider {
             for (Document doc : this.banlogCollection.find(new Document("player", player))) {
                 MongoCollection<Document> collection = this.banlogCollection;
                 collection.deleteOne(new Document("id", doc.getString("id")));
-                Server.getInstance().getPluginManager().callEvent(new ClearBanlogEvent(player));
+                Server.getInstance().getPluginManager().callEvent(new ClearBanlogEvent(player, "null"));
             }
         });
     }
@@ -308,7 +326,7 @@ public class MongodbProvider extends Provider {
             for (Document doc : this.mutelogCollection.find(new Document("player", player))) {
                 MongoCollection<Document> collection = this.mutelogCollection;
                 collection.deleteOne(new Document("id", doc.getString("id")));
-                Server.getInstance().getPluginManager().callEvent(new ClearMutelogEvent(player));
+                Server.getInstance().getPluginManager().callEvent(new ClearMutelogEvent(player, "null"));
             }
         });
     }
@@ -319,7 +337,40 @@ public class MongodbProvider extends Provider {
             for (Document doc : this.warnCollection.find(new Document("player", player))) {
                 MongoCollection<Document> collection = this.warnCollection;
                 collection.deleteOne(new Document("id", doc.getString("id")));
-                Server.getInstance().getPluginManager().callEvent(new ClearWarnlogEvent(player));
+                Server.getInstance().getPluginManager().callEvent(new ClearWarnlogEvent(player, "null"));
+            }
+        });
+    }
+
+    @Override
+    public void clearBanlog(String player, String executor) {
+        CompletableFuture.runAsync(() -> {
+            for (Document doc : this.banlogCollection.find(new Document("player", player))) {
+                MongoCollection<Document> collection = this.banlogCollection;
+                collection.deleteOne(new Document("id", doc.getString("id")));
+                Server.getInstance().getPluginManager().callEvent(new ClearBanlogEvent(player, executor));
+            }
+        });
+    }
+
+    @Override
+    public void clearMutelog(String player, String executor) {
+        CompletableFuture.runAsync(() -> {
+            for (Document doc : this.mutelogCollection.find(new Document("player", player))) {
+                MongoCollection<Document> collection = this.mutelogCollection;
+                collection.deleteOne(new Document("id", doc.getString("id")));
+                Server.getInstance().getPluginManager().callEvent(new ClearMutelogEvent(player, executor));
+            }
+        });
+    }
+
+    @Override
+    public void clearWarns(String player, String executor) {
+        CompletableFuture.runAsync(() -> {
+            for (Document doc : this.warnCollection.find(new Document("player", player))) {
+                MongoCollection<Document> collection = this.warnCollection;
+                collection.deleteOne(new Document("id", doc.getString("id")));
+                Server.getInstance().getPluginManager().callEvent(new ClearWarnlogEvent(player, executor));
             }
         });
     }
@@ -372,10 +423,57 @@ public class MongodbProvider extends Provider {
     }
 
     @Override
+    public void setBanReason(String player, String reason, String executor) {
+        CompletableFuture.runAsync(() -> {
+            Document document = new Document("player", player);
+            Document found = this.banCollection.find(document).first();
+            Bson newEntry = new Document("reason", reason);
+            Bson newEntrySet = new Document("$set", newEntry);
+            assert found != null;
+            this.banCollection.updateOne(found, newEntrySet);
+        });
+    }
+
+    @Override
+    public void setMuteReason(String player, String reason, String executor) {
+        CompletableFuture.runAsync(() -> {
+            Document document = new Document("player", player);
+            Document found = this.muteCollection.find(document).first();
+            Bson newEntry = new Document("reason", reason);
+            Bson newEntrySet = new Document("$set", newEntry);
+            assert found != null;
+            this.muteCollection.updateOne(found, newEntrySet);
+        });
+    }
+
+    @Override
+    public void setBanTime(String player, long time, String executor) {
+        CompletableFuture.runAsync(() -> {
+            Document document = new Document("player", player);
+            Document found = this.banCollection.find(document).first();
+            Bson newEntry = new Document("time", time);
+            Bson newEntrySet = new Document("$set", newEntry);
+            assert found != null;
+            this.banCollection.updateOne(found, newEntrySet);
+        });
+    }
+
+    @Override
+    public void setMuteTime(String player, long time, String executor) {
+        CompletableFuture.runAsync(() -> {
+            Document document = new Document("player", player);
+            Document found = this.muteCollection.find(document).first();
+            Bson newEntry = new Document("time", time);
+            Bson newEntrySet = new Document("$set", newEntry);
+            this.muteCollection.updateOne(found, newEntrySet);
+        });
+    }
+
+    @Override
     public void deleteBan(String id) {
         CompletableFuture.runAsync(() -> {
             this.banlogCollection.findOneAndDelete(new Document("id", id));
-            Server.getInstance().getPluginManager().callEvent(new DeleteBanEvent(id));
+            Server.getInstance().getPluginManager().callEvent(new DeleteBanEvent(id, "null"));
         });
     }
 
@@ -383,7 +481,7 @@ public class MongodbProvider extends Provider {
     public void deleteMute(String id) {
         CompletableFuture.runAsync(() -> {
             this.mutelogCollection.findOneAndDelete(new Document("id", id));
-            Server.getInstance().getPluginManager().callEvent(new DeleteMuteEvent(id));
+            Server.getInstance().getPluginManager().callEvent(new DeleteMuteEvent(id, "null"));
         });
     }
 
@@ -391,7 +489,31 @@ public class MongodbProvider extends Provider {
     public void deleteWarn(String id) {
         CompletableFuture.runAsync(() -> {
             this.warnCollection.findOneAndDelete(new Document("id", id));
-            Server.getInstance().getPluginManager().callEvent(new DeleteWarnEvent(id));
+            Server.getInstance().getPluginManager().callEvent(new DeleteWarnEvent(id, "null"));
+        });
+    }
+
+    @Override
+    public void deleteBan(String id, String executor) {
+        CompletableFuture.runAsync(() -> {
+            this.banlogCollection.findOneAndDelete(new Document("id", id));
+            Server.getInstance().getPluginManager().callEvent(new DeleteBanEvent(id, executor));
+        });
+    }
+
+    @Override
+    public void deleteMute(String id, String executor) {
+        CompletableFuture.runAsync(() -> {
+            this.mutelogCollection.findOneAndDelete(new Document("id", id));
+            Server.getInstance().getPluginManager().callEvent(new DeleteMuteEvent(id, executor));
+        });
+    }
+
+    @Override
+    public void deleteWarn(String id, String executor) {
+        CompletableFuture.runAsync(() -> {
+            this.warnCollection.findOneAndDelete(new Document("id", id));
+            Server.getInstance().getPluginManager().callEvent(new DeleteWarnEvent(id, executor));
         });
     }
 

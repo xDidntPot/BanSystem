@@ -106,11 +106,11 @@ DeletebanCommandUsage: "/[0] <ID>"
 DeletemuteCommandUsage: "/[0] <ID>"
 DeletewarnCommandUsage: "/[0] <ID>"
 
-Days: days
-Day: day
-Hours: hours
-Hour: hour
-Minutes: minutes
-Minute: minute
-Seconds: Some seconds
-Permanent: Permanent
+Days: "days"
+Day: "day"
+Hours: "hours"
+Hour: "hour"
+Minutes: "minutes"
+Minute: "minute"
+Seconds: "Some seconds"
+Permanent: "Permanent"

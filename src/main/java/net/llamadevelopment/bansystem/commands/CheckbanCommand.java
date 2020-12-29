@@ -6,7 +6,6 @@ import cn.nukkit.command.data.CommandParamType;
 import cn.nukkit.command.data.CommandParameter;
 import net.llamadevelopment.bansystem.BanSystem;
 import net.llamadevelopment.bansystem.components.language.Language;
-import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
 
 public class CheckbanCommand extends PluginCommand<BanSystem> {
 
@@ -33,7 +32,7 @@ public class CheckbanCommand extends PluginCommand<BanSystem> {
                             sender.sendMessage(Language.get("CheckbanID", ban.getBanID()));
                             sender.sendMessage(Language.get("CheckbanBanner", ban.getBanner()));
                             sender.sendMessage(Language.get("CheckbanDate", ban.getDate()));
-                            sender.sendMessage(Language.get("CheckbanTime", BanSystemAPI.getRemainingTime(ban.getTime())));
+                            sender.sendMessage(Language.get("CheckbanTime", this.getPlugin().provider.getRemainingTime(ban.getTime())));
                         });
                     } else {
                         this.getPlugin().provider.banIdExists(player, false, exists -> {
@@ -44,7 +43,7 @@ public class CheckbanCommand extends PluginCommand<BanSystem> {
                                     sender.sendMessage(Language.get("CheckbanIdReason", ban.getReason()));
                                     sender.sendMessage(Language.get("CheckbanIdBanner", ban.getBanner()));
                                     sender.sendMessage(Language.get("CheckbanIdDate", ban.getDate()));
-                                    sender.sendMessage(Language.get("CheckbanIdTime", BanSystemAPI.getRemainingTime(ban.getTime())));
+                                    sender.sendMessage(Language.get("CheckbanIdTime", this.getPlugin().provider.getRemainingTime(ban.getTime())));
                                 });
                             } else sender.sendMessage(Language.get("PlayerNotBanned"));
                         });

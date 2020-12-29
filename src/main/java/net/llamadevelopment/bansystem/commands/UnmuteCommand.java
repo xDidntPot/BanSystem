@@ -8,8 +8,6 @@ import cn.nukkit.command.data.CommandParamType;
 import cn.nukkit.command.data.CommandParameter;
 import net.llamadevelopment.bansystem.BanSystem;
 import net.llamadevelopment.bansystem.components.language.Language;
-import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
-import net.llamadevelopment.bansystem.components.api.SystemSettings;
 
 public class UnmuteCommand extends PluginCommand<BanSystem> {
 
@@ -33,8 +31,7 @@ public class UnmuteCommand extends PluginCommand<BanSystem> {
                         this.getPlugin().provider.unmutePlayer(player);
                         Player onlinePlayer = Server.getInstance().getPlayer(player);
                         if (onlinePlayer != null) {
-                            SystemSettings settings = BanSystemAPI.getSystemSettings();
-                            settings.cachedMute.remove(onlinePlayer.getName());
+                            this.getPlugin().provider.cachedMutes.remove(onlinePlayer.getName());
                         }
                         sender.sendMessage(Language.get("PlayerUnmuted", player));
                     } else sender.sendMessage(Language.get("PlayerIsNotMuted"));
