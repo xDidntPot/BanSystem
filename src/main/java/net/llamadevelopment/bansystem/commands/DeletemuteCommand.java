@@ -26,7 +26,7 @@ public class DeletemuteCommand extends PluginCommand<BanSystem> {
                 String id = args[0];
                 this.getPlugin().provider.muteIdExists(id, true, exists -> {
                     if (exists) {
-                        this.getPlugin().provider.deleteMute(id);
+                        this.getPlugin().provider.deleteMute(id, sender.getName());
                         sender.sendMessage(Language.get("MuteDeleted", id));
                         return;
                     }

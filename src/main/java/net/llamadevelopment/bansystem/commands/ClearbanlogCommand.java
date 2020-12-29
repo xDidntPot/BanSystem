@@ -30,7 +30,7 @@ public class ClearbanlogCommand extends PluginCommand<BanSystem> {
                         sender.sendMessage(Language.get("NoDataFound"));
                         return;
                     }
-                    this.getPlugin().provider.clearBanlog(player);
+                    this.getPlugin().provider.clearBanlog(player, sender.getName());
                     sender.sendMessage(Language.get("Clearbanlog", i));
                 });
             } else sender.sendMessage(Language.get("ClearbanlogCommandUsage", this.getName()));

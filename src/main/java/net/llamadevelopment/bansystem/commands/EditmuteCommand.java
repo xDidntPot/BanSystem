@@ -32,7 +32,7 @@ public class EditmuteCommand extends PluginCommand<BanSystem> {
                         if (isMuted) {
                             String reason = "";
                             for (int i = 2; i < args.length; ++i) reason = reason + args[i] + " ";
-                            this.getPlugin().provider.setMuteReason(player, reason);
+                            this.getPlugin().provider.setMuteReason(player, reason, sender.getName());
                             Player onlinePlayer = Server.getInstance().getPlayer(player);
                             if (onlinePlayer != null) {
                                 this.getPlugin().provider.getMute(player, mute -> {
@@ -58,7 +58,7 @@ public class EditmuteCommand extends PluginCommand<BanSystem> {
                                     return;
                                 }
                                 long end = System.currentTimeMillis() + seconds * 1000L;
-                                this.getPlugin().provider.setMuteTime(player, end);
+                                this.getPlugin().provider.setMuteTime(player, end, sender.getName());
                                 Player onlinePlayer = Server.getInstance().getPlayer(player);
                                 if (onlinePlayer != null) {
                                     this.getPlugin().provider.getMute(player, mute -> {

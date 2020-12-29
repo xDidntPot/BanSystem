@@ -30,7 +30,7 @@ public class EditbanCommand extends PluginCommand<BanSystem> {
                         if (isBanned) {
                             String reason = "";
                             for (int i = 2; i < args.length; ++i) reason = reason + args[i] + " ";
-                            this.getPlugin().provider.setBanReason(player, reason);
+                            this.getPlugin().provider.setBanReason(player, reason, sender.getName());
                             sender.sendMessage(Language.get("ReasonSet"));
                         } else sender.sendMessage(Language.get("PlayerIsNotBanned"));
                     });
@@ -49,7 +49,7 @@ public class EditbanCommand extends PluginCommand<BanSystem> {
                                     return;
                                 }
                                 long end = System.currentTimeMillis() + seconds * 1000L;
-                                this.getPlugin().provider.setBanTime(player, end);
+                                this.getPlugin().provider.setBanTime(player, end, sender.getName());
                                 sender.sendMessage(Language.get("TimeSet"));
                             } catch (NumberFormatException exception) {
                                 sender.sendMessage(Language.get("InvalidNumber"));

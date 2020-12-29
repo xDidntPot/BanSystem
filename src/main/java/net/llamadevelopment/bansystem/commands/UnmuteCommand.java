@@ -28,7 +28,7 @@ public class UnmuteCommand extends PluginCommand<BanSystem> {
                 String player = args[0];
                 this.getPlugin().provider.playerIsMuted(player, isMuted -> {
                     if (isMuted) {
-                        this.getPlugin().provider.unmutePlayer(player);
+                        this.getPlugin().provider.unmutePlayer(player, sender.getName());
                         Player onlinePlayer = Server.getInstance().getPlayer(player);
                         if (onlinePlayer != null) {
                             this.getPlugin().provider.cachedMutes.remove(onlinePlayer.getName());

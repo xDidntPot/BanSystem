@@ -30,7 +30,7 @@ public class ClearmutelogCommand extends PluginCommand<BanSystem> {
                         sender.sendMessage(Language.get("NoDataFound"));
                         return;
                     }
-                    this.getPlugin().provider.clearMutelog(player);
+                    this.getPlugin().provider.clearMutelog(player, sender.getName());
                     sender.sendMessage(Language.get("Clearmutelog", i));
                 });
             } else sender.sendMessage(Language.get("ClearmutelogCommandUsage", this.getName()));

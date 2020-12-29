@@ -26,7 +26,7 @@ public class DeletebanCommand extends PluginCommand<BanSystem> {
                 String id = args[0];
                 this.getPlugin().provider.banIdExists(id, true, exists -> {
                     if (exists) {
-                        this.getPlugin().provider.deleteBan(id);
+                        this.getPlugin().provider.deleteBan(id, sender.getName());
                         sender.sendMessage(Language.get("BanDeleted", id));
                         return;
                     }

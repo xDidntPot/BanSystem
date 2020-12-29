@@ -30,7 +30,7 @@ public class ClearwarningsCommand extends PluginCommand<BanSystem> {
                         sender.sendMessage(Language.get("NoDataFound"));
                         return;
                     }
-                    this.getPlugin().provider.clearWarns(player);
+                    this.getPlugin().provider.clearWarns(player, sender.getName());
                     sender.sendMessage(Language.get("Clearwarnings", i));
                 });
             } else sender.sendMessage(Language.get("ClearwarningsCommandUsage", this.getName()));
