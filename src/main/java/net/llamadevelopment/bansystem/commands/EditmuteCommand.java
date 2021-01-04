@@ -8,8 +8,6 @@ import cn.nukkit.command.data.CommandParamType;
 import cn.nukkit.command.data.CommandParameter;
 import net.llamadevelopment.bansystem.BanSystem;
 import net.llamadevelopment.bansystem.components.language.Language;
-import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
-import net.llamadevelopment.bansystem.components.api.SystemSettings;
 
 public class EditmuteCommand extends PluginCommand<BanSystem> {
 
@@ -26,7 +24,6 @@ public class EditmuteCommand extends PluginCommand<BanSystem> {
 
     @Override
     public boolean execute(CommandSender sender, String s, String[] args) {
-        SystemSettings settings = BanSystemAPI.getSystemSettings();
         if (sender.hasPermission(this.getPermission())) {
             if (args.length >= 3) {
                 String player = args[0];
@@ -35,12 +32,12 @@ public class EditmuteCommand extends PluginCommand<BanSystem> {
                         if (isMuted) {
                             String reason = "";
                             for (int i = 2; i < args.length; ++i) reason = reason + args[i] + " ";
-                            this.getPlugin().provider.setMuteReason(player, reason);
+                            this.getPlugin().provider.setMuteReason(player, reason, sender.getName());
                             Player onlinePlayer = Server.getInstance().getPlayer(player);
                             if (onlinePlayer != null) {
                                 this.getPlugin().provider.getMute(player, mute -> {
-                                    settings.cachedMute.remove(player);
-                                    settings.cachedMute.put(player, mute);
+                                    this.getPlugin().provider.cachedMutes.remove(player);
+                                    this.getPlugin().provider.cachedMutes.put(player, mute);
                                 });
                             }
                             sender.sendMessage(Language.get("ReasonSet"));
@@ -61,12 +58,12 @@ public class EditmuteCommand extends PluginCommand<BanSystem> {
                                     return;
                                 }
                                 long end = System.currentTimeMillis() + seconds * 1000L;
-                                this.getPlugin().provider.setMuteTime(player, end);
+                                this.getPlugin().provider.setMuteTime(player, end, sender.getName());
                                 Player onlinePlayer = Server.getInstance().getPlayer(player);
                                 if (onlinePlayer != null) {
                                     this.getPlugin().provider.getMute(player, mute -> {
-                                        settings.cachedMute.remove(player);
-                                        settings.cachedMute.put(player, mute);
+                                        this.getPlugin().provider.cachedMutes.remove(player);
+                                        this.getPlugin().provider.cachedMutes.put(player, mute);
                                     });
                                 }
                                 sender.sendMessage(Language.get("TimeSet"));

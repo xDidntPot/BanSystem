@@ -4,14 +4,15 @@ import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.utils.Config;
 import net.llamadevelopment.bansystem.BanSystem;
-import net.llamadevelopment.bansystem.components.event.*;
-import net.llamadevelopment.bansystem.components.language.Language;
-import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
 import net.llamadevelopment.bansystem.components.data.Ban;
 import net.llamadevelopment.bansystem.components.data.Mute;
 import net.llamadevelopment.bansystem.components.data.Warn;
+import net.llamadevelopment.bansystem.components.event.*;
+import net.llamadevelopment.bansystem.components.language.Language;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
@@ -93,8 +94,8 @@ public class YamlProvider extends Provider {
     public void banPlayer(String player, String reason, String banner, int seconds) {
         long end = System.currentTimeMillis() + seconds * 1000L;
         if (seconds == -1) end = -1L;
-        String id = BanSystemAPI.getRandomIDCode();
-        String date = BanSystemAPI.getDate();
+        String id = this.getRandomIDCode();
+        String date = this.getDate();
         this.bans.set("Ban." + player + ".Reason", reason);
         this.bans.set("Ban." + player + ".ID", id);
         this.bans.set("Ban." + player + ".Banner", banner);
@@ -106,7 +107,7 @@ public class YamlProvider extends Provider {
         this.createBanlog(ban);
         Player onlinePlayer = Server.getInstance().getPlayer(player);
         if (onlinePlayer != null) {
-            onlinePlayer.kick(Language.getNP("BanScreen", ban.getReason(), ban.getBanID(), BanSystemAPI.getRemainingTime(ban.getTime())), false);
+            onlinePlayer.kick(Language.getNP("BanScreen", ban.getReason(), ban.getBanID(), this.getRemainingTime(ban.getTime())), false);
         }
         Server.getInstance().getPluginManager().callEvent(new PlayerBanEvent(ban));
     }
@@ -115,8 +116,8 @@ public class YamlProvider extends Provider {
     public void mutePlayer(String player, String reason, String banner, int seconds) {
         long end = System.currentTimeMillis() + seconds * 1000L;
         if (seconds == -1) end = -1L;
-        String id = BanSystemAPI.getRandomIDCode();
-        String date = BanSystemAPI.getDate();
+        String id = this.getRandomIDCode();
+        String date = this.getDate();
         this.mutes.set("Mute." + player + ".Reason", reason);
         this.mutes.set("Mute." + player + ".ID", id);
         this.mutes.set("Mute." + player + ".Banner", banner);
@@ -131,8 +132,8 @@ public class YamlProvider extends Provider {
 
     @Override
     public void warnPlayer(String player, String reason, String creator) {
-        String id = BanSystemAPI.getRandomIDCode();
-        String date = BanSystemAPI.getDate();
+        String id = this.getRandomIDCode();
+        String date = this.getDate();
         this.warns.set("Warn." + player + "." + id + ".Reason", reason);
         this.warns.set("Warn." + player + "." + id + ".Creator", creator);
         this.warns.set("Warn." + player + "." + id + ".Date", date);
@@ -150,7 +151,7 @@ public class YamlProvider extends Provider {
         this.bans.set("Ban", map);
         this.bans.save();
         this.bans.reload();
-        Server.getInstance().getPluginManager().callEvent(new PlayerUnbanEvent(player));
+        Server.getInstance().getPluginManager().callEvent(new PlayerUnbanEvent(player, "null"));
     }
 
     @Override
@@ -160,7 +161,27 @@ public class YamlProvider extends Provider {
         this.mutes.set("Mute", map);
         this.mutes.save();
         this.mutes.reload();
-        Server.getInstance().getPluginManager().callEvent(new PlayerUnmuteEvent(player));
+        Server.getInstance().getPluginManager().callEvent(new PlayerUnmuteEvent(player, "null"));
+    }
+
+    @Override
+    public void unbanPlayer(String player, String executor) {
+        Map<String, Object> map = this.bans.getSection("Ban").getAllMap();
+        map.remove(player);
+        this.bans.set("Ban", map);
+        this.bans.save();
+        this.bans.reload();
+        Server.getInstance().getPluginManager().callEvent(new PlayerUnbanEvent(player, executor));
+    }
+
+    @Override
+    public void unmutePlayer(String player, String executor) {
+        Map<String, Object> map = this.mutes.getSection("Mute").getAllMap();
+        map.remove(player);
+        this.mutes.set("Mute", map);
+        this.mutes.save();
+        this.mutes.reload();
+        Server.getInstance().getPluginManager().callEvent(new PlayerUnmuteEvent(player, executor));
     }
 
     @Override
@@ -295,7 +316,7 @@ public class YamlProvider extends Provider {
             this.banlog.set("Banlog", map);
             this.banlog.save();
             this.banlog.reload();
-            Server.getInstance().getPluginManager().callEvent(new ClearBanlogEvent(player));
+            Server.getInstance().getPluginManager().callEvent(new ClearBanlogEvent(player, "null"));
         });
     }
 
@@ -307,7 +328,7 @@ public class YamlProvider extends Provider {
             this.mutelog.set("Mutelog", map);
             this.mutelog.save();
             this.mutelog.reload();
-            Server.getInstance().getPluginManager().callEvent(new ClearMutelogEvent(player));
+            Server.getInstance().getPluginManager().callEvent(new ClearMutelogEvent(player, "null"));
         });
     }
 
@@ -319,12 +340,49 @@ public class YamlProvider extends Provider {
             this.warns.set("Warn", map);
             this.warns.save();
             this.warns.reload();
-            Server.getInstance().getPluginManager().callEvent(new ClearWarnlogEvent(player));
+            Server.getInstance().getPluginManager().callEvent(new ClearWarnlogEvent(player, "null"));
+        });
+    }
+
+    @Override
+    public void clearBanlog(String player, String executor) {
+        CompletableFuture.runAsync(() -> {
+            Map<String, Object> map = this.banlog.getSection("Banlog").getAllMap();
+            map.remove(player);
+            this.banlog.set("Banlog", map);
+            this.banlog.save();
+            this.banlog.reload();
+            Server.getInstance().getPluginManager().callEvent(new ClearBanlogEvent(player, executor));
+        });
+    }
+
+    @Override
+    public void clearMutelog(String player, String executor) {
+        CompletableFuture.runAsync(() -> {
+            Map<String, Object> map = this.mutelog.getSection("Mutelog").getAllMap();
+            map.remove(player);
+            this.mutelog.set("Mutelog", map);
+            this.mutelog.save();
+            this.mutelog.reload();
+            Server.getInstance().getPluginManager().callEvent(new ClearMutelogEvent(player, executor));
+        });
+    }
+
+    @Override
+    public void clearWarns(String player, String executor) {
+        CompletableFuture.runAsync(() -> {
+            Map<String, Object> map = this.warns.getSection("Warn").getAllMap();
+            map.remove(player);
+            this.warns.set("Warn", map);
+            this.warns.save();
+            this.warns.reload();
+            Server.getInstance().getPluginManager().callEvent(new ClearWarnlogEvent(player, executor));
         });
     }
 
     @Override
     public void setBanReason(String player, String reason) {
+        Server.getInstance().getPluginManager().callEvent(new EditBanReasonEvent(player, reason, "null"));
         this.bans.set("Ban." + player + ".Reason", reason);
         this.bans.save();
         this.bans.reload();
@@ -332,6 +390,7 @@ public class YamlProvider extends Provider {
 
     @Override
     public void setMuteReason(String player, String reason) {
+        Server.getInstance().getPluginManager().callEvent(new EditMuteReasonEvent(player, reason, "null"));
         this.mutes.set("Mute." + player + ".Reason", reason);
         this.mutes.save();
         this.mutes.reload();
@@ -339,6 +398,7 @@ public class YamlProvider extends Provider {
 
     @Override
     public void setBanTime(String player, long time) {
+        Server.getInstance().getPluginManager().callEvent(new EditBanTimeEvent(player, time, "null"));
         this.bans.set("Ban." + player + ".Time", time);
         this.bans.save();
         this.bans.reload();
@@ -346,6 +406,39 @@ public class YamlProvider extends Provider {
 
     @Override
     public void setMuteTime(String player, long time) {
+        Server.getInstance().getPluginManager().callEvent(new EditMuteTimeEvent(player, time, "null"));
+        this.mutes.set("Mute." + player + ".Time", time);
+        this.mutes.save();
+        this.mutes.reload();
+    }
+
+    @Override
+    public void setBanReason(String player, String reason, String executor) {
+        Server.getInstance().getPluginManager().callEvent(new EditBanReasonEvent(player, reason, executor));
+        this.bans.set("Ban." + player + ".Reason", reason);
+        this.bans.save();
+        this.bans.reload();
+    }
+
+    @Override
+    public void setMuteReason(String player, String reason, String executor) {
+        Server.getInstance().getPluginManager().callEvent(new EditMuteReasonEvent(player, reason, executor));
+        this.mutes.set("Mute." + player + ".Reason", reason);
+        this.mutes.save();
+        this.mutes.reload();
+    }
+
+    @Override
+    public void setBanTime(String player, long time, String executor) {
+        Server.getInstance().getPluginManager().callEvent(new EditBanTimeEvent(player, time, executor));
+        this.bans.set("Ban." + player + ".Time", time);
+        this.bans.save();
+        this.bans.reload();
+    }
+
+    @Override
+    public void setMuteTime(String player, long time, String executor) {
+        Server.getInstance().getPluginManager().callEvent(new EditMuteTimeEvent(player, time, executor));
         this.mutes.set("Mute." + player + ".Time", time);
         this.mutes.save();
         this.mutes.reload();
@@ -355,7 +448,7 @@ public class YamlProvider extends Provider {
     public void deleteBan(String id) {
         for (String s : this.banlog.getSection("Banlog").getAll().getKeys(false)) {
             if (this.banlog.exists("Banlog." + s + "." + id)) {
-                Server.getInstance().getPluginManager().callEvent(new DeleteBanEvent(id));
+                Server.getInstance().getPluginManager().callEvent(new DeleteBanEvent(id, "null"));
                 Map<String, Object> map = this.banlog.getSection("Banlog." + s).getAllMap();
                 map.remove(id);
                 this.banlog.set("Banlog." + s, map);
@@ -369,7 +462,7 @@ public class YamlProvider extends Provider {
     public void deleteMute(String id) {
         for (String s : this.mutelog.getSection("Mutelog").getAll().getKeys(false)) {
             if (this.mutelog.exists("Mutelog." + s + "." + id)) {
-                Server.getInstance().getPluginManager().callEvent(new DeleteMuteEvent(id));
+                Server.getInstance().getPluginManager().callEvent(new DeleteMuteEvent(id, "null"));
                 Map<String, Object> map = this.mutelog.getSection("Mutelog." + s).getAllMap();
                 map.remove(id);
                 this.mutelog.set("Mutelog." + s, map);
@@ -383,7 +476,49 @@ public class YamlProvider extends Provider {
     public void deleteWarn(String id) {
         for (String s : this.warns.getSection("Warn").getAll().getKeys(false)) {
             if (this.warns.exists("Warn." + s + "." + id)) {
-                Server.getInstance().getPluginManager().callEvent(new DeleteWarnEvent(id));
+                Server.getInstance().getPluginManager().callEvent(new DeleteWarnEvent(id, "null"));
+                Map<String, Object> map = this.warns.getSection("Warn." + s).getAllMap();
+                map.remove(id);
+                this.warns.set("Warn." + s, map);
+                this.warns.save();
+                this.warns.reload();
+            }
+        }
+    }
+
+    @Override
+    public void deleteBan(String id, String executor) {
+        for (String s : this.banlog.getSection("Banlog").getAll().getKeys(false)) {
+            if (this.banlog.exists("Banlog." + s + "." + id)) {
+                Server.getInstance().getPluginManager().callEvent(new DeleteBanEvent(id, executor));
+                Map<String, Object> map = this.banlog.getSection("Banlog." + s).getAllMap();
+                map.remove(id);
+                this.banlog.set("Banlog." + s, map);
+                this.banlog.save();
+                this.banlog.reload();
+            }
+        }
+    }
+
+    @Override
+    public void deleteMute(String id, String executor) {
+        for (String s : this.mutelog.getSection("Mutelog").getAll().getKeys(false)) {
+            if (this.mutelog.exists("Mutelog." + s + "." + id)) {
+                Server.getInstance().getPluginManager().callEvent(new DeleteMuteEvent(id, executor));
+                Map<String, Object> map = this.mutelog.getSection("Mutelog." + s).getAllMap();
+                map.remove(id);
+                this.mutelog.set("Mutelog." + s, map);
+                this.mutelog.save();
+                this.mutelog.reload();
+            }
+        }
+    }
+
+    @Override
+    public void deleteWarn(String id, String executor) {
+        for (String s : this.warns.getSection("Warn").getAll().getKeys(false)) {
+            if (this.warns.exists("Warn." + s + "." + id)) {
+                Server.getInstance().getPluginManager().callEvent(new DeleteWarnEvent(id, executor));
                 Map<String, Object> map = this.warns.getSection("Warn." + s).getAllMap();
                 map.remove(id);
                 this.warns.set("Warn." + s, map);

@@ -26,7 +26,7 @@ public class UnbanCommand extends PluginCommand<BanSystem> {
                 String player = args[0];
                 this.getPlugin().provider.playerIsBanned(player, isBanned -> {
                     if (isBanned) {
-                        this.getPlugin().provider.unbanPlayer(player);
+                        this.getPlugin().provider.unbanPlayer(player, sender.getName());
                         sender.sendMessage(Language.get("PlayerUnbanned", player));
                     } else sender.sendMessage(Language.get("PlayerIsNotBanned"));
                 });

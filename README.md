@@ -89,25 +89,26 @@ Maven
 <dependency>
     <groupId>net.llamadevelopment.bansystem</groupId>
     <artifactId>BanSystemNK</artifactId>
-    <version>2.2.3-20201220.081023-1</version>
+    <version>2.5.0-20201229.153344-1</version>
 </dependency>
 ```
 
 API
 
 ```java
+import net.llamadevelopment.bansystem.BanSystem;
 import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
 
 public class Test {
 
-    private Provider api = BanSystemAPI.getProvider();
+    private Provider api = BanSystem.getApi().getProvider();
 
     public void test() {
-        BanSystemAPI.getProvider().getBan("testuser", ban -> {
+        this.api.getBan("testuser", ban -> {
             System.out.println("Player is banned for: " + ban.getReason());
         });
-        
-        BanSystemAPI.getProvider().unbanPlayer("testuser");
+
+        this.api.unbanPlayer("testuser", "byME");
     }
 
 }
@@ -118,7 +119,6 @@ Events
 ```java
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.Listener;
-import net.llamadevelopment.bansystem.components.api.BanSystemAPI;
 import net.llamadevelopment.bansystem.components.event.PlayerBanEvent;
 import net.llamadevelopment.bansystem.components.event.PlayerUnbanEvent;
 
@@ -131,9 +131,9 @@ public class Test implements Listener {
 
     @EventHandler
     public void on(PlayerUnbanEvent event) {
-        System.out.println("Player " + event.getTarget() + " was unbanned!");
+        System.out.println("Player " + event.getTarget() + " was unbanned by " + event.getExecutor() + "!");
     }
-    
+
 }
 ```
 
@@ -147,6 +147,19 @@ public class Test implements Listener {
 ![Alt Text](https://cloudburstmc.org/attachments/bansystem_4-png.1817/)
 
 ---
+
+
+## Thanks to ZAP-Hosting!
+This project wouldn't be possible without the help of ZAP-Hosting!
+***
+### ZAP-Hosting
+Zap-Hosting is a VPS, Rootserver, (Lifetime) Gameserver, Domain & TeamSpeak 3/5 hosting company. They offer **good quality** servers **at a low price**. This project was also tested on a ZAP-Hosting Server. So if you need a **cheap** vps/gameserver/rootserver/teamspeak3/etc. hoster, ZAP-Hosting is the best choice.
+
+Get your own **Server** today here: [Click me](https://zap-hosting.com/lldv)
+
+### Special offer
+Use the code `proxma-20` for a 20% discount
+***
 
 ![YourKit](https://www.yourkit.com/images/yklogo.png)
 ------

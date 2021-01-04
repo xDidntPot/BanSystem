@@ -26,7 +26,7 @@ public class DeletewarnCommand extends PluginCommand<BanSystem> {
                 String id = args[0];
                 this.getPlugin().provider.warnIdExists(id, exists -> {
                     if (exists) {
-                        this.getPlugin().provider.deleteWarn(id);
+                        this.getPlugin().provider.deleteWarn(id, sender.getName());
                         sender.sendMessage(Language.get("WarnDeleted", id));
                         return;
                     }

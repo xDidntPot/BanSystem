@@ -7,9 +7,10 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public class ClearMutelogEvent extends Event {
+public class EditBanTimeEvent extends Event {
 
-    private final String target;
+    private final String player;
+    private final long time;
     private final String executor;
     private static final HandlerList handlers = new HandlerList();
 

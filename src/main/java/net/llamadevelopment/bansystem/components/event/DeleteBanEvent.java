@@ -10,6 +10,7 @@ import lombok.Getter;
 public class DeleteBanEvent extends PlayerEvent {
 
     private final String id;
+    private final String executor;
     private static final HandlerList handlers = new HandlerList();
 
     public static HandlerList getHandlers() {
