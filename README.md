@@ -89,7 +89,7 @@ Maven
 <dependency>
     <groupId>net.llamadevelopment.bansystem</groupId>
     <artifactId>BanSystemNK</artifactId>
-    <version>2.2.3-20201220.081023-1</version>
+    <version>2.5.0-20201229.153344-1</version>
 </dependency>
 ```
 
