@@ -158,3 +158,8 @@ Commands:
     Description: "Delete a warn entry"
     Permission: "bansystem.command.deletewarn"
     Aliases: [ "dwarn", "removewarn" ]
+  History:
+    Name: "history"
+    Description: "Get the history of all punish types of a player"
+    Permission: "bansystem.command.history"
+    Aliases: [ "hst" ]
