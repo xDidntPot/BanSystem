@@ -71,6 +71,7 @@ warnlog    |/warnlog \<Player>    |bansystem.command.warnlog
 deleteban    |/deleteban \<ID>    |bansystem.command.deleteban
 deletemute    |/deletemute \<ID>|    bansystem.command.deletemute
 deletewarn    |/deletewarn \<ID>|    bansystem.command.deletewarn
+history    |/history \<Player>|    bansystem.command.history
 
 **All commands are editable: Permission, Usage, Command name and Command aliases.**
 

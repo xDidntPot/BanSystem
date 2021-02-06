@@ -79,6 +79,7 @@ public class BanSystem extends PluginBase {
         map.register("bansystem", new DeletebanCommand(this));
         map.register("bansystem", new DeletemuteCommand(this));
         map.register("bansystem", new DeletewarnCommand(this));
+        map.register("bansystem", new HistoryCommand(this));
 
         this.getServer().getPluginManager().registerEvents(new EventListener(this), this);
         this.loadReasons();
