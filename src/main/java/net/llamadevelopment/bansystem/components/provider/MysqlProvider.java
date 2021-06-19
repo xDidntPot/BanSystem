@@ -71,6 +71,12 @@ public class MysqlProvider extends Provider {
                                 .append("banner", SqlColumn.Type.VARCHAR, 64)
                                 .append("date", SqlColumn.Type.VARCHAR, 64));
 
+                this.client.createTable("wave", "id",
+                        new SqlColumn("player", SqlColumn.Type.VARCHAR, 64)
+                                .append("reason", SqlColumn.Type.VARCHAR, 128)
+                                .append("id", SqlColumn.Type.VARCHAR, 64)
+                                .append("banner", SqlColumn.Type.VARCHAR, 64));
+
                 server.getLogger().info("[MySqlClient] Connection opened.");
             } catch (Exception e) {
                 e.printStackTrace();

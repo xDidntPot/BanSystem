@@ -2,6 +2,7 @@ package net.llamadevelopment.bansystem.components.api;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import net.llamadevelopment.bansystem.components.forms.FormWindows;
 import net.llamadevelopment.bansystem.components.provider.Provider;
 
 @Getter
@@ -9,6 +10,7 @@ import net.llamadevelopment.bansystem.components.provider.Provider;
 public class API {
 
     private final Provider provider;
+    private final FormWindows formWindows;
     private final int joinDelay;
 
 }

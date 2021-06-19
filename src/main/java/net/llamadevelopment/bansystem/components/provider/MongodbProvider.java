@@ -26,7 +26,7 @@ public class MongodbProvider extends Provider {
 
     private MongoClient mongoClient;
     private MongoDatabase mongoDatabase;
-    private MongoCollection<Document> banCollection, banlogCollection, muteCollection, mutelogCollection, warnCollection;
+    private MongoCollection<Document> banCollection, banlogCollection, muteCollection, mutelogCollection, warnCollection, extendedCollection;
 
     @Override
     public void connect(BanSystem server) {
@@ -39,6 +39,7 @@ public class MongodbProvider extends Provider {
             this.muteCollection = this.mongoDatabase.getCollection("mutes");
             this.mutelogCollection = this.mongoDatabase.getCollection("mutelog");
             this.warnCollection = this.mongoDatabase.getCollection("warns");
+            this.extendedCollection = this.mongoDatabase.getCollection("extended");
             Logger mongoLogger = Logger.getLogger("org.mongodb.driver");
             mongoLogger.setLevel(Level.OFF);
             server.getLogger().info("[MongoClient] Connection opened.");

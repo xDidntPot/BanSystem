@@ -18,7 +18,7 @@ import java.util.function.Consumer;
 
 public class YamlProvider extends Provider {
 
-    private Config bans, banlog, mutes, mutelog, warns;
+    private Config bans, banlog, mutes, mutelog, warns, extended;
 
     @Override
     public void connect(BanSystem server) {
@@ -28,11 +28,13 @@ public class YamlProvider extends Provider {
             server.saveResource("/data/mutes.yml");
             server.saveResource("/data/mutelog.yml");
             server.saveResource("/data/warns.yml");
+            server.saveResource("/data/extended.yml");
             this.bans = new Config(server.getDataFolder() + "/data/bans.yml", Config.YAML);
             this.banlog = new Config(server.getDataFolder() + "/data/banlog.yml", Config.YAML);
             this.mutes = new Config(server.getDataFolder() + "/data/mutes.yml", Config.YAML);
             this.mutelog = new Config(server.getDataFolder() + "/data/mutelog.yml", Config.YAML);
             this.warns = new Config(server.getDataFolder() + "/data/warns.yml", Config.YAML);
+            this.extended = new Config(server.getDataFolder() + "/data/extended.yml", Config.YAML);
         });
     }
 

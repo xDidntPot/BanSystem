@@ -8,6 +8,8 @@ import net.llamadevelopment.bansystem.commands.*;
 import net.llamadevelopment.bansystem.components.api.API;
 import net.llamadevelopment.bansystem.components.data.BanReason;
 import net.llamadevelopment.bansystem.components.data.MuteReason;
+import net.llamadevelopment.bansystem.components.forms.FormListener;
+import net.llamadevelopment.bansystem.components.forms.FormWindows;
 import net.llamadevelopment.bansystem.components.provider.MongodbProvider;
 import net.llamadevelopment.bansystem.components.provider.MysqlProvider;
 import net.llamadevelopment.bansystem.components.provider.YamlProvider;
@@ -26,6 +28,9 @@ public class BanSystem extends PluginBase {
     @Getter
     private static API api;
 
+    @Getter
+    private FormWindows formWindows;
+
     @Override
     public void onEnable() {
         try {
@@ -40,7 +45,8 @@ public class BanSystem extends PluginBase {
             this.provider = this.providers.get(this.getConfig().getString("Provider"));
             this.provider.connect(this);
             this.getLogger().info("§aSuccessfully loaded " + this.provider.getProvider() + " provider.");
-            api = new API(this.provider, this.getConfig().getInt("Settings.JoinDelay"));
+            this.formWindows = new FormWindows(this.provider);
+            api = new API(this.provider, this.formWindows, this.getConfig().getInt("Settings.JoinDelay"));
             Language.init(this);
             this.loadPlugin();
             this.getLogger().info("§aBanSystem successfully started.");
@@ -82,6 +88,7 @@ public class BanSystem extends PluginBase {
         map.register("bansystem", new HistoryCommand(this));
 
         this.getServer().getPluginManager().registerEvents(new EventListener(this), this);
+        this.getServer().getPluginManager().registerEvents(new FormListener(), this);
         this.loadReasons();
     }
 

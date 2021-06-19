@@ -199,6 +199,18 @@ public class Provider {
 
     }
 
+    public void isOnList(String player, Consumer<Boolean> is) {
+
+    }
+
+    public void addToList(String player, String reason, String executor) {
+
+    }
+
+    public void removeFromList(String player) {
+
+    }
+
     public String getProvider() {
         return null;
     }
